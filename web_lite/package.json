@@ -1,6 +1,7 @@
 {
   "name": "deckbox-web-lite",
   "version": "0.1.0",
+  "type": "module",
   "description": "Lightweight HTML5/CSS 3D web client for DeckBox",
   "private": true,
   "scripts": {
