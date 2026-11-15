@@ -11,7 +11,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 // Resolve module under test: web_lite/js/action_dispatcher.js or contract specification
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -19,7 +19,7 @@ const implPath = path.resolve(__dirname, '../js/action_dispatcher.js');
 
 let ActionDispatcher;
 if (fs.existsSync(implPath)) {
-  const mod = await import(implPath);
+  const mod = await import(pathToFileURL(implPath).href);
   ActionDispatcher = mod.ActionDispatcher || mod.default;
 } else {
   const mod = await import('./web_contracts.js');

@@ -14,7 +14,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { setupGlobalDOM } from './mock_dom.js';
 
 setupGlobalDOM();
@@ -27,8 +27,8 @@ const cardRendererPath = path.resolve(__dirname, '../js/card_renderer.js');
 const stateStorePath = path.resolve(__dirname, '../js/state_store.js');
 
 if (fs.existsSync(cardRendererPath) && fs.existsSync(stateStorePath)) {
-  const modCR = await import(cardRendererPath);
-  const modSS = await import(stateStorePath);
+  const modCR = await import(pathToFileURL(cardRendererPath).href);
+  const modSS = await import(pathToFileURL(stateStorePath).href);
   CardRenderer = modCR.CardRenderer || modCR.default;
   StateStore = modSS.StateStore || modSS.default;
   // Use contracts for sanitizer helper

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DeckBox Lite — Mobile Web Multiplayer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#121820">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/cards.css">
+</head>
+<body>
+  <div id="deckbox-app" class="role--spectator">
+    <!-- Header / Status Bar -->
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-title">DeckBox</span>
+        <span class="brand-badge">Lite</span>
+      </div>
+      <div id="connection-status" class="status-indicator status--connecting" title="Connecting">
+        <span class="status-dot"></span>
+        <span class="status-text">Connecting...</span>
+      </div>
+      <div class="header-controls">
+        <div id="room-badge" class="badge badge--room">PIN: <strong id="display-room-code">----</strong></div>
+        <select id="role-selector" class="role-select" aria-label="Select Role">
+          <option value="player">Player</option>
+          <option value="table">Table View</option>
+          <option value="spectator" selected>Spectator</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- Main Game Arena -->
+    <main class="game-arena">
+      <!-- Center Table Playmat (Visible across all roles) -->
+      <section id="table-playmat" class="playmat-container" aria-label="Game Table">
+        <div class="turn-banner" id="turn-banner">Waiting for players...</div>
+        <div class="table-center">
+          <div id="draw-deck-container" class="deck-area"></div>
+          <div id="discard-pile-container" class="discard-area"></div>
+        </div>
+        <div class="direction-indicator" id="direction-indicator" aria-label="Direction">
+          <span class="direction-arrow">↻</span>
+        </div>
+      </section>
+
+      <!-- Scoreboard / Player Ring (Visible in Table & Spectator roles) -->
+      <aside id="scoreboard" class="scoreboard-container" aria-label="Player Roster"></aside>
+
+      <!-- Spectator Overlay (Visible only in Spectator role) -->
+      <div id="spectator-overlay" class="spectator-watermark" aria-live="polite">Spectator Mode (Read-Only)</div>
+
+      <!-- Player Hand Container (Visible only in Player role) -->
+      <section id="hand-container" class="hand-tray" aria-label="Your Hand"></section>
+
+      <!-- Player Action Bar (Visible only in Player role) -->
+      <nav id="player-actions" class="action-bar" aria-label="Player Actions">
+        <button id="btn-draw" class="btn btn--action btn--draw" disabled>Draw Card</button>
+        <button id="btn-uno" class="btn btn--action btn--uno">Call UNO!</button>
+      </nav>
+    </main>
+
+    <!-- Bottom Emote Bar (Visible across all roles) -->
+    <footer id="emote-container" class="emote-bar" aria-label="Emote Reactions">
+      <button class="btn-emote" data-emote="wave" aria-label="Wave">👋</button>
+      <button class="btn-emote" data-emote="think" aria-label="Thinking">🤔</button>
+      <button class="btn-emote" data-emote="fire" aria-label="Fire">🔥</button>
+      <button class="btn-emote" data-emote="gg" aria-label="Good Game">🏆</button>
+      <button class="btn-emote" data-emote="cry" aria-label="Cry">😭</button>
+    </footer>
+
+    <!-- Wild Color Picker Modal -->
+    <dialog id="color-picker-modal" class="modal-dialog">
+      <div class="modal-content color-picker">
+        <h3 class="modal-title">Choose Color</h3>
+        <div class="color-grid">
+          <button class="btn-color-pick color-pick--red" data-color="red" aria-label="Red (Triangle)">▲ Red</button>
+          <button class="btn-color-pick color-pick--blue" data-color="blue" aria-label="Blue (Diamond)">◆ Blue</button>
+          <button class="btn-color-pick color-pick--green" data-color="green" aria-label="Green (Circle)">● Green</button>
+          <button class="btn-color-pick color-pick--yellow" data-color="yellow" aria-label="Yellow (Star)">★ Yellow</button>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- Join Dialog Modal (when no URL params provided) -->
+    <dialog id="join-modal" class="modal-dialog">
+      <div class="modal-content join-card">
+        <h2 class="modal-title">Join DeckBox Room</h2>
+        <form id="join-form" method="dialog">
+          <div class="form-group">
+            <label for="input-room-code">Room PIN</label>
+            <input type="text" id="input-room-code" class="form-input room-pin-input" inputmode="numeric" maxlength="6" placeholder="4912" required autofocus>
+          </div>
+          <div class="form-group">
+            <label for="input-player-name">Your Name</label>
+            <input type="text" id="input-player-name" class="form-input" maxlength="20" placeholder="Player" required>
+          </div>
+          <div class="form-group">
+            <label for="input-role">Role</label>
+            <select id="input-role" class="form-input form-select">
+              <option value="player">Player (Private Hand)</option>
+              <option value="table">Table View (Shared Screen)</option>
+              <option value="spectator" selected>Spectator (Audience)</option>
+            </select>
+          </div>
+          <button type="submit" id="btn-submit-join" class="btn btn--primary btn--full">Join Match</button>
+        </form>
+      </div>
+    </dialog>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

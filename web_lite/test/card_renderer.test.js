@@ -11,7 +11,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { setupGlobalDOM } from './mock_dom.js';
 
 setupGlobalDOM();
@@ -22,7 +22,7 @@ const implPath = path.resolve(__dirname, '../js/card_renderer.js');
 
 let CardRenderer, COLOR_SYMBOLS;
 if (fs.existsSync(implPath)) {
-  const mod = await import(implPath);
+  const mod = await import(pathToFileURL(implPath).href);
   CardRenderer = mod.CardRenderer || mod.default;
   COLOR_SYMBOLS = mod.COLOR_SYMBOLS;
 } else {

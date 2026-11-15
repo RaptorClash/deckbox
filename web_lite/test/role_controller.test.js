@@ -12,7 +12,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { setupGlobalDOM } from './mock_dom.js';
 
 setupGlobalDOM();
@@ -23,7 +23,7 @@ const implPath = path.resolve(__dirname, '../js/role_controller.js');
 
 let RoleController, StateStore;
 if (fs.existsSync(implPath)) {
-  const modRC = await import(implPath);
+  const modRC = await import(pathToFileURL(implPath).href);
   RoleController = modRC.RoleController || modRC.default;
   const modSS = await import('./web_contracts.js');
   StateStore = modSS.StateStore;
