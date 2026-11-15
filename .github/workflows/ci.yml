@@ -21,33 +21,65 @@ jobs:
 
       - name: Run Python Tool Unit Tests (Stdlib)
         run: |
-          python3 -m unittest discover -s test/tool
+          python3 -m unittest discover -s test/tool -v
 
-  project-quality-gate:
-    name: Project Test Suite & Quality Gate
+  node-web-tests:
+    name: Node.js Web Lite Client Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Conditional stack setup steps:
-      - name: Run Test Suite
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Web Lite Client Tests
+        run: |
+          node --test web_lite/test/*.test.js
+
+  godot-gut-tests:
+    name: Godot 4 GUT Headless Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download & Install Godot 4 Linux
         shell: bash
         run: |
-          if [ -f "project.godot" ]; then
-            echo "Detected Godot 4 project."
-            # Godot test runner hook (e.g. GUT headless)
-            if [ -d "addons/gut" ]; then
-              echo "Executing GUT headless tests..."
-            fi
-          elif [ -f "pubspec.yaml" ]; then
-            echo "Detected Flutter project. Run flutter test."
-          elif [ -f "package.json" ]; then
-            echo "Detected Node.js project. Run npm test."
-            if [ -f "package-lock.json" ]; then
-              npm ci
-            fi
-            npm test || true
-          else
-            echo "Generic project quality gate passed."
-          fi
+          GODOT_VERSION="4.3-stable"
+          echo "Fetching Godot ${GODOT_VERSION} Linux binary..."
+          wget -q "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          unzip -q "Godot_v${GODOT_VERSION}_linux.x86_64.zip" -d /tmp/godot
+          chmod +x /tmp/godot/Godot_v${GODOT_VERSION}_linux.x86_64
+          sudo mv /tmp/godot/Godot_v${GODOT_VERSION}_linux.x86_64 /usr/local/bin/godot
+          godot --version
+
+      - name: Run GUT Headless Test Suite
+        shell: bash
+        run: |
+          godot --headless -s addons/gut/gut_cmdln.gd -gdir=res://test -gexit
+
+  multi-target-validation:
+    name: Multi-Target Build Matrix (${{ matrix.target }} - ${{ matrix.platform }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [collection, uno]
+        platform: [windows, android]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Configure Target via build_target.py
+        shell: bash
+        run: |
+          python3 tool/build_target.py --target ${{ matrix.target }} --output-dir "build/${{ matrix.target }}"
+          python3 tool/build_target.py --target ${{ matrix.target }} --dry-run

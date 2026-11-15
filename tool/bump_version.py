@@ -367,11 +367,15 @@ def main():
         print("  python tool/bump_version.py minor --commit --tag")
         return
 
-    new_ver = calculate_next_version(v_name, build, args.target)
-    new_v_name, new_build = parse_version(new_ver)
-    if args.build is not None:
-        new_build = args.build
-        new_ver = f"{new_v_name}+{new_build}"
+    try:
+        new_ver = calculate_next_version(v_name, build, args.target)
+        new_v_name, new_build = parse_version(new_ver)
+        if args.build is not None:
+            new_build = args.build
+            new_ver = f"{new_v_name}+{new_build}"
+    except ValueError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
 
     # For Godot / Node, clean version string without build number is typically preferred unless specified
     effective_ver_for_file = new_ver if stack == "flutter" else new_v_name
@@ -388,9 +392,13 @@ def main():
         return
 
     # Update all relevant files
-    for f in target_files:
-        apply_version_to_file(f, new_ver, dry_run=False)
-        print(f"Successfully updated: {f}")
+    try:
+        for f in target_files:
+            apply_version_to_file(f, new_ver, dry_run=False)
+            print(f"Successfully updated: {f}")
+    except (ValueError, FileNotFoundError) as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
 
     commit_msg = f"chore(release): bump version to {new_ver}"
     tag_name = f"v{new_v_name}"

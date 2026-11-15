@@ -116,3 +116,50 @@ jobs:
           draft: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # =========================================================================
+  # 2. BUILD & ATTACH MULTI-TARGET MATRIX PACKAGES
+  # =========================================================================
+  build-and-attach-matrix:
+    name: Build & Attach Package (${{ matrix.target }} - ${{ matrix.platform }})
+    needs: [check-release-needed, publish-release]
+    if: needs.check-release-needed.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [collection, uno]
+        platform: [windows, android]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Configure Target via build_target.py
+        shell: bash
+        run: |
+          python3 tool/build_target.py --target ${{ matrix.target }} --output-dir "build/${{ matrix.target }}"
+
+      - name: Package Target Artifacts
+        shell: bash
+        run: |
+          TAG="${{ needs.check-release-needed.outputs.target_tag }}"
+          [ -z "$TAG" ] && TAG="latest"
+          PKG_NAME="deckbox-${{ matrix.target }}-${{ matrix.platform }}-${TAG}"
+          
+          mkdir -p release_packages
+          echo "Packaging ${{ matrix.target }} for ${{ matrix.platform }} as ${PKG_NAME}..."
+          
+          tar -czf "release_packages/${PKG_NAME}.tar.gz" project.godot export_presets.cfg core scenes games web_lite
+          zip -r "release_packages/${PKG_NAME}.zip" project.godot export_presets.cfg core scenes games web_lite
+
+      - name: Attach Package to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.check-release-needed.outputs.target_tag }}
+          files: release_packages/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

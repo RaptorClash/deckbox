@@ -306,6 +306,19 @@ class TestDryRunAndCLI(unittest.TestCase):
             # Regardless of whether it finds the file or reports dry-run, original file must remain intact
             self.assertEqual(pubspec.read_text(encoding="utf-8"), original_content)
 
+    def test_cli_invalid_target_exits_cleanly(self):
+        """Verify that CLI invocation with invalid target exits with code 1 and prints Error: without tracebacks."""
+        for invalid_target in ["invalid_ver", "1.0.0+bad", "not_a_semver"]:
+            result = subprocess.run(
+                [sys.executable, str(self.script_path), invalid_target, "--dry-run"],
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 1, f"Expected returncode 1 for {invalid_target}")
+            self.assertIn("Error:", result.stderr)
+            self.assertNotIn("Traceback", result.stderr)
+
+
 
 class TestBoundaryAndCorruptedCases(unittest.TestCase):
     """Tier 2: Error handling, corrupted inputs, and edge conditions."""
