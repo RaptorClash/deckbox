@@ -1,0 +1,118 @@
+name: Build & Release Multi-Platform Packages
+
+on:
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      version_tag:
+        description: 'Version tag (e.g. v1.0.0 or v0.1.0-beta.1 - leave empty for auto)'
+        required: false
+        default: ''
+      is_prerelease:
+        description: 'Mark as pre-release / beta'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  # =========================================================================
+  # 0. RELEASE GATE & TRIGGER EVALUATION
+  # =========================================================================
+  check-release-needed:
+    name: Check Release Trigger Condition
+    runs-on: ubuntu-latest
+    outputs:
+      should_release: ${{ steps.gate.outputs.should_release }}
+      target_tag: ${{ steps.gate.outputs.target_tag }}
+      release_title: ${{ steps.info.outputs.release_title }}
+      is_prerelease: ${{ steps.info.outputs.is_prerelease }}
+      body_path: ${{ steps.info.outputs.body_path }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Evaluate Release Gate
+        id: gate
+        shell: bash
+        run: |
+          EVENT="${{ github.event_name }}"
+          REF_NAME="${{ github.ref_name }}"
+          TAG_INPUT="${{ github.event.inputs.version_tag }}"
+          
+          echo "Evaluating release trigger: event=$EVENT, ref=$REF_NAME, tag_input=$TAG_INPUT"
+          
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            echo "Manual workflow dispatch -> Release enabled."
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          
+          if [[ "$REF_NAME" =~ ^v[0-9] ]]; then
+            echo "Direct tag push ($REF_NAME) -> Release enabled."
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            echo "target_tag=$REF_NAME" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          
+          git fetch --tags --force || true
+          
+          # Use extract_release_info.py to discover current version
+          CURR_VER=$(python3 tool/extract_release_info.py --notes RELEASE_NOTES.md | grep "Tag Name:" | awk '{print $3}')
+          echo "Target tag for current project version on main: $CURR_VER"
+          echo "target_tag=$CURR_VER" >> "$GITHUB_OUTPUT"
+          
+          if git rev-parse "refs/tags/$CURR_VER" >/dev/null 2>&1; then
+            echo "::notice ::Release tag $CURR_VER already exists in repository. Skipping release on main to prevent overwrites."
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Release tag $CURR_VER does not exist yet -> New release detected on main! Release enabled."
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Extract Release Info
+        id: info
+        if: steps.gate.outputs.should_release == 'true'
+        shell: bash
+        run: |
+          python3 tool/extract_release_info.py \
+            --notes RELEASE_NOTES.md \
+            --ref "${{ github.ref_name }}" \
+            --tag-input "${{ github.event.inputs.version_tag }}" \
+            --prerelease-input "${{ github.event.inputs.is_prerelease }}" \
+            --github-output "$GITHUB_OUTPUT"
+
+  # =========================================================================
+  # 1. PUBLISH GITHUB RELEASE
+  # =========================================================================
+  publish-release:
+    name: Create GitHub Release
+    needs: [check-release-needed]
+    if: needs.check-release-needed.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Create GitHub Release Entry
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.check-release-needed.outputs.target_tag }}
+          name: ${{ needs.check-release-needed.outputs.release_title }}
+          body_path: ${{ needs.check-release-needed.outputs.body_path }}
+          prerelease: ${{ needs.check-release-needed.outputs.is_prerelease == 'true' }}
+          draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

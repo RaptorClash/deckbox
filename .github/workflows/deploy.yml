@@ -1,0 +1,43 @@
+name: Deploy Web Client to GitHub Pages
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    name: Build & Deploy to Pages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify Web Distribution Directory
+        shell: bash
+        run: |
+          if [ -d "web_lite" ]; then
+            echo "Deploying web_lite directory."
+            mkdir -p dist
+            cp -r web_lite/* dist/
+          elif [ -d "dist" ]; then
+            echo "Using existing dist directory."
+          elif [ -d "build/web" ]; then
+            echo "Using build/web directory."
+            mkdir -p dist
+            cp -r build/web/* dist/
+          else
+            echo "Creating minimal landing page."
+            mkdir -p dist
+            echo "<h1>Project Documentation & Web Client</h1>" > dist/index.html
+          fi
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist

@@ -1,0 +1,46 @@
+# Godot 4
+.godot/
+.import/
+*.translation
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+
+# Node
+node_modules/
+.npm/
+
+# Portable Database / Development Data
+/database/
+/user_data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
+# Build & Release Artifacts
+/build/
+/dist/
+*.pck.tmp
+*.apk
+*.aab
+*.exe
+*.zip
+*.tar.gz
+*.AppImage
+
+# OS & Editor Artifacts
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
+*.swp
+.idea/
+*.iml
+.vscode/
+
+# Translation Cache
+.translation_cache.json

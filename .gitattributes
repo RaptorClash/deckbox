@@ -1,0 +1,36 @@
+# Auto-detect text files and normalize line endings to LF on commit
+* text=auto eol=lf
+
+# Godot engine & scene files
+*.godot text eol=lf
+*.tscn text eol=lf
+*.tres text eol=lf
+*.gd text eol=lf
+
+# Web Lite & Scripting
+*.js text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.json text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.cfg text eol=lf
+
+# Explicit binary files
+*.blend binary
+*.glb binary
+*.gltf binary
+*.pck binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.ogg binary
+*.wav binary
+*.mp3 binary
+*.ttf binary
+*.otf binary
+*.zip binary
