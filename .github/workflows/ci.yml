@@ -57,6 +57,11 @@ jobs:
           sudo mv /tmp/godot/Godot_v${GODOT_VERSION}_linux.x86_64 /usr/local/bin/godot
           godot --version
 
+      - name: Import Godot Project Assets & Register Classes
+        shell: bash
+        run: |
+          godot --headless --editor --quit || true
+
       - name: Run GUT Headless Test Suite
         shell: bash
         run: |
