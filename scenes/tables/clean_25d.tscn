@@ -1,0 +1,60 @@
+[gd_scene load_steps=5 format=3 uid="uid://bclean25dtheme003"]
+
+[ext_resource type="Script" path="res://scenes/tables/table_theme.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://assets/3d/table_clean.glb" id="2_mesh"]
+
+[sub_resource type="Environment" id="Environment_clean"]
+background_mode = 1
+background_color = Color(0.1, 0.12, 0.15, 1)
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_clean"]
+
+[node name="Clean25DTable" type="Node3D"]
+script = ExtResource("1_script")
+theme_id = "clean_25d"
+theme_display_name = "Clean 2.5D"
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_clean")
+camera_attributes = SubResource("CameraAttributesPractical_clean")
+
+[node name="TableMesh" parent="." instance=ExtResource("2_mesh")]
+
+[node name="Lighting" type="Node3D" parent="."]
+
+[node name="KeyLight" type="DirectionalLight3D" parent="Lighting"]
+transform = Transform3D(0.966, -0.183, 0.183, 0, 0.707, 0.707, -0.259, -0.683, 0.683, 0, 3.5, 1.5)
+light_color = Color(1, 1, 1, 1)
+light_energy = 1.1
+shadow_enabled = true
+
+[node name="FillLight" type="DirectionalLight3D" parent="Lighting"]
+transform = Transform3D(0.866, 0.354, -0.354, 0, 0.707, 0.707, 0.5, -0.612, 0.612, 0, 2.5, -1.5)
+light_color = Color(0.58, 0.64, 0.72, 1)
+light_energy = 0.5
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.374607, 0.927184, 0, -0.927184, 0.374607, 0, 2.8, 1.1)
+fov = 52.0
+
+[node name="Anchors" type="Node3D" parent="."]
+
+[node name="DrawPileAnchor" type="Marker3D" parent="Anchors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15, 0.755, 0)
+
+[node name="DiscardPileAnchor" type="Marker3D" parent="Anchors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0.755, 0)
+
+[node name="Seats" type="Node3D" parent="Anchors"]
+
+[node name="Seat_0" type="Marker3D" parent="Anchors/Seats"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.755, 0.6)
+
+[node name="Seat_1" type="Marker3D" parent="Anchors/Seats"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0, 0.755, 0)
+
+[node name="Seat_2" type="Marker3D" parent="Anchors/Seats"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.755, -0.6)
+
+[node name="Seat_3" type="Marker3D" parent="Anchors/Seats"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0, 0.755, 0)

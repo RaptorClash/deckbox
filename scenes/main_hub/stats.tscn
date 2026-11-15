@@ -1,0 +1,154 @@
+[gd_scene load_steps=2 format=3 uid="uid://bhubstats001"]
+
+[ext_resource type="Script" path="res://scenes/main_hub/stats.gd" id="1_script"]
+
+[node name="StatsScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 15
+
+[node name="Header" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="VBoxContainer/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+text = "Player Statistics & History"
+
+[node name="RefreshButton" type="Button" parent="VBoxContainer/Header"]
+layout_mode = 2
+text = "Refresh"
+
+[node name="BackButton" type="Button" parent="VBoxContainer/Header"]
+layout_mode = 2
+text = "Back"
+
+[node name="SummaryRow" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="MatchesCard" type="PanelContainer" parent="VBoxContainer/SummaryRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Box" type="VBoxContainer" parent="VBoxContainer/SummaryRow/MatchesCard"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="VBoxContainer/SummaryRow/MatchesCard/Box"]
+layout_mode = 2
+text = "Total Matches"
+
+[node name="Val" type="Label" parent="VBoxContainer/SummaryRow/MatchesCard/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "0"
+
+[node name="WinsCard" type="PanelContainer" parent="VBoxContainer/SummaryRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Box" type="VBoxContainer" parent="VBoxContainer/SummaryRow/WinsCard"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="VBoxContainer/SummaryRow/WinsCard/Box"]
+layout_mode = 2
+text = "Total Wins"
+
+[node name="Val" type="Label" parent="VBoxContainer/SummaryRow/WinsCard/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "0"
+
+[node name="WinRateCard" type="PanelContainer" parent="VBoxContainer/SummaryRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Box" type="VBoxContainer" parent="VBoxContainer/SummaryRow/WinRateCard"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="VBoxContainer/SummaryRow/WinRateCard/Box"]
+layout_mode = 2
+text = "Win Rate"
+
+[node name="Val" type="Label" parent="VBoxContainer/SummaryRow/WinRateCard/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "0.0%"
+
+[node name="StreakCard" type="PanelContainer" parent="VBoxContainer/SummaryRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Box" type="VBoxContainer" parent="VBoxContainer/SummaryRow/StreakCard"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="VBoxContainer/SummaryRow/StreakCard/Box"]
+layout_mode = 2
+text = "Win Streak"
+
+[node name="Val" type="Label" parent="VBoxContainer/SummaryRow/StreakCard/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "0"
+
+[node name="PlayTimeCard" type="PanelContainer" parent="VBoxContainer/SummaryRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Box" type="VBoxContainer" parent="VBoxContainer/SummaryRow/PlayTimeCard"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="VBoxContainer/SummaryRow/PlayTimeCard/Box"]
+layout_mode = 2
+text = "Play Time"
+
+[node name="Val" type="Label" parent="VBoxContainer/SummaryRow/PlayTimeCard/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "0 min"
+
+[node name="ChartsRow" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="DonutBox" type="CenterContainer" parent="VBoxContainer/ChartsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BarBox" type="CenterContainer" parent="VBoxContainer/ChartsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="OpponentsLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Opponents Head-to-Head:"
+
+[node name="OpponentsScroll" type="ScrollContainer" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+
+[node name="OpponentsList" type="VBoxContainer" parent="VBoxContainer/OpponentsScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[connection signal="pressed" from="VBoxContainer/Header/RefreshButton" to="." method="_on_refresh_pressed"]
+[connection signal="pressed" from="VBoxContainer/Header/BackButton" to="." method="_on_back_pressed"]
