@@ -1,0 +1,141 @@
+[gd_scene load_steps=2 format=3 uid="uid://bpe1packeditor001"]
+
+[ext_resource type="Script" path="res://scenes/main_hub/pack_editor.gd" id="1_script"]
+
+[node name="PackEditor" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Header" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="VBoxContainer/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "DeckBox Card Pack Editor"
+
+[node name="NewButton" type="Button" parent="VBoxContainer/Header"]
+layout_mode = 2
+text = "New"
+
+[node name="ValidateButton" type="Button" parent="VBoxContainer/Header"]
+layout_mode = 2
+text = "Validate"
+
+[node name="ExportButton" type="Button" parent="VBoxContainer/Header"]
+layout_mode = 2
+text = "Export"
+
+[node name="TabContainer" type="TabContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Metadata" type="MarginContainer" parent="VBoxContainer/TabContainer"]
+layout_mode = 2
+
+[node name="GridContainer" type="GridContainer" parent="VBoxContainer/TabContainer/Metadata"]
+layout_mode = 2
+columns = 2
+
+[node name="IdLabel" type="Label" parent="VBoxContainer/TabContainer/Metadata/GridContainer"]
+layout_mode = 2
+text = "Pack ID:"
+
+[node name="IdEdit" type="LineEdit" parent="VBoxContainer/TabContainer/Metadata/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="NameLabel" type="Label" parent="VBoxContainer/TabContainer/Metadata/GridContainer"]
+layout_mode = 2
+text = "Name:"
+
+[node name="NameEdit" type="LineEdit" parent="VBoxContainer/TabContainer/Metadata/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="AuthorLabel" type="Label" parent="VBoxContainer/TabContainer/Metadata/GridContainer"]
+layout_mode = 2
+text = "Author:"
+
+[node name="AuthorEdit" type="LineEdit" parent="VBoxContainer/TabContainer/Metadata/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VersionLabel" type="Label" parent="VBoxContainer/TabContainer/Metadata/GridContainer"]
+layout_mode = 2
+text = "Version:"
+
+[node name="VersionEdit" type="LineEdit" parent="VBoxContainer/TabContainer/Metadata/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="DescLabel" type="Label" parent="VBoxContainer/TabContainer/Metadata/GridContainer"]
+layout_mode = 2
+text = "Description:"
+
+[node name="DescEdit" type="TextEdit" parent="VBoxContainer/TabContainer/Metadata/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Cards" type="MarginContainer" parent="VBoxContainer/TabContainer"]
+visible = false
+layout_mode = 2
+
+[node name="HSplitContainer" type="HSplitContainer" parent="VBoxContainer/TabContainer/Cards"]
+layout_mode = 2
+
+[node name="CardList" type="ItemList" parent="VBoxContainer/TabContainer/Cards/HSplitContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CardDetails" type="VBoxContainer" parent="VBoxContainer/TabContainer/Cards/HSplitContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CardIdEdit" type="LineEdit" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails"]
+layout_mode = 2
+placeholder_text = "Card ID (e.g. tornado_card)"
+
+[node name="CardNameEdit" type="LineEdit" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails"]
+layout_mode = 2
+placeholder_text = "Card Name"
+
+[node name="CardColorOpt" type="OptionButton" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails"]
+layout_mode = 2
+
+[node name="CardCountSpin" type="SpinBox" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails"]
+layout_mode = 2
+min_value = 1.0
+max_value = 20.0
+value = 1.0
+
+[node name="AddCardButton" type="Button" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails"]
+layout_mode = 2
+text = "Add / Update Card"
+
+[node name="Footer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="VBoxContainer/Footer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Ready."
+
+[connection signal="pressed" from="VBoxContainer/Header/NewButton" to="." method="_on_new_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/Header/ValidateButton" to="." method="_on_validate_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/Header/ExportButton" to="." method="_on_export_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/AddCardButton" to="." method="_on_add_card_pressed"]

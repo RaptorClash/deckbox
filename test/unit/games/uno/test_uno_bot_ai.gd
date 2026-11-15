@@ -178,3 +178,65 @@ func test_bot_timeout_safety():
 	for i in range(10):
 		var res = game.handle_timeout()
 		assert_true(res["success"], "Timeout %d must resolve cleanly without stalling or crashing" % i)
+
+func test_bot_plays_matching_color_on_wild_top_discard_with_active_color():
+	var ai = _create_bot_evaluator()
+	if ai == null:
+		pass_test("Bot AI not loaded")
+		return
+
+	var top_discard = { "color": "wild", "value": "wild" }
+	var match_context = {
+		"active_color": "blue",
+		"next_player_card_count": 5
+	}
+	var hand = [
+		{ "id": "c_b7", "color": "blue", "value": "7" },
+		{ "id": "c_r2", "color": "red", "value": "2" }
+	]
+
+	var action = ai.choose_action_with_context(hand, top_discard, match_context, "tactical")
+	assert_eq(action["type"], "ACTION_PLAY_CARD", "Bot should play Blue 7 matching active color")
+	assert_eq(action["card_id"], "c_b7")
+
+func test_bot_draws_penalty_when_cannot_counter_stack():
+	var ai = _create_bot_evaluator()
+	if ai == null:
+		pass_test("Bot AI not loaded")
+		return
+
+	var top_discard = { "color": "green", "value": "draw_two" }
+	var match_context = {
+		"pending_penalty_draws": 4,
+		"stacking_draw_two": true,
+		"stacking_draw_four": true
+	}
+	# Hand contains a matching regular green card, but NO +2 or +4
+	var hand = [
+		{ "id": "c_g5", "color": "green", "value": "5" },
+		{ "id": "c_r3", "color": "red", "value": "3" }
+	]
+
+	var action = ai.choose_action_with_context(hand, top_discard, match_context, "tactical")
+	assert_eq(action["type"], "ACTION_DRAW_CARD", "Bot must draw penalty instead of attempting illegal play")
+
+func test_bot_counter_stacks_when_holding_valid_penalty_card():
+	var ai = _create_bot_evaluator()
+	if ai == null:
+		pass_test("Bot AI not loaded")
+		return
+
+	var top_discard = { "color": "yellow", "value": "draw_two" }
+	var match_context = {
+		"pending_penalty_draws": 2,
+		"stacking_draw_two": true,
+		"stacking_draw_four": true
+	}
+	var hand = [
+		{ "id": "c_r_d2", "color": "red", "value": "draw_two" },
+		{ "id": "c_y1", "color": "yellow", "value": "1" }
+	]
+
+	var action = ai.choose_action_with_context(hand, top_discard, match_context, "tactical")
+	assert_eq(action["type"], "ACTION_PLAY_CARD", "Bot must counter-stack Draw Two")
+	assert_eq(action["card_id"], "c_r_d2")

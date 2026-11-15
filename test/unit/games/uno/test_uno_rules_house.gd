@@ -129,7 +129,7 @@ func test_jump_in_exact_identical_card_steals_turn():
 
 	if game.has_method("debug_set_state"):
 		game.debug_set_state({
-			"top_discard": { "uid": "top", "color": "blue", "value": "1" },
+			"top_discard": { "uid": "top", "color": "red", "value": "1" },
 			"active_seat": 0,
 			"direction": 1,
 			"player_hands": {
@@ -277,3 +277,75 @@ func test_draw_to_match_enabled():
 		# P0 should have drawn until the playable Red 3 card was obtained (3 cards drawn)
 		var p0_view = game.get_player_view("p0")
 		assert_gte(p0_view["hand"].size(), 2, "Draw-to-match keeps drawing until playable card found")
+
+func test_discard_pile_sync_and_reshuffle_on_draw_pile_exhaustion():
+	var game = _create_custom_match({})
+	if game == null:
+		pass_test("UnoCartridge not loaded")
+		return
+
+	# Setup match with empty draw pile and 3 cards in discard pile
+	var card_top = { "id": "t1", "uid": "t1", "color": "red", "value": "1" }
+	var card_discard_1 = { "id": "d1", "uid": "d1", "color": "blue", "value": "2" }
+	var card_discard_2 = { "id": "d2", "uid": "d2", "color": "green", "value": "3" }
+	game.draw_pile = []
+	game.discard_pile = [card_discard_1, card_discard_2, card_top]
+	game.player_hands["p0"] = []
+
+	# Draw a card when draw_pile is exhausted; must trigger reshuffle from discard_pile
+	var res = game.handle_action("p0", { "type": "ACTION_DRAW_CARD" })
+	assert_true(res["success"], "Draw action must succeed via discard pile reshuffle")
+	assert_eq(game.get_player_card_count("p0"), 1, "P0 must have received 1 card from reshuffle")
+	assert_eq(game.discard_pile.size(), 1, "Top discard must remain on discard pile")
+	assert_eq(game.uno_rules.discard_pile.size(), 1, "Rules discard pile must stay synchronized")
+	assert_eq(game.draw_pile.size(), 1, "1 card remaining in draw pile after drawing 1 from 2 reshuffled")
+
+func test_jump_in_final_card_triggers_round_over_and_win():
+	var game = _create_custom_match({ "jump_in": true })
+	if game == null:
+		pass_test("UnoCartridge not loaded")
+		return
+
+	game.discard_pile = [{ "id": "top_card", "uid": "top_card", "color": "red", "value": "5" }]
+	game.player_hands["p0"] = [
+		{ "id": "p0_c1", "uid": "p0_c1", "color": "blue", "value": "3" },
+		{ "id": "p0_c2", "uid": "p0_c2", "color": "yellow", "value": "2" }
+	]
+	game.player_hands["p1"] = [
+		{ "id": "p1_r5", "uid": "p1_r5", "color": "red", "value": "5" } # Exactly 1 card left!
+	]
+	game.current_turn_seat = 0
+
+	# P1 jumps in out of turn with their last card
+	var res = game.handle_action("p1", { "type": "ACTION_JUMP_IN", "card_id": "p1_r5" })
+	assert_true(res["success"], "Jump-in must succeed")
+	assert_eq(game.get_player_card_count("p1"), 0, "P1 hand size must be 0")
+	assert_true(game.is_round_over(), "Round must be over when player jumps in with last card")
+	assert_eq(game.round_results["winner_seat"], 1, "Winner must be Seat 1")
+	assert_eq(game.round_results["winner_player_id"], "p1", "Winner must be p1")
+
+func test_seven_swap_final_card_does_not_win_if_holding_swapped_cards():
+	var game = _create_custom_match({ "seven_zero_passing": true })
+	if game == null:
+		pass_test("UnoCartridge not loaded")
+		return
+
+	game.discard_pile = [{ "id": "top", "uid": "top", "color": "red", "value": "2" }]
+	game.player_hands["p0"] = [{ "id": "r7", "uid": "r7", "color": "red", "value": "7" }]
+	game.player_hands["p1"] = [
+		{ "id": "b1", "uid": "b1", "color": "blue", "value": "1" },
+		{ "id": "b2", "uid": "b2", "color": "blue", "value": "2" }
+	]
+	game.current_turn_seat = 0
+
+	# P0 plays Red 7 as their last card, swapping with P1
+	var action = {
+		"type": "ACTION_PLAY_CARD",
+		"card_id": "r7",
+		"swap_target_seat": 1
+	}
+	var res = game.handle_action("p0", action)
+	assert_true(res["success"])
+	assert_false(game.is_round_over(), "P0 must NOT win because they received P1's 2 cards")
+	assert_eq(game.get_player_card_count("p0"), 2, "P0 now holds 2 cards")
+	assert_eq(game.get_player_card_count("p1"), 0, "P1 received 0 cards")

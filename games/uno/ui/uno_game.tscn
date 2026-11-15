@@ -1,0 +1,88 @@
+[gd_scene load_steps=2 format=3 uid="uid://bunogame001"]
+
+[ext_resource type="Script" path="res://games/uno/ui/uno_game.gd" id="1_script"]
+
+[node name="UnoGame" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Header" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="VBoxContainer/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "DeckBox UNO Table"
+
+[node name="TurnLabel" type="Label" parent="VBoxContainer/Header"]
+layout_mode = 2
+text = "Active Seat: 0"
+
+[node name="OpponentsArea" type="MarginContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="OpponentsContainer" type="HBoxContainer" parent="VBoxContainer/OpponentsArea"]
+layout_mode = 2
+alignment = 1
+
+[node name="TableArea" type="CenterContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CenterTable" type="HBoxContainer" parent="VBoxContainer/TableArea"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="DrawPileBtn" type="Button" parent="VBoxContainer/TableArea/CenterTable"]
+custom_minimum_size = Vector2(90, 130)
+layout_mode = 2
+text = "Draw Pile\n(79)"
+
+[node name="DiscardCard" type="PanelContainer" parent="VBoxContainer/TableArea/CenterTable"]
+custom_minimum_size = Vector2(90, 130)
+layout_mode = 2
+
+[node name="DiscardLabel" type="Label" parent="VBoxContainer/TableArea/CenterTable/DiscardCard"]
+layout_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlayerArea" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="ActionButtons" type="HBoxContainer" parent="VBoxContainer/PlayerArea"]
+layout_mode = 2
+alignment = 1
+
+[node name="CallUnoButton" type="Button" parent="VBoxContainer/PlayerArea/ActionButtons"]
+layout_mode = 2
+text = "Call UNO!"
+
+[node name="HandScroll" type="ScrollContainer" parent="VBoxContainer/PlayerArea"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+
+[node name="HandContainer" type="HBoxContainer" parent="VBoxContainer/PlayerArea/HandScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="ColorChoiceDialog" type="ConfirmationDialog" parent="."]
+title = "Choose Wild Color"
+size = Vector2i(200, 100)
+
+[connection signal="pressed" from="VBoxContainer/TableArea/CenterTable/DrawPileBtn" to="." method="_on_draw_pile_btn_pressed"]
+[connection signal="pressed" from="VBoxContainer/PlayerArea/ActionButtons/CallUnoButton" to="." method="_on_call_uno_button_pressed"]
