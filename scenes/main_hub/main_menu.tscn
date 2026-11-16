@@ -1,0 +1,383 @@
+[gd_scene load_steps=5 format=3 uid="uid://bmainmenuhub001"]
+
+[ext_resource type="Script" path="res://scenes/main_hub/main_menu.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/main_hub/pack_editor.tscn" id="2_pack_editor"]
+[ext_resource type="PackedScene" path="res://scenes/main_hub/profile.tscn" id="3_profile"]
+[ext_resource type="PackedScene" path="res://scenes/main_hub/stats.tscn" id="4_stats"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.06, 0.08, 0.13, 1)
+
+[node name="HubShell" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 18.0
+offset_top = 14.0
+offset_right = -18.0
+offset_bottom = -14.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="TopBar" type="HBoxContainer" parent="HubShell"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BrandTitle" type="Label" parent="HubShell/TopBar"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "DeckBox 3D Collection"
+
+[node name="VersionBadge" type="Label" parent="HubShell/TopBar"]
+layout_mode = 2
+text = "v0.1.0"
+
+[node name="Spacer" type="Control" parent="HubShell/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PlayTabBtn" type="Button" parent="HubShell/TopBar"]
+layout_mode = 2
+text = "Play & 3D Table"
+
+[node name="FriendsTabBtn" type="Button" parent="HubShell/TopBar"]
+layout_mode = 2
+text = "Friends QR"
+
+[node name="PacksTabBtn" type="Button" parent="HubShell/TopBar"]
+layout_mode = 2
+text = "Card Pack Editor"
+
+[node name="ProfileTabBtn" type="Button" parent="HubShell/TopBar"]
+layout_mode = 2
+text = "Profile & Backup"
+
+[node name="StatsTabBtn" type="Button" parent="HubShell/TopBar"]
+layout_mode = 2
+text = "Statistics"
+
+[node name="UpdaterTabBtn" type="Button" parent="HubShell/TopBar"]
+layout_mode = 2
+text = "Updater"
+
+[node name="HSeparator" type="HSeparator" parent="HubShell"]
+layout_mode = 2
+
+[node name="ContentStack" type="Control" parent="HubShell"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PlayTab" type="MarginContainer" parent="HubShell/ContentStack"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Columns" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="SetupPanel" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/Columns"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SetupBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="GameHeader" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "DeckBox UNO — 3D Edition"
+
+[node name="ModeLabel" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
+layout_mode = 2
+text = "Match Mode:"
+
+[node name="ModeOption" type="OptionButton" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
+layout_mode = 2
+
+[node name="PlayerCountRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
+layout_mode = 2
+
+[node name="PlayerCountLabel" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/PlayerCountRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Pass & Play Human Seats:"
+
+[node name="PlayerCountSpin" type="SpinBox" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/PlayerCountRow"]
+layout_mode = 2
+min_value = 2.0
+max_value = 4.0
+value = 2.0
+
+[node name="ThemeLabel" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
+layout_mode = 2
+text = "3D Table Environment:"
+
+[node name="ThemeOption" type="OptionButton" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
+layout_mode = 2
+
+[node name="QualityLabel" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
+layout_mode = 2
+text = "3D Graphics Quality:"
+
+[node name="QualityOption" type="OptionButton" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
+layout_mode = 2
+
+[node name="RulesHeader" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
+layout_mode = 2
+text = "House Rules:"
+
+[node name="RulesGrid" type="GridContainer" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
+layout_mode = 2
+columns = 2
+
+[node name="StackD2Check" type="CheckBox" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/RulesGrid"]
+layout_mode = 2
+text = "Stack +2 Cards"
+
+[node name="StackD4Check" type="CheckBox" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/RulesGrid"]
+layout_mode = 2
+text = "Stack +4 Cards"
+
+[node name="JumpInCheck" type="CheckBox" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/RulesGrid"]
+layout_mode = 2
+text = "Jump-In (Identical Card)"
+
+[node name="SevenZeroCheck" type="CheckBox" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/RulesGrid"]
+layout_mode = 2
+text = "7-Swap & 0-Rotate"
+
+[node name="DrawMatchCheck" type="CheckBox" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/RulesGrid"]
+layout_mode = 2
+text = "Draw Until Playable"
+
+[node name="LaunchUnoBtn" type="Button" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "▶ Launch 3D UNO Match"
+
+[node name="HSep" type="HSeparator" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
+layout_mode = 2
+
+[node name="ExternalRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
+layout_mode = 2
+
+[node name="PckPathEdit" type="LineEdit" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/ExternalRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "External cartridge (.pck / .zip path)"
+
+[node name="LoadPckBtn" type="Button" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/ExternalRow"]
+layout_mode = 2
+text = "Mount Cartridge"
+
+[node name="ExternalStatusLabel" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
+layout_mode = 2
+text = "Built-in cartridges ready: UNO (Phase 2 ready for Wizard & Doppelkopf)"
+
+[node name="LobbyPanel" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/Columns"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="LobbyBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/Columns/LobbyPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LobbyHeader" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/LobbyPanel/LobbyBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Live 3D Table Preview & QR / LAN Host"
+
+[node name="PreviewViewportContainer" type="SubViewportContainer" parent="HubShell/ContentStack/PlayTab/Columns/LobbyPanel/LobbyBox"]
+custom_minimum_size = Vector2(0, 210)
+layout_mode = 2
+size_flags_vertical = 3
+stretch = true
+
+[node name="PreviewViewport" type="SubViewport" parent="HubShell/ContentStack/PlayTab/Columns/LobbyPanel/LobbyBox/PreviewViewportContainer"]
+own_world_3d = true
+handle_input_locally = false
+size = Vector2i(560, 220)
+render_target_update_mode = 4
+
+[node name="HostLanBtn" type="Button" parent="HubShell/ContentStack/PlayTab/Columns/LobbyPanel/LobbyBox"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Start LAN / QR Host"
+
+[node name="RoomPinLabel" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/LobbyPanel/LobbyBox"]
+layout_mode = 2
+text = "Room PIN: ---- (Offline)"
+
+[node name="JoinUrlLabel" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/LobbyPanel/LobbyBox"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Player URL: (Start host to generate QR & link)"
+
+[node name="TableUrlLabel" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/LobbyPanel/LobbyBox"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Table Display URL: ----"
+
+[node name="StunLabel" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/LobbyPanel/LobbyBox"]
+layout_mode = 2
+text = "Online P2P STUN: stun:stun.l.google.com:19302"
+
+[node name="QrCenter" type="CenterContainer" parent="HubShell/ContentStack/PlayTab/Columns/LobbyPanel/LobbyBox"]
+layout_mode = 2
+
+[node name="QRTextureRect" type="TextureRect" parent="HubShell/ContentStack/PlayTab/Columns/LobbyPanel/LobbyBox/QrCenter"]
+custom_minimum_size = Vector2(140, 140)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="FriendsTab" type="PanelContainer" parent="HubShell/ContentStack"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="FriendsBox" type="VBoxContainer" parent="HubShell/ContentStack/FriendsTab"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="FriendsTitle" type="Label" parent="HubShell/ContentStack/FriendsTab/FriendsBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Decentralized Friends List (QR / UUID)"
+
+[node name="MyUuidLabel" type="Label" parent="HubShell/ContentStack/FriendsTab/FriendsBox"]
+layout_mode = 2
+text = "Your UUID: ----"
+
+[node name="FriendQrRow" type="HBoxContainer" parent="HubShell/ContentStack/FriendsTab/FriendsBox"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="MyFriendQrRect" type="TextureRect" parent="HubShell/ContentStack/FriendsTab/FriendsBox/FriendQrRow"]
+custom_minimum_size = Vector2(140, 140)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="MyFriendPayloadEdit" type="LineEdit" parent="HubShell/ContentStack/FriendsTab/FriendsBox/FriendQrRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+editable = false
+placeholder_text = "Your friend QR payload URI"
+
+[node name="AddFriendRow" type="HBoxContainer" parent="HubShell/ContentStack/FriendsTab/FriendsBox"]
+layout_mode = 2
+
+[node name="AddFriendPayloadEdit" type="LineEdit" parent="HubShell/ContentStack/FriendsTab/FriendsBox/AddFriendRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Paste friend's deckbox://friend?... payload here"
+
+[node name="AddFriendBtn" type="Button" parent="HubShell/ContentStack/FriendsTab/FriendsBox/AddFriendRow"]
+layout_mode = 2
+text = "Add Friend"
+
+[node name="FriendsStatusLabel" type="Label" parent="HubShell/ContentStack/FriendsTab/FriendsBox"]
+layout_mode = 2
+text = ""
+
+[node name="FriendsScroll" type="ScrollContainer" parent="HubShell/ContentStack/FriendsTab/FriendsBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="FriendsListBox" type="VBoxContainer" parent="HubShell/ContentStack/FriendsTab/FriendsBox/FriendsScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PackEditorTab" parent="HubShell/ContentStack" instance=ExtResource("2_pack_editor")]
+visible = false
+layout_mode = 1
+
+[node name="ProfileTab" parent="HubShell/ContentStack" instance=ExtResource("3_profile")]
+visible = false
+layout_mode = 1
+
+[node name="StatsTab" parent="HubShell/ContentStack" instance=ExtResource("4_stats")]
+visible = false
+layout_mode = 1
+
+[node name="UpdaterTab" type="PanelContainer" parent="HubShell/ContentStack"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="UpdaterBox" type="VBoxContainer" parent="HubShell/ContentStack/UpdaterTab"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="UpdaterHeader" type="Label" parent="HubShell/ContentStack/UpdaterTab/UpdaterBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Release Updater & Multiplayer Version Guard"
+
+[node name="CheckUpdatesBtn" type="Button" parent="HubShell/ContentStack/UpdaterTab/UpdaterBox"]
+layout_mode = 2
+text = "Query GitHub Releases (Update / Downgrade)"
+
+[node name="UpdaterStatusLabel" type="Label" parent="HubShell/ContentStack/UpdaterTab/UpdaterBox"]
+layout_mode = 2
+text = "Ready to check releases for RaptorClash/deckbox."
+
+[node name="ReleasesList" type="ItemList" parent="HubShell/ContentStack/UpdaterTab/UpdaterBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ActiveMatchHost" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="GitHubReleasesRequest" type="HTTPRequest" parent="."]
+
+[connection signal="pressed" from="HubShell/TopBar/PlayTabBtn" to="." method="select_tab" binds= ["play"]]
+[connection signal="pressed" from="HubShell/TopBar/FriendsTabBtn" to="." method="select_tab" binds= ["friends"]]
+[connection signal="pressed" from="HubShell/TopBar/PacksTabBtn" to="." method="select_tab" binds= ["pack_editor"]]
+[connection signal="pressed" from="HubShell/TopBar/ProfileTabBtn" to="." method="select_tab" binds= ["profile"]]
+[connection signal="pressed" from="HubShell/TopBar/StatsTabBtn" to="." method="select_tab" binds= ["stats"]]
+[connection signal="pressed" from="HubShell/TopBar/UpdaterTabBtn" to="." method="select_tab" binds= ["updater"]]
+[connection signal="item_selected" from="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/ThemeOption" to="." method="_on_preview_setting_changed"]
+[connection signal="item_selected" from="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/QualityOption" to="." method="_on_preview_setting_changed"]
+[connection signal="pressed" from="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/LaunchUnoBtn" to="." method="start_uno_match"]
+[connection signal="pressed" from="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/ExternalRow/LoadPckBtn" to="." method="_on_load_external_pck_pressed"]
+[connection signal="pressed" from="HubShell/ContentStack/PlayTab/Columns/LobbyPanel/LobbyBox/HostLanBtn" to="." method="_on_host_lan_btn_pressed"]
+[connection signal="pressed" from="HubShell/ContentStack/FriendsTab/FriendsBox/AddFriendRow/AddFriendBtn" to="." method="_on_add_friend_pressed"]
+[connection signal="pressed" from="HubShell/ContentStack/UpdaterTab/UpdaterBox/CheckUpdatesBtn" to="." method="_on_check_updates_pressed"]
+[connection signal="request_completed" from="GitHubReleasesRequest" to="." method="_on_github_releases_completed"]
