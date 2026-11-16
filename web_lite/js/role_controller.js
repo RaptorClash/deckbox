@@ -37,13 +37,14 @@ export class RoleController {
   }
 
   setRole(role, options = {}) {
+    const opts = options || {};
     const validRoles = ['player', 'table', 'spectator'];
     if (!validRoles.includes(role)) {
       return { success: false, error: 'INVALID_ROLE' };
     }
 
     if (role === 'player') {
-      const pId = options.playerId || (this.stateStore ? this.stateStore.getState().myPlayerId : null);
+      const pId = opts.playerId || (this.stateStore ? this.stateStore.getState().myPlayerId : null);
       if (!pId) {
         return { success: false, error: 'PLAYER_ID_REQUIRED' };
       }

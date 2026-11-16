@@ -381,6 +381,38 @@ describe('StateStore (Reactive Match State)', () => {
       assert.equal(s.direction, -1);
       assert.equal(s.activePlayer.name, 'P3');
     });
+
+    it('14b. Safely filters out null or undefined cards in my_hand array', () => {
+      const store = new StateStore();
+      const res = store.applyMessage({
+        v: 1,
+        type: 'PLAYER_VIEW_UPDATE',
+        seq: 1,
+        payload: {
+          my_hand: [null, { id: 'c1', color: 'red', value: '5' }, undefined]
+        }
+      });
+      assert.equal(res.success, true);
+      const hand = store.getState().myHand;
+      assert.equal(hand.length, 1);
+      assert.equal(hand[0].id, 'c1');
+    });
+
+    it('14c. Safely filters out null or undefined players in players array', () => {
+      const store = new StateStore();
+      const res = store.applyMessage({
+        v: 1,
+        type: 'PUBLIC_STATE_UPDATE',
+        seq: 1,
+        payload: {
+          players: [null, { seat: 0, name: 'Alice', card_count: 5 }, undefined]
+        }
+      });
+      assert.equal(res.success, true);
+      const players = store.getState().players;
+      assert.equal(players.length, 1);
+      assert.equal(players[0].name, 'Alice');
+    });
   });
 
   // ==========================================================================

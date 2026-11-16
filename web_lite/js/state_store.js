@@ -99,7 +99,7 @@ export class StateStore {
     if (payload.direction !== undefined) this._state.direction = payload.direction;
     if (payload.turn_seat !== undefined) this._state.turnSeat = payload.turn_seat;
     if (Array.isArray(payload.players)) {
-      this._state.players = payload.players.map(p => ({
+      this._state.players = payload.players.filter(Boolean).map(p => ({
         seat: p.seat,
         name: p.name,
         cardCount: p.card_count ?? p.cardCount ?? 0,
@@ -118,7 +118,7 @@ export class StateStore {
     if (payload.my_player_id !== undefined) this._state.myPlayerId = payload.my_player_id;
     if (payload.my_seat !== undefined) this._state.mySeat = payload.my_seat;
     if (Array.isArray(payload.my_hand)) {
-      this._state.myHand = payload.my_hand.map(card => {
+      this._state.myHand = payload.my_hand.filter(Boolean).map(card => {
         const isPlayable = this._isCardPlayable(card);
         return {
           ...card,

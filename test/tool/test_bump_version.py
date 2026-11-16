@@ -107,6 +107,13 @@ class TestSemVerCalculation(unittest.TestCase):
         next_v = calculate_next_version("1.7.0-beta.1", 9, "beta")
         self.assertEqual(next_v, "1.7.0-beta.2+10")
 
+    def test_calculate_beta_increment_case_insensitive(self):
+        """P1: Ensure uppercase and mixed-case -BETA tag correctly increments without duplication."""
+        next_v1 = calculate_next_version("1.0.0-BETA.1", 1, "beta")
+        self.assertEqual(next_v1, "1.0.0-beta.2+2")
+        next_v2 = calculate_next_version("1.2.3-Beta.5", 3, "beta")
+        self.assertEqual(next_v2, "1.2.3-beta.6+4")
+
     def test_calculate_explicit_version_without_build(self):
         next_v = calculate_next_version("1.5.0", 6, "1.6.0")
         self.assertEqual(next_v, "1.6.0+7")
@@ -315,6 +322,34 @@ class TestDryRunAndCLI(unittest.TestCase):
                 text=True,
             )
             self.assertEqual(result.returncode, 1, f"Expected returncode 1 for {invalid_target}")
+            self.assertIn("Error:", result.stderr)
+            self.assertNotIn("Traceback", result.stderr)
+
+    def test_cli_malformed_package_json_exits_cleanly(self):
+        """P2: Verify that invalid JSON in package.json exits with code 1 and clean Error: without tracebacks."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            pkg_file = Path(tmpdir) / "package.json"
+            pkg_file.write_text("{ invalid json here ", encoding="utf-8")
+            result = subprocess.run(
+                [sys.executable, str(self.script_path), "patch", "--file", str(pkg_file)],
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("Error:", result.stderr)
+            self.assertNotIn("Traceback", result.stderr)
+
+    def test_cli_pubspec_missing_version_exits_cleanly(self):
+        """P3: Verify that pubspec.yaml with missing version line exits with code 1 and clean Error: without tracebacks."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            pub_file = Path(tmpdir) / "pubspec.yaml"
+            pub_file.write_text("name: my_app\ndescription: missing version line\n", encoding="utf-8")
+            result = subprocess.run(
+                [sys.executable, str(self.script_path), "patch", "--file", str(pub_file)],
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 1)
             self.assertIn("Error:", result.stderr)
             self.assertNotIn("Traceback", result.stderr)
 

@@ -177,6 +177,17 @@ describe('RoleController (Role-Based View Management)', () => {
       assert.equal(controller.getRole(), 'spectator');
     });
 
+    it('8b. setRole handles explicit null options without throwing TypeError', () => {
+      const { controller } = setupHarness('spectator');
+      const resPlayer = controller.setRole('player', null);
+      assert.equal(resPlayer.success, false);
+      assert.equal(resPlayer.error, 'PLAYER_ID_REQUIRED');
+
+      const resTable = controller.setRole('table', null);
+      assert.equal(resTable.success, true);
+      assert.equal(controller.getRole(), 'table');
+    });
+
     it('9. Table view scoreboard renders all players without revealing private cards', () => {
       const { root, store, controller } = setupHarness('spectator');
       controller.setRole('table');

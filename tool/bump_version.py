@@ -61,7 +61,7 @@ def calculate_next_version(v_name: str, build: int, target: str) -> str:
         beta_match = re.search(r'-beta\.(\d+)', v_name, flags=re.IGNORECASE)
         if beta_match:
             current_beta_num = int(beta_match.group(1))
-            base_v = v_name.split('-beta')[0]
+            base_v = v_name[:beta_match.start()]
             return f"{base_v}-beta.{current_beta_num + 1}+{next_build}"
         else:
             return f"{major}.{minor + 1}.0-beta.1+{next_build}"
@@ -345,8 +345,12 @@ def main():
         sys.exit(1)
 
     primary_file = target_files[0]
-    current_ver = get_current_version_from_file(primary_file)
-    v_name, build = parse_version(current_ver)
+    try:
+        current_ver = get_current_version_from_file(primary_file)
+        v_name, build = parse_version(current_ver)
+    except (ValueError, json.JSONDecodeError, FileNotFoundError) as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
 
     if not args.target:
         print("=" * 60)

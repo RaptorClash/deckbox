@@ -58,7 +58,7 @@ export class ActionDispatcher {
     // If wild, must select valid color
     if (isWild) {
       const validColors = ['red', 'blue', 'green', 'yellow'];
-      if (!chosenColor) {
+      if (!chosenColor || typeof chosenColor !== 'string') {
         return { valid: false, error: 'MISSING_CHOSEN_COLOR' };
       }
       if (!validColors.includes(chosenColor.toLowerCase())) {

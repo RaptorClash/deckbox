@@ -165,6 +165,26 @@ describe('CardRenderer (HTML/CSS DOM Generation & Accessibility)', () => {
       assert.equal(el.getAttribute('aria-label'), 'Card (Face Down)');
     });
 
+    it('10b. Coerces non-string or numeric card.color safely without throwing', () => {
+      const card = { id: 'c-num-color', color: 123, value: '5' };
+      const el = renderer.renderCard(card);
+      assert.equal(el.classList.contains('card--123'), true);
+      assert.equal(el.getAttribute('data-color'), '123');
+    });
+
+    it('10c. Strict anti-leak on non-boolean truthy card.masked ("true", 1)', () => {
+      for (const maskedVal of ['true', 1]) {
+        const maskedCard = { id: 'leak-id', color: 'red', value: '7', masked: maskedVal };
+        const el = renderer.renderCard(maskedCard);
+        assert.equal(el.classList.contains('card--masked'), true);
+        assert.equal(el.classList.contains('card--back'), true);
+        assert.equal(el.hasAttribute('data-card-id'), false, `Must NOT leak data-card-id when masked is ${maskedVal}`);
+        assert.equal(el.hasAttribute('data-color'), false, `Must NOT leak data-color when masked is ${maskedVal}`);
+        assert.equal(el.hasAttribute('data-value'), false, `Must NOT leak data-value when masked is ${maskedVal}`);
+        assert.equal(el.getAttribute('aria-label'), 'Card (Face Down)');
+      }
+    });
+
     it('11. Handles null or undefined card gracefully returning fallback element', () => {
       const nullEl = renderer.renderCard(null);
       assert.equal(nullEl.classList.contains('card--unknown'), true);

@@ -200,6 +200,16 @@ describe('ActionDispatcher (Framing & Pre-Validation)', () => {
       assert.equal(transport.sent.length, 0);
     });
 
+    it('10b. Pre-validation cleanly rejects non-string chosen_color on Wild card without throwing', () => {
+      const { dispatcher, transport } = createHarness();
+      for (const badColor of [123, true, false, {}, [], () => {}]) {
+        const res = dispatcher.dispatchPlayCard('c-wild', badColor);
+        assert.equal(res.success, false);
+        assert.equal(res.error, 'MISSING_CHOSEN_COLOR');
+        assert.equal(transport.sent.length, 0);
+      }
+    });
+
     it('11. Pre-validation blocks Wild play when chosen_color is invalid (e.g. purple)', () => {
       const { dispatcher, transport } = createHarness();
       const res = dispatcher.dispatchPlayCard('c-wild', 'purple');

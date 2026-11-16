@@ -43,7 +43,7 @@ export class CardRenderer {
     }
 
     // Masked opponent card handling (strict anti-leak)
-    if (card.masked === true) {
+    if (card.masked === true || card.masked === 'true' || card.masked === 1) {
       cardEl.classList.add('card--masked', 'card--back');
       cardEl.setAttribute('role', 'img');
       cardEl.setAttribute('aria-label', 'Card (Face Down)');
@@ -57,7 +57,7 @@ export class CardRenderer {
       return cardEl;
     }
 
-    const color = (card.color || 'wild').toLowerCase();
+    const color = String(card.color || 'wild').toLowerCase();
     const rawValue = String(card.value ?? 'unknown');
     // Sanitize value to prevent HTML injection
     const sanitizedValue = rawValue.replace(/[<>"'&]/g, '');
