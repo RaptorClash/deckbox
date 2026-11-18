@@ -195,5 +195,9 @@
   "ui.game.jump_in_btn": "⚡ ¡Interponerse! ({card})",
   "ui.game.skip_banner": "🚫 ¡SALTO! ¡{player} pierde el turno!",
   "ui.game.player_finished_toast": "🏁 ¡{player} terminó (#{place})!",
-  "ui.game.podium_header": "🏆 Clasificación final (Hasta el final):"
+  "ui.game.podium_header": "🏆 Clasificación final (Hasta el final):",
+  "ui.gallery.online_help_btn": "ℹ Guía de juego online",
+  "ui.gallery.mod_help_only": "📦 MÓDULOS EXTERNOS (.pck / .zip)\n\n• Carga juegos personalizados en .pck o .zip desde la tarjeta de módulos.\n• Se registran automáticamente en tu galería.\n• Crea cartas y diseños propios en '🎨 Editor' y compártelos en .cardpack o .json.",
+  "ui.gallery.online_help_only": "🌐 CONFIGURAR JUEGO ONLINE Y LAN\n\n1. Misma red Wi-Fi (Móvil / PC):\n   • Inicia el Host LAN / QR al preparar la partida.\n   • Comparte el código QR o la URL corta (http://192.168.x.x:8080).\n\n2. Por Internet (P2P / TURN):\n   • STUN está activo por defecto. Para redes estrictas, configura un servidor TURN en '⚙ Ajustes'.",
+  "ui.settings.preview_3d_title": "🎥 Vista previa 3D en vivo: Mesa y Lugar"
 }

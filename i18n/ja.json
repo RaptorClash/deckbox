@@ -195,5 +195,9 @@
   "ui.game.jump_in_btn": "⚡ 割り込む！({card})",
   "ui.game.skip_banner": "🚫 スキップ！ {player} は1回休み！",
   "ui.game.player_finished_toast": "🏁 {player} が上がりました（#{place}位）！",
-  "ui.game.podium_header": "🏆 最終順位（最後までプレイ）:"
+  "ui.game.podium_header": "🏆 最終順位（最後までプレイ）:",
+  "ui.gallery.online_help_btn": "ℹ オンラインプレイガイド",
+  "ui.gallery.mod_help_only": "📦 外部ゲームモジュール (.pck / .zip)\n\n• .pck または .zip 形式のカスタムゲームをモジュールカードから直接読み込めます。\n• エディタで独自のカードやデザインを作成し、.cardpack / .json で共有できます。",
+  "ui.gallery.online_help_only": "🌐 オンライン＆LANプレイ設定\n\n1. 同じWi-Fi（スマホ / PC）:\n   • マッチ設定で LAN / QR ホストを開始します。\n   • QRコードまたは短縮URL (http://192.168.x.x:8080) で参加できます。\n\n2. インターネット (P2P / TURN):\n   • STUNは標準で有効です。必要に応じて設定からTURNサーバーを指定してください。",
+  "ui.settings.preview_3d_title": "🎥 ライブ3Dプレビュー: テーブル＆背景"
 }

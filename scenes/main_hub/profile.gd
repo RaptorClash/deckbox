@@ -24,6 +24,7 @@ var _backup_svc: RefCounted
 @onready var music_slider: HSlider = $VBoxContainer/TabContainer/Accessibility/Grid/MusicSlider
 @onready var sfx_slider: HSlider = $VBoxContainer/TabContainer/Accessibility/Grid/SfxSlider
 @onready var anim_slider: HSlider = $VBoxContainer/TabContainer/Accessibility/Grid/AnimSlider
+@onready var import_path_edit: LineEdit = $VBoxContainer/TabContainer/Backup/VBox/ImportRow/ImportPathEdit
 @onready var status_label: Label = $VBoxContainer/Footer/StatusLabel
 
 func _ready() -> void:
@@ -60,73 +61,151 @@ func _init_pickers() -> void:
 	if quality_picker:
 		quality_picker.clear()
 		quality_picker.add_item("High", 0)
+		quality_picker.set_item_metadata(0, "high")
 		quality_picker.add_item("Medium", 1)
+		quality_picker.set_item_metadata(1, "medium")
 		quality_picker.add_item("Low", 2)
+		quality_picker.set_item_metadata(2, "low")
 
 	if card_back_picker:
 		card_back_picker.clear()
 		card_back_picker.add_item("Classic Blue", 0)
+		card_back_picker.set_item_metadata(0, "classic_blue")
 		card_back_picker.add_item("Crimson Red", 1)
+		card_back_picker.set_item_metadata(1, "crimson_red")
 		card_back_picker.add_item("Cyber Neon", 2)
+		card_back_picker.set_item_metadata(2, "cyber_neon")
+
+func _select_meta(opt: OptionButton, val: String) -> void:
+	if opt == null:
+		return
+	for i in range(opt.item_count):
+		if str(opt.get_item_metadata(i)) == val:
+			opt.select(i)
+			return
 
 func load_current_profile() -> void:
 	var prof = _profile_svc.get_profile()
 	if name_input:
 		name_input.text = prof.get("display_name", "Player")
 
-	var th = prof.get("theme_preset", "arcade_ps5")
-	if theme_picker:
-		for i in range(theme_picker.item_count):
-			if theme_picker.get_item_metadata(i) == th:
-				theme_picker.select(i)
-				break
+	_select_meta(theme_picker, str(prof.get("theme_preset", "arcade_ps5")))
+	_select_meta(quality_picker, str(prof.get("quality_preset", "high")))
+	_select_meta(card_back_picker, str(prof.get("preferred_card_back", "classic_blue")))
 
 	if colorblind_check:
 		colorblind_check.button_pressed = prof.get("colorblind_mode", false)
 
-	if master_slider and _audio_controls:
-		master_slider.value = _audio_controls.get_bus_volume("Master") * 100.0
-	if music_slider and _audio_controls:
-		music_slider.value = _audio_controls.get_bus_volume("Music") * 100.0
-	if sfx_slider and _audio_controls:
-		sfx_slider.value = _audio_controls.get_bus_volume("SFX") * 100.0
-	if anim_slider and _audio_controls:
-		anim_slider.value = _audio_controls.get_animation_speed()
+	var m_vol := float(prof.get("master_volume", 1.0))
+	var mu_vol := float(prof.get("music_volume", 0.8))
+	var s_vol := float(prof.get("sfx_volume", 0.9))
+	var a_spd := float(prof.get("animation_speed", 1.0))
+	if _audio_controls:
+		_audio_controls.set_bus_volume("Master", m_vol)
+		_audio_controls.set_bus_volume("Music", mu_vol)
+		_audio_controls.set_bus_volume("SFX", s_vol)
+		_audio_controls.set_animation_speed(a_spd)
+	if master_slider:
+		master_slider.value = m_vol * 100.0
+	if music_slider:
+		music_slider.value = mu_vol * 100.0
+	if sfx_slider:
+		sfx_slider.value = s_vol * 100.0
+	if anim_slider:
+		anim_slider.value = a_spd
 
 func save_current_profile() -> void:
 	var new_name = name_input.text.strip_edges() if name_input else "Player"
-	var selected_theme = theme_picker.get_item_metadata(theme_picker.selected) if theme_picker else "arcade_ps5"
+	if new_name.is_empty():
+		new_name = "Player"
+	var selected_theme = str(theme_picker.get_item_metadata(theme_picker.selected)) if (theme_picker and theme_picker.selected >= 0) else "arcade_ps5"
+	var selected_quality = str(quality_picker.get_item_metadata(quality_picker.selected)) if (quality_picker and quality_picker.selected >= 0) else "high"
+	var selected_back = str(card_back_picker.get_item_metadata(card_back_picker.selected)) if (card_back_picker and card_back_picker.selected >= 0) else "classic_blue"
 	var cb_mode = colorblind_check.button_pressed if colorblind_check else false
+	var m_vol := (master_slider.value / 100.0) if master_slider else 1.0
+	var mu_vol := (music_slider.value / 100.0) if music_slider else 0.8
+	var s_vol := (sfx_slider.value / 100.0) if sfx_slider else 0.9
+	var a_spd := anim_slider.value if anim_slider else 1.0
 
 	var ok = _profile_svc.update_profile({
 		"display_name": new_name,
 		"theme_preset": selected_theme,
-		"colorblind_mode": cb_mode
+		"quality_preset": selected_quality,
+		"preferred_card_back": selected_back,
+		"colorblind_mode": cb_mode,
+		"master_volume": m_vol,
+		"music_volume": mu_vol,
+		"sfx_volume": s_vol,
+		"animation_speed": a_spd
 	})
 
 	if _audio_controls:
-		if master_slider:
-			_audio_controls.set_bus_volume("Master", master_slider.value / 100.0)
-		if music_slider:
-			_audio_controls.set_bus_volume("Music", music_slider.value / 100.0)
-		if sfx_slider:
-			_audio_controls.set_bus_volume("SFX", sfx_slider.value / 100.0)
-		if anim_slider:
-			_audio_controls.set_animation_speed(anim_slider.value)
+		_audio_controls.set_bus_volume("Master", m_vol)
+		_audio_controls.set_bus_volume("Music", mu_vol)
+		_audio_controls.set_bus_volume("SFX", s_vol)
+		_audio_controls.set_animation_speed(a_spd)
 
 	if ok:
-		_set_status("Profile saved successfully!", Color.GREEN)
+		_set_status("Profil & alle Einstellungen gespeichert!", Color.GREEN)
 		profile_saved.emit(_profile_svc.get_profile())
 	else:
-		_set_status("Failed to save profile.", Color.RED)
+		_set_status("Fehler beim Speichern des Profils.", Color.RED)
 
 func export_backup() -> void:
+	save_current_profile()
 	var path = "user://deckbox_backup_%d.deckbox-backup.zip" % int(Time.get_unix_time_from_system())
 	var res = _backup_svc.export_backup(path)
 	if res.get("success", false):
-		_set_status("Backup exported: %s" % path.get_file(), Color.GREEN)
+		var full_p := ProjectSettings.globalize_path(path)
+		if import_path_edit:
+			import_path_edit.text = full_p
+		_set_status("Backup exportiert: %s" % full_p, Color.GREEN)
 	else:
 		_set_status("Backup export failed: %s" % str(res.get("error")), Color.RED)
+
+func import_backup_from_path(source_path: String) -> Dictionary:
+	var clean_p := source_path.strip_edges()
+	if clean_p.is_empty():
+		return { "success": false, "error": "Pfad ist leer" }
+	var res: Dictionary = _backup_svc.import_backup(clean_p, "MERGE_OVERWRITE")
+	if res.get("success", false):
+		_profile_svc.load_profile()
+		load_current_profile()
+		_set_status("Backup erfolgreich importiert!", Color.GREEN)
+		profile_saved.emit(_profile_svc.get_profile())
+	else:
+		_set_status("Backup-Import fehlgeschlagen: %s" % str(res.get("error", "")), Color.RED)
+	return res
+
+func _on_import_backup_pressed() -> void:
+	var p := import_path_edit.text.strip_edges() if import_path_edit else ""
+	if p.ends_with(".json"):
+		if _profile_svc.import_settings_json(p):
+			load_current_profile()
+			_set_status("Einstellungen (.json) importiert!", Color.GREEN)
+			profile_saved.emit(_profile_svc.get_profile())
+		else:
+			_set_status("JSON-Import fehlgeschlagen.", Color.RED)
+		return
+	import_backup_from_path(p)
+
+func _on_export_settings_json_pressed() -> void:
+	save_current_profile()
+	var p := "user://deckbox_settings_export.json"
+	if _profile_svc.export_settings_json(p):
+		var full_p := ProjectSettings.globalize_path(p)
+		if import_path_edit:
+			import_path_edit.text = full_p
+		_set_status("Einstellungen exportiert: %s" % full_p, Color.GREEN)
+
+func _on_import_settings_json_pressed() -> void:
+	var p := import_path_edit.text.strip_edges() if import_path_edit and not import_path_edit.text.strip_edges().is_empty() else "user://deckbox_settings_export.json"
+	if _profile_svc.import_settings_json(p):
+		load_current_profile()
+		_set_status("Einstellungen importiert!", Color.GREEN)
+		profile_saved.emit(_profile_svc.get_profile())
+	else:
+		_set_status("Keine gültige Einstellungs-JSON gefunden: %s" % p, Color.RED)
 
 func _set_status(msg: String, col: Color) -> void:
 	if status_label:

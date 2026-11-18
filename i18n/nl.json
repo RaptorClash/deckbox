@@ -195,5 +195,9 @@
   "ui.game.jump_in_btn": "⚡ Tussengooien! ({card})",
   "ui.game.skip_banner": "🚫 BEURT OVERGESLAGEN! {player} slaat over!",
   "ui.game.player_finished_toast": "🏁 {player} is uit (#{place}e plaats)!",
-  "ui.game.podium_header": "🏆 Eindstand (Tot het einde):"
+  "ui.game.podium_header": "🏆 Eindstand (Tot het einde):",
+  "ui.gallery.online_help_btn": "ℹ Handleiding Online Spelen",
+  "ui.gallery.mod_help_only": "📦 EXTERNE SPELMODULES (.pck / .zip)\n\n• Laad eigen kaartspellen als .pck of .zip vanuit de modulekaart.\n• Geldige modules verschijnen automatisch in de spellenlijst.\n• Maak kaarten en ontwerpen in de Editor en deel ze als .cardpack of .json.",
+  "ui.gallery.online_help_only": "🌐 ONLINE & LAN SPEL INSTELLEN\n\n1. Zelfde Wi-Fi (Telefoon / PC):\n   • Start de LAN / QR-host bij het opzetten van het spel.\n   • Deel de QR-code of korte URL (http://192.168.x.x:8080).\n\n2. Via Internet (P2P / TURN):\n   • STUN staat standaard aan. Voor strenge routers kun je bij '⚙ Instellingen' een TURN-server toevoegen.",
+  "ui.settings.preview_3d_title": "🎥 Live 3D-Voorbeeld: Tafel & Locatie"
 }

@@ -195,5 +195,9 @@
   "ui.game.jump_in_btn": "⚡ Intercalar! ({card})",
   "ui.game.skip_banner": "🚫 BLOQUEADO! {player} perde a vez!",
   "ui.game.player_finished_toast": "🏁 {player} terminou (#{place}.º)!",
-  "ui.game.podium_header": "🏆 Classificação Final (Até ao Fim):"
+  "ui.game.podium_header": "🏆 Classificação Final (Até ao Fim):",
+  "ui.gallery.online_help_btn": "ℹ Guia de Jogo Online",
+  "ui.gallery.mod_help_only": "📦 MÓDULOS EXTERNOS (.pck / .zip)\n\n• Carregue jogos personalizados em .pck ou .zip no cartão de módulos.\n• Os cartuchos válidos aparecem automaticamente.\n• Crie cartas e designs no Editor e partilhe via .cardpack ou .json.",
+  "ui.gallery.online_help_only": "🌐 CONFIGURAR JOGO ONLINE E LAN\n\n1. Mesmo Wi-Fi (Telemóvel / PC):\n   • Inicie o Host LAN / QR na configuração da partida.\n   • Partilhe o código QR ou URL curto (http://192.168.x.x:8080).\n\n2. Pela Internet (P2P / TURN):\n   • O STUN vem ativo. Em redes restritas configure um servidor TURN em '⚙ Definições'.",
+  "ui.settings.preview_3d_title": "🎥 Pré-visualização 3D: Mesa e Local"
 }

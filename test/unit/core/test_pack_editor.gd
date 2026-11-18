@@ -110,3 +110,45 @@ func test_pack_editor_scene_instantiation():
 
 	# Clean up instance
 	instance.free()
+
+func test_pack_editor_3d_preview_designs_game_target_import_export_and_no_presets():
+	var tex_gen = load("res://core/visuals/card_texture_generator.gd")
+	var skin_id := "custom_emerald_gold"
+	assert_true(tex_gen.register_custom_skin({
+		"id": skin_id,
+		"name": "Emerald & Gold",
+		"frame_color": "#FFD700",
+		"bg_color": "#0A281E",
+		"accent_color": "#20E090",
+		"back_primary": "#0C3A2C",
+		"back_secondary": "#F5C542",
+		"back_emblem": "EG"
+	}), "Registering custom card design must succeed")
+	assert_has(tex_gen.get_available_skin_ids(), skin_id, "Custom skin ID must appear in available skins")
+	var front_t: ImageTexture = tex_gen.get_card_front_texture({ "color": "red", "value": "7" }, skin_id, true)
+	var back_t: ImageTexture = tex_gen.get_card_back_texture(skin_id)
+	assert_not_null(front_t)
+	assert_not_null(back_t)
+
+	var model = _model_script.new()
+	model.set_target_game("wizard")
+	assert_eq(model.get_target_game(), "wizard", "PackEditorModel must store target_game")
+
+	var editor = load(SCENE_PATH).instantiate()
+	add_child_autofree(editor)
+	assert_null(editor.get_node_or_null("VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PresetsRow"), "Quick presets row must be removed")
+	assert_not_null(editor.card_preview_3d_viewport, "PackEditor must expose 3D SubViewport card preview")
+	assert_not_null(editor.preview_flip_btn, "PackEditor must expose 3D front/back flip toggle button")
+	assert_not_null(editor.target_game_opt, "PackEditor must expose target game selector OptionButton")
+	assert_gte(editor.target_game_opt.item_count, 3, "Target game selector must list multiple games")
+	assert_not_null(editor.design_tab, "PackEditor must expose Card Design tab")
+
+	editor.design_id_edit.text = "shared_crimson_royal"
+	editor.design_name_edit.text = "Crimson Royal"
+	editor.design_emblem_edit.text = "CR"
+	var share_path := "user://test_shared_design.json"
+	var exp_res: Dictionary = editor.export_design_to_file(share_path)
+	assert_true(bool(exp_res.get("success", false)), "Design export must succeed")
+	var imp_res: Dictionary = editor.import_pack_or_design_from_file(share_path)
+	assert_true(bool(imp_res.get("success", false)), "Design import must succeed")
+	assert_has(tex_gen.get_available_skin_ids(), "shared_crimson_royal", "Imported design must register into CardTextureGenerator")

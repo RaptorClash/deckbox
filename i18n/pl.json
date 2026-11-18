@@ -195,5 +195,9 @@
   "ui.game.jump_in_btn": "⚡ Wskocz! ({card})",
   "ui.game.skip_banner": "🚫 POSTÓJ! {player} traci kolejkę!",
   "ui.game.player_finished_toast": "🏁 {player} skończył karty ({place}. miejsce)!",
-  "ui.game.podium_header": "🏆 Końcowe miejsca (Do końca):"
+  "ui.game.podium_header": "🏆 Końcowe miejsca (Do końca):",
+  "ui.gallery.online_help_btn": "ℹ Instrukcja gry online",
+  "ui.gallery.mod_help_only": "📦 ZEWNĘTRZNE MODUŁY (.pck / .zip)\n\n• Wczytuj własne gry karciane jako .pck lub .zip bezpośrednio z kafelka modułów.\n• Poprawne moduły rejestrują się automatycznie.\n• Twórz karty i style w Edytorze i udostępniaj jako .cardpack lub .json.",
+  "ui.gallery.online_help_only": "🌐 KONFIGURACJA GRY ONLINE I LAN\n\n1. Ta sama sieć Wi-Fi (Telefon / PC):\n   • Uruchom hosta LAN / QR podczas tworzenia stołu.\n   • Udostępnij kod QR lub krótki link (http://192.168.x.x:8080).\n\n2. Przez Internet (P2P / TURN):\n   • STUN działa domyślnie. Dla ścisłego NAT wpisz serwer TURN w Ustawieniach.",
+  "ui.settings.preview_3d_title": "🎥 Podgląd 3D na żywo: Stół i Otoczenie"
 }

@@ -54,7 +54,9 @@ var _connected_lobby_clients: Dictionary = {}
 var _syncing_counts: bool = false
 var _custom_human_names: Array[String] = []
 var active_preview_table_3d: Node3D = null
+var _settings_preview_table_3d: Node3D = null
 var _preview_showcase_root: Node3D = null
+var _settings_showcase_root: Node3D = null
 var _lounge_orbit_angle: float = 0.0
 var _menu_sfx: Node = null
 var _keybind_svc: RefCounted = null
@@ -82,16 +84,17 @@ var _awaiting_rebind_action: String = ""
 
 # Step 1: Game Selector Gallery
 @onready var game_selector_view: VBoxContainer = $HubShell/ContentStack/PlayTab/GameSelectorView
-@onready var game_search_edit: LineEdit = $HubShell/ContentStack/PlayTab/GameSelectorView/GalleryHeaderPanel/HeaderBox/GameSearchEdit
+@onready var game_search_edit: LineEdit = $HubShell/ContentStack/PlayTab/GameSelectorView/GalleryHeaderPanel/HeaderBox/HeaderRow/GameSearchEdit
 @onready var games_grid: GridContainer = $HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid
 @onready var alle_ablegen_card: PanelContainer = $HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/AlleAblegenCard
 @onready var select_uno_btn: Button = $HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/AlleAblegenCard/CardBox/SelectUnoBtn
-@onready var join_address_edit: LineEdit = $HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/JoinAddressRow/JoinAddressEdit
+@onready var join_address_edit: LineEdit = $HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/JoinDirectCol/JoinAddressRow/JoinAddressEdit
 @onready var lan_rooms_list: ItemList = $HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/LanRoomsRow/LanRoomsList
-@onready var join_status_label: Label = $HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/JoinStatusLabel
-@onready var pck_path_edit: LineEdit = $HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox/ExternalRow/PckPathEdit
-@onready var ext_status_label: Label = $HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox/ExternalStatusLabel
-@onready var mod_help_btn: Button = $HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox/ModHelpBtn
+@onready var join_status_label: Label = $HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/JoinDirectCol/JoinStatusLabel
+@onready var online_help_btn: Button = $HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/JoinDirectCol/JoinHeaderRow/OnlineHelpBtn
+@onready var pck_path_edit: LineEdit = $HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/ExternalModuleCard/CardBox/ExternalRow/PckPathEdit
+@onready var ext_status_label: Label = $HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/ExternalModuleCard/CardBox/ExternalStatusLabel
+@onready var mod_help_btn: Button = $HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/ExternalModuleCard/CardBox/ModHelpBtn
 @onready var mod_help_overlay: PanelContainer = $ModHelpOverlay
 @onready var mod_help_label: Label = $ModHelpOverlay/HelpBox/HelpScroll/ModHelpLabel
 
@@ -130,21 +133,25 @@ var _awaiting_rebind_action: String = ""
 @onready var host_role_option: OptionButton = $HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/LobbyRosterPanel/LobbyRosterBox/HostRoleOption
 @onready var lobby_clients_list: VBoxContainer = $HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/LobbyRosterPanel/LobbyRosterBox/LobbyClientsScroll/LobbyClientsList
 
-# Settings Tab (Visuals, 3D Table & Network/TURN)
-@onready var language_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/LanguageRow/LanguageOption
-@onready var view_mode_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/ViewModeRow/ViewModeOption
-@onready var skin_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/SkinRow/SkinOption
-@onready var theme_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/ThemeRow/ThemeOption
-@onready var location_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/LocationRow/LocationOption
-@onready var jukebox_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/JukeboxRow/JukeboxOption
-@onready var keybinds_box: VBoxContainer = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/KeybindsScroll/KeybindsBox
-@onready var quality_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/QualityRow/QualityOption
-@onready var bot_speed_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/SpeedRow/BotSpeedOption
-@onready var colorblind_check: CheckButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/ColorblindCheck
-@onready var turn_url_edit: LineEdit = $HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/TurnUrlEdit
-@onready var turn_user_edit: LineEdit = $HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/TurnCredsRow/TurnUserEdit
-@onready var turn_pass_edit: LineEdit = $HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/TurnCredsRow/TurnPassEdit
-@onready var settings_status_label: Label = $HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/SettingsStatusLabel
+# Settings Tab (Visuals, 3D Table, Keybinds, TURN & Export/Import Left; 3D Live Preview Right)
+@onready var language_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/LanguageRow/LanguageOption
+@onready var view_mode_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/ViewModeRow/ViewModeOption
+@onready var skin_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/SkinRow/SkinOption
+@onready var theme_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/ThemeRow/ThemeOption
+@onready var location_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/LocationRow/LocationOption
+@onready var jukebox_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/JukeboxRow/JukeboxOption
+@onready var keybinds_box: VBoxContainer = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/KeybindsBox
+@onready var quality_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/QualityRow/QualityOption
+@onready var bot_speed_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/SpeedRow/BotSpeedOption
+@onready var colorblind_check: CheckButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/ColorblindCheck
+@onready var turn_url_edit: LineEdit = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/TurnUrlEdit
+@onready var turn_user_edit: LineEdit = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/TurnCredsRow/TurnUserEdit
+@onready var turn_pass_edit: LineEdit = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/TurnCredsRow/TurnPassEdit
+@onready var settings_transfer_edit: LineEdit = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/SettingsTransferRow/SettingsTransferEdit
+@onready var settings_status_label: Label = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsFooterRow/SettingsStatusLabel
+@onready var settings_preview_viewport: SubViewport = $HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/SettingsPreviewContainer/SettingsPreviewViewport
+@onready var preview_theme_btn: Button = $HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/PreviewSwitchersRow/PreviewThemeBtn
+@onready var preview_loc_btn: Button = $HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/PreviewSwitchersRow/PreviewLocBtn
 @onready var turn_help_panel: PanelContainer = $HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/TurnHelpPanel
 
 @onready var my_uuid_label: Label = $HubShell/ContentStack/FriendsTab/FriendsBox/MyUuidLabel
@@ -279,14 +286,17 @@ func _process(delta: float) -> void:
 		_lan_discovery.poll()
 	if _preview_showcase_root != null and is_instance_valid(_preview_showcase_root):
 		_preview_showcase_root.rotate_y(delta * 0.55)
-	if active_preview_table_3d != null and is_instance_valid(active_preview_table_3d) and active_preview_table_3d.has_method("get_camera"):
-		_lounge_orbit_angle += delta * 0.14
-		var cam: Camera3D = active_preview_table_3d.get_camera()
-		if cam != null:
-			var cam_pos = Vector3(sin(_lounge_orbit_angle) * 1.45, 1.52, cos(_lounge_orbit_angle) * 1.45)
-			var dir = (Vector3(0.0, 0.78, 0.0) - cam_pos).normalized()
-			if not dir.is_zero_approx():
-				cam.transform = Transform3D(Basis.looking_at(dir, Vector3.UP), cam_pos)
+	if _settings_showcase_root != null and is_instance_valid(_settings_showcase_root):
+		_settings_showcase_root.rotate_y(delta * 0.55)
+	_lounge_orbit_angle += delta * 0.14
+	for tbl in [active_preview_table_3d, _settings_preview_table_3d]:
+		if tbl != null and is_instance_valid(tbl) and tbl.has_method("get_camera"):
+			var cam: Camera3D = tbl.get_camera()
+			if cam != null:
+				var cam_pos = Vector3(sin(_lounge_orbit_angle) * 1.45, 1.52, cos(_lounge_orbit_angle) * 1.45)
+				var dir = (Vector3(0.0, 0.78, 0.0) - cam_pos).normalized()
+				if not dir.is_zero_approx():
+					cam.transform = Transform3D(Basis.looking_at(dir, Vector3.UP), cam_pos)
 
 func is_game_selected() -> bool:
 	return not _selected_game_id.is_empty()
@@ -333,12 +343,7 @@ func _init_play_options() -> void:
 		view_mode_option.add_item("TV-Tisch-Modus (Großbild)", 3)
 		view_mode_option.set_item_metadata(3, "table_role")
 
-	if skin_option != null:
-		skin_option.clear()
-		skin_option.add_item("Classic Arcade", 0)
-		skin_option.set_item_metadata(0, "classic_arcade")
-		skin_option.add_item("Minimal Dark", 1)
-		skin_option.set_item_metadata(1, "minimal_dark")
+	_populate_skin_option()
 
 	if theme_option != null:
 		theme_option.clear()
@@ -472,9 +477,9 @@ func apply_language() -> void:
 
 	# Step 1: Game Selector Gallery
 	var gs = "HubShell/ContentStack/PlayTab/GameSelectorView/"
-	_set_rel_text(gs + "GalleryHeaderPanel/HeaderBox/GalleryTitle", "gallery.title")
+	_set_rel_text(gs + "GalleryHeaderPanel/HeaderBox/HeaderRow/GalleryTitle", "gallery.title")
 	_set_rel_text(gs + "GalleryHeaderPanel/HeaderBox/GallerySubtitle", "gallery.subtitle")
-	_set_rel_placeholder(gs + "GalleryHeaderPanel/HeaderBox/GameSearchEdit", "gallery.search_placeholder")
+	_set_rel_placeholder(gs + "GalleryHeaderPanel/HeaderBox/HeaderRow/GameSearchEdit", "gallery.search_placeholder")
 	var gg = gs + "GamesScroll/GamesGrid/"
 	_set_rel_text(gg + "AlleAblegenCard/CardBox/Badge", "gallery.ready_badge")
 	_set_rel_text(gg + "AlleAblegenCard/CardBox/Title", "gallery.alle_ablegen_title")
@@ -489,24 +494,25 @@ func apply_language() -> void:
 	_set_rel_text(gg + "DoppelkopfCard/CardBox/Title", "gallery.doko_title")
 	_set_rel_text(gg + "DoppelkopfCard/CardBox/Desc", "gallery.doko_desc")
 	_set_rel_text(gg + "DoppelkopfCard/CardBox/SoonBtn", "gallery.soon_btn")
+	_set_rel_text(gg + "ExternalModuleCard/CardBox/Title", "gallery.mod_title")
+	_set_rel_placeholder(gg + "ExternalModuleCard/CardBox/ExternalRow/PckPathEdit", "gallery.mod_placeholder")
+	_set_rel_text(gg + "ExternalModuleCard/CardBox/ExternalRow/LoadPckBtn", "gallery.mod_load_btn")
+	if mod_help_btn != null:
+		mod_help_btn.text = I18nServiceScript.t("gallery.mod_help_btn")
+	if ext_status_label != null:
+		ext_status_label.text = I18nServiceScript.t("gallery.mod_ready")
 
-	_set_rel_text(gs + "BottomJoinRow/QuickJoinPanel/JoinBox/JoinTitle", "gallery.join_title")
-	_set_rel_placeholder(gs + "BottomJoinRow/QuickJoinPanel/JoinBox/JoinAddressRow/JoinAddressEdit", "gallery.join_placeholder")
-	_set_rel_text(gs + "BottomJoinRow/QuickJoinPanel/JoinBox/JoinAddressRow/JoinDirectBtn", "gallery.join_browser_btn")
+	_set_rel_text(gs + "BottomJoinRow/QuickJoinPanel/JoinBox/JoinDirectCol/JoinHeaderRow/JoinTitle", "gallery.join_title")
+	_set_rel_placeholder(gs + "BottomJoinRow/QuickJoinPanel/JoinBox/JoinDirectCol/JoinAddressRow/JoinAddressEdit", "gallery.join_placeholder")
+	_set_rel_text(gs + "BottomJoinRow/QuickJoinPanel/JoinBox/JoinDirectCol/JoinAddressRow/JoinDirectBtn", "gallery.join_browser_btn")
+	if online_help_btn != null:
+		online_help_btn.text = I18nServiceScript.t("ui.gallery.online_help_btn")
 	_set_rel_text(gs + "BottomJoinRow/QuickJoinPanel/JoinBox/LanRoomsRow/LanJoinBtns/JoinLanRoomBtn", "gallery.room_open_btn")
 	_set_rel_text(gs + "BottomJoinRow/QuickJoinPanel/JoinBox/LanRoomsRow/LanJoinBtns/RefreshLanBtn", "gallery.lan_search_btn")
 	if join_status_label != null and not join_status_label.text.begins_with("🌐"):
 		join_status_label.text = I18nServiceScript.t("gallery.join_tip")
-	_set_rel_text(gs + "BottomJoinRow/ExternalModulePanel/ModBox/ModTitle", "gallery.mod_title")
-	_set_rel_text(gs + "BottomJoinRow/ExternalModulePanel/ModBox/ModHint", "gallery.mod_hint")
-	_set_rel_placeholder(gs + "BottomJoinRow/ExternalModulePanel/ModBox/ExternalRow/PckPathEdit", "gallery.mod_placeholder")
-	_set_rel_text(gs + "BottomJoinRow/ExternalModulePanel/ModBox/ExternalRow/LoadPckBtn", "gallery.mod_load_btn")
-	if mod_help_btn != null:
-		mod_help_btn.text = I18nServiceScript.t("gallery.mod_help_btn")
 	if mod_help_label != null:
 		mod_help_label.text = get_external_module_help_text()
-	if ext_status_label != null:
-		ext_status_label.text = I18nServiceScript.t("gallery.mod_ready")
 
 	# Step 2: Match Setup
 	var ms = "HubShell/ContentStack/PlayTab/MatchSetupView/"
@@ -573,7 +579,8 @@ func apply_language() -> void:
 			table_url_label.text = I18nServiceScript.t("lobby.table_url_empty")
 
 	# Settings Tab
-	var st_vis = "HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/"
+	var st_vis = "HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/"
+	var st_foot = "HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsFooterRow/"
 	_set_rel_text(st_vis + "VisualTitle", "settings.visual_title")
 	_set_rel_text(st_vis + "LanguageRow/LanguageLabel", "settings.language_label")
 	_set_rel_text(st_vis + "ViewModeRow/ViewLabel", "settings.view_mode")
@@ -588,17 +595,17 @@ func apply_language() -> void:
 	_set_rel_text(st_vis + "KeybindsTitle", "ui.settings.keybinds_title")
 	_set_rel_text(st_vis + "KeybindsHint", "ui.settings.keybinds_hint")
 	_set_rel_text(st_vis + "KeybindsResetBtn", "ui.settings.keybinds_reset")
+	_set_rel_text(st_vis + "TurnTitle", "settings.net_title")
+	_set_rel_text(st_vis + "TurnUrlLbl", "settings.turn_label")
+	_set_rel_placeholder(st_vis + "TurnUrlEdit", "settings.turn_url_placeholder")
+	_set_rel_placeholder(st_vis + "TurnCredsRow/TurnUserEdit", "settings.turn_user_placeholder")
+	_set_rel_placeholder(st_vis + "TurnCredsRow/TurnPassEdit", "settings.turn_pass_placeholder")
 	_populate_location_and_jukebox_options()
 	_rebuild_keybinds_ui()
-	_set_rel_text(st_vis + "SaveVisualSettingsBtn", "settings.save_visual_btn")
+	_set_rel_text(st_foot + "SaveVisualSettingsBtn", "settings.save_visual_btn")
 
 	var st_net = "HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/"
-	_set_rel_text(st_net + "NetTitle", "settings.net_title")
-	_set_rel_text(st_net + "TurnUrlLbl", "settings.turn_label")
-	_set_rel_placeholder(st_net + "TurnUrlEdit", "settings.turn_url_placeholder")
-	_set_rel_placeholder(st_net + "TurnCredsRow/TurnUserEdit", "settings.turn_user_placeholder")
-	_set_rel_placeholder(st_net + "TurnCredsRow/TurnPassEdit", "settings.turn_pass_placeholder")
-	_set_rel_text(st_net + "SaveNetworkSettingsBtn", "settings.save_net_btn")
+	_set_rel_text(st_net + "NetTitle", "ui.settings.preview_3d_title")
 	_set_rel_text(st_net + "TurnHelpPanel/TurnHelpScroll/TurnHelpLabel", "settings.turn_help")
 
 	# Friends & Updater Tabs
@@ -620,12 +627,21 @@ func apply_language() -> void:
 		_active_uno_view.apply_language()
 
 func get_external_module_help_text() -> String:
-	return I18nServiceScript.t("gallery.mod_help_text")
+	return I18nServiceScript.t("ui.gallery.mod_help_only")
+
+func get_online_help_text() -> String:
+	return I18nServiceScript.t("ui.gallery.online_help_only")
 
 func _on_toggle_mod_help_pressed() -> void:
 	if mod_help_overlay != null:
 		if mod_help_label != null:
 			mod_help_label.text = get_external_module_help_text()
+		mod_help_overlay.visible = not mod_help_overlay.visible
+
+func _on_toggle_online_help_pressed() -> void:
+	if mod_help_overlay != null:
+		if mod_help_label != null:
+			mod_help_label.text = get_online_help_text()
 		mod_help_overlay.visible = not mod_help_overlay.visible
 
 func _on_game_search_changed(query: String) -> void:
@@ -651,7 +667,7 @@ func _update_games_grid_columns() -> void:
 		return
 	var w := games_grid.size.x
 	if w > 100.0:
-		games_grid.columns = clampi(int(w / 256.0), 2, 5)
+		games_grid.columns = clampi(int(w / 230.0), 2, 5)
 	else:
 		games_grid.columns = 4
 
@@ -674,7 +690,7 @@ func _rebuild_dynamic_game_cards() -> void:
 			var card_p = PanelContainer.new()
 			card_p.name = "DynCard_%s" % gid
 			card_p.set_meta("dynamic_cartridge", gid)
-			card_p.custom_minimum_size = Vector2(240, 185)
+			card_p.custom_minimum_size = Vector2(215, 162)
 			card_p.size_flags_horizontal = SIZE_SHRINK_BEGIN
 			card_p.add_theme_stylebox_override("panel", UIThemeScript.make_glass_panel(UIThemeScript.COL_GLASS_SURFACE, Color(0.28, 0.72, 1.0, 0.55), 16, 16))
 			var vbox = VBoxContainer.new()
@@ -901,44 +917,65 @@ func _get_selected_meta(opt: OptionButton, fallback: String) -> String:
 	return fallback
 
 func _update_3d_preview() -> void:
-	if preview_viewport == null:
-		return
 	var theme_id = _get_selected_meta(theme_option, "arcade_ps5")
 	if not TABLE_SCENES.has(theme_id):
 		theme_id = "arcade_ps5"
-
 	var quality = _get_selected_meta(quality_option, "high")
 	var skin_id = _get_selected_meta(skin_option, "classic_arcade")
+	var loc_id := _get_selected_meta(location_option, "cozy_house")
 
-	if active_preview_table_3d != null:
-		if active_preview_table_3d.get_parent() == preview_viewport:
-			preview_viewport.remove_child(active_preview_table_3d)
-		active_preview_table_3d.queue_free()
-		active_preview_table_3d = null
-		_preview_showcase_root = null
+	if preview_theme_btn != null and theme_option != null and theme_option.selected >= 0:
+		preview_theme_btn.text = "%s ▶" % theme_option.get_item_text(theme_option.selected)
+	if preview_loc_btn != null and location_option != null and location_option.selected >= 0:
+		preview_loc_btn.text = "%s ▶" % location_option.get_item_text(location_option.selected)
 
+	if preview_viewport != null:
+		if active_preview_table_3d != null:
+			if active_preview_table_3d.get_parent() == preview_viewport:
+				preview_viewport.remove_child(active_preview_table_3d)
+			active_preview_table_3d.queue_free()
+			active_preview_table_3d = null
+			_preview_showcase_root = null
+		var hub_pair := _instantiate_preview_table(preview_viewport, theme_id, loc_id, quality, skin_id, "PreviewShowcaseRoot")
+		active_preview_table_3d = hub_pair.get("table", null)
+		_preview_showcase_root = hub_pair.get("showcase", null)
+
+	if settings_preview_viewport != null:
+		if _settings_preview_table_3d != null:
+			if _settings_preview_table_3d.get_parent() == settings_preview_viewport:
+				settings_preview_viewport.remove_child(_settings_preview_table_3d)
+			_settings_preview_table_3d.queue_free()
+			_settings_preview_table_3d = null
+			_settings_showcase_root = null
+		var set_pair := _instantiate_preview_table(settings_preview_viewport, theme_id, loc_id, quality, skin_id, "SettingsShowcaseRoot")
+		_settings_preview_table_3d = set_pair.get("table", null)
+		_settings_showcase_root = set_pair.get("showcase", null)
+
+func _instantiate_preview_table(vp: SubViewport, theme_id: String, loc_id: String, quality: String, skin_id: String, showcase_name: String) -> Dictionary:
 	var scene_path = TABLE_SCENES[theme_id]
-	if ResourceLoader.exists(scene_path):
-		var packed = load(scene_path)
-		if packed is PackedScene:
-			var inst = packed.instantiate()
-			if inst is Node3D:
-				active_preview_table_3d = inst
-				preview_viewport.add_child(active_preview_table_3d)
-				var loc_id := _get_selected_meta(location_option, "cozy_house")
-				if active_preview_table_3d.has_method("apply_location_environment"):
-					active_preview_table_3d.apply_location_environment(loc_id)
-				if active_preview_table_3d.has_method("apply_quality_preset"):
-					active_preview_table_3d.apply_quality_preset(quality)
-				_spawn_preview_3d_cards(skin_id)
+	if not ResourceLoader.exists(scene_path):
+		return {}
+	var packed = load(scene_path)
+	if not (packed is PackedScene):
+		return {}
+	var inst = packed.instantiate()
+	if not (inst is Node3D):
+		return {}
+	vp.add_child(inst)
+	if inst.has_method("apply_location_environment"):
+		inst.apply_location_environment(loc_id)
+	if inst.has_method("apply_quality_preset"):
+		inst.apply_quality_preset(quality)
+	var showcase := _spawn_preview_3d_cards_on(inst, skin_id, showcase_name)
+	return { "table": inst, "showcase": showcase }
 
-func _spawn_preview_3d_cards(skin_id: String = "classic_arcade") -> void:
-	if active_preview_table_3d == null or CardMeshScene == null:
-		return
-	_preview_showcase_root = Node3D.new()
-	_preview_showcase_root.name = "PreviewShowcaseRoot"
-	_preview_showcase_root.position = Vector3(0.0, 0.85, 0.0)
-	active_preview_table_3d.add_child(_preview_showcase_root)
+func _spawn_preview_3d_cards_on(table_node: Node3D, skin_id: String, root_name: String) -> Node3D:
+	if table_node == null or CardMeshScene == null:
+		return null
+	var root := Node3D.new()
+	root.name = root_name
+	root.position = Vector3(0.0, 0.85, 0.0)
+	table_node.add_child(root)
 
 	var ring = MeshInstance3D.new()
 	var torus = TorusMesh.new()
@@ -952,7 +989,7 @@ func _spawn_preview_3d_cards(skin_id: String = "classic_arcade") -> void:
 	ring_mat.emission = Color(0.0, 0.88, 1.0)
 	ring_mat.emission_energy_multiplier = 1.6
 	ring.material_override = ring_mat
-	_preview_showcase_root.add_child(ring)
+	root.add_child(ring)
 
 	var showcase_cards = [
 		{ "id": "p1", "color": "red", "value": "7" },
@@ -969,7 +1006,101 @@ func _spawn_preview_3d_cards(skin_id: String = "classic_arcade") -> void:
 			card.transform.basis = Basis(Vector3.UP, -ang + PI * 0.5) * Basis(Vector3.RIGHT, deg_to_rad(56.0))
 			card.scale = Vector3.ONE * 2.2
 			CardTextureGenScript.apply_card_materials_to_mesh(card, showcase_cards[i], skin_id, true, true)
-			_preview_showcase_root.add_child(card)
+			root.add_child(card)
+	return root
+
+func _populate_skin_option() -> void:
+	if skin_option == null:
+		return
+	var prev_skin := _get_selected_meta(skin_option, "classic_arcade")
+	skin_option.clear()
+	var ids: Array[String] = CardTextureGenScript.get_available_skin_ids()
+	for i in range(ids.size()):
+		var sid := ids[i]
+		skin_option.add_item(CardTextureGenScript.get_skin_display_name(sid), i)
+		skin_option.set_item_metadata(i, sid)
+	_select_option_by_meta(skin_option, prev_skin)
+
+func _cycle_option(opt: OptionButton, step: int) -> void:
+	if opt == null or opt.item_count == 0:
+		return
+	var next_idx := (opt.selected + step + opt.item_count) % opt.item_count
+	opt.select(next_idx)
+	_on_preview_setting_changed(next_idx)
+
+func preview_next_theme() -> void:
+	_cycle_option(theme_option, 1)
+
+func preview_prev_theme() -> void:
+	_cycle_option(theme_option, -1)
+
+func preview_next_location() -> void:
+	_cycle_option(location_option, 1)
+
+func preview_prev_location() -> void:
+	_cycle_option(location_option, -1)
+
+func export_settings_to_file(file_path: String) -> bool:
+	if _profile_svc == null:
+		return false
+	return _profile_svc.export_settings_json(file_path)
+
+func import_settings_from_file(file_path: String) -> bool:
+	if _profile_svc == null:
+		return false
+	if not _profile_svc.import_settings_json(file_path):
+		return false
+	var prof: Dictionary = _profile_svc.get_profile()
+	_apply_profile_to_settings_ui(prof)
+	if profile_tab != null and profile_tab.has_method("load_current_profile"):
+		profile_tab.load_current_profile()
+	return true
+
+func _apply_profile_to_settings_ui(prof: Dictionary) -> void:
+	var lang := str(prof.get("language", ""))
+	if not lang.is_empty():
+		I18nServiceScript.set_language(lang)
+		_select_option_by_meta(language_option, lang)
+	_select_option_by_meta(view_mode_option, str(prof.get("view_mode", "full_3d")))
+	_populate_skin_option()
+	_select_option_by_meta(skin_option, str(prof.get("card_skin", "classic_arcade")))
+	_select_option_by_meta(theme_option, str(prof.get("theme_preset", "arcade_ps5")))
+	_select_option_by_meta(location_option, str(prof.get("location_id", "cozy_house")))
+	_select_option_by_meta(jukebox_option, str(prof.get("jukebox_mode", "auto")))
+	_select_option_by_meta(quality_option, str(prof.get("quality_preset", "high")))
+	_select_option_by_meta(bot_speed_option, str(prof.get("bot_speed", "normal")))
+	if colorblind_check != null:
+		colorblind_check.button_pressed = bool(prof.get("colorblind_mode", true))
+	if turn_url_edit != null:
+		turn_url_edit.text = str(prof.get("turn_url", ""))
+	if turn_user_edit != null:
+		turn_user_edit.text = str(prof.get("turn_username", ""))
+	if turn_pass_edit != null:
+		turn_pass_edit.text = str(prof.get("turn_credential", ""))
+	if _keybind_svc != null and prof.get("keybinds", null) is Dictionary:
+		_keybind_svc.load_from_dict(prof["keybinds"])
+	apply_language()
+	_apply_turn_config_from_inputs()
+	_update_3d_preview()
+	_update_jukebox_music()
+
+func _on_export_settings_btn_pressed() -> void:
+	save_settings()
+	var p := settings_transfer_edit.text.strip_edges() if (settings_transfer_edit != null and not settings_transfer_edit.text.strip_edges().is_empty()) else "user://deckbox_settings_export.json"
+	if export_settings_to_file(p):
+		var full_p := ProjectSettings.globalize_path(p)
+		if settings_transfer_edit != null:
+			settings_transfer_edit.text = full_p
+		if settings_status_label != null:
+			settings_status_label.text = "📤 Exportiert: %s" % full_p
+
+func _on_import_settings_btn_pressed() -> void:
+	var p := settings_transfer_edit.text.strip_edges() if (settings_transfer_edit != null and not settings_transfer_edit.text.strip_edges().is_empty()) else "user://deckbox_settings_export.json"
+	if import_settings_from_file(p):
+		if settings_status_label != null:
+			settings_status_label.text = "📥 Alle Einstellungen + Name importiert!"
+	elif settings_status_label != null:
+		settings_status_label.text = "❌ Import fehlgeschlagen: %s" % p
 
 func _on_preview_setting_changed(_idx: int) -> void:
 	_update_3d_preview()
@@ -1074,13 +1205,15 @@ func _wire_embedded_screens() -> void:
 			profile_tab.profile_saved.connect(_on_profile_saved)
 	if stats_tab != null and stats_tab.has_signal("back_requested"):
 		stats_tab.back_requested.connect(func(): select_tab("play"))
+	if pack_editor_tab != null and pack_editor_tab.has_signal("design_saved"):
+		pack_editor_tab.design_saved.connect(func(skin_id: String):
+			_populate_skin_option()
+			_select_option_by_meta(skin_option, skin_id)
+			_update_3d_preview()
+		)
 
 func _on_profile_saved(prof: Dictionary) -> void:
-	_select_option_by_meta(theme_option, str(prof.get("theme_preset", "arcade_ps5")))
-	_select_option_by_meta(quality_option, str(prof.get("quality_preset", "high")))
-	if colorblind_check != null and prof.has("colorblind_mode"):
-		colorblind_check.button_pressed = bool(prof.get("colorblind_mode", true))
-	_update_3d_preview()
+	_apply_profile_to_settings_ui(prof)
 	_refresh_friends_ui()
 
 func select_tab(tab_id: String) -> bool:

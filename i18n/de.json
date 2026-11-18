@@ -195,5 +195,9 @@
   "ui.game.jump_in_btn": "⚡ Dazwischenlegen! ({card})",
   "ui.game.skip_banner": "🚫 AUSSETZEN! {player} wird übersprungen!",
   "ui.game.player_finished_toast": "🏁 {player} hat alle Karten abgelegt ({place}. Platz)!",
-  "ui.game.podium_header": "🏆 Platzierungen (Bis zum Ende):"
+  "ui.game.podium_header": "🏆 Platzierungen (Bis zum Ende):",
+  "ui.gallery.online_help_btn": "ℹ Anleitung: Online-Spiel",
+  "ui.gallery.mod_help_only": "📦 EXTERNE SPIELMODULE (.pck / .zip)\n\n• Eigene oder Community-Kartenspiele können direkt als .pck oder .zip geladen werden (im Spielmodul-Slot oben).\n• Neue Cartridges registrieren sich automatisch über die Cartridge-Schnittstelle.\n• Karten-Pakete & eigene Designs kannst du im Tab '🎨 Karten-Editor' erstellen und als .cardpack oder .json exportieren/importieren.",
+  "ui.gallery.online_help_only": "🌐 ONLINE- & LAN-SPIEL EINRICHTEN\n\n1. Im selben WLAN (Handy / Tablet / PC):\n   • Starte im Match-Setup den 'LAN / QR Host'.\n   • Teile den QR-Code oder die Kurz-URL (z. B. http://192.168.x.x:8080).\n   • Im Lobby-Bereich kannst du Mitspieler- und Tisch-Rollen verteilen.\n\n2. Über das Internet (P2P / TURN):\n   • STUN ist standardmäßig aktiv. Bei strikten Routern/Mobilfunk trage in '⚙ Einstellungen' einen TURN-Server ein.\n   • Beide Geräte verbinden sich dann verschlüsselt über WebRTC.",
+  "ui.settings.preview_3d_title": "🎥 Live 3D-Vorschau: Tisch-Theme & Umgebung"
 }
