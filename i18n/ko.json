@@ -195,5 +195,9 @@
   "ui.game.jump_in_btn": "⚡ 끼어들기! ({card})",
   "ui.game.skip_banner": "🚫 건너뛰기! {player} 차례 건너뜀!",
   "ui.game.player_finished_toast": "🏁 {player} 완료 (#{place}위)!",
-  "ui.game.podium_header": "🏆 최종 순위 (끝까지 플레이):"
+  "ui.game.podium_header": "🏆 최종 순위 (끝까지 플레이):",
+  "ui.gallery.online_help_btn": "ℹ 온라인 플레이 안내",
+  "ui.gallery.mod_help_only": "📦 외부 게임 모듈 (.pck / .zip)\n\n• 모듈 카드에서 .pck 또는 .zip 형식의 커스텀 카드 게임을 불러올 수 있습니다.\n• 에디터에서 카드와 디자인을 제작하고 .cardpack / .json으로 내보내 공유하세요.",
+  "ui.gallery.online_help_only": "🌐 온라인 및 LAN 플레이 설정\n\n1. 같은 Wi-Fi (모바일 / PC):\n   • 매치 설정에서 LAN / QR 호스트를 시작하세요.\n   • QR 코드나 짧은 URL(http://192.168.x.x:8080)로 접속합니다.\n\n2. 인터넷 (P2P / TURN):\n   • STUN은 기본 활성화되어 있으며, 필요 시 설정에서 TURN 서버를 입력할 수 있습니다.",
+  "ui.settings.preview_3d_title": "🎥 실시간 3D 미리보기: 테이블 & 배경"
 }

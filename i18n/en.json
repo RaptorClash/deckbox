@@ -195,5 +195,9 @@
   "ui.game.jump_in_btn": "⚡ Jump In! ({card})",
   "ui.game.skip_banner": "🚫 SKIPPED! {player} misses a turn!",
   "ui.game.player_finished_toast": "🏁 {player} finished all cards (#{place} place)!",
-  "ui.game.podium_header": "🏆 Final Standings (Play Until End):"
+  "ui.game.podium_header": "🏆 Final Standings (Play Until End):",
+  "ui.gallery.online_help_btn": "ℹ Online Play Guide",
+  "ui.gallery.mod_help_only": "📦 EXTERNAL GAME MODULES (.pck / .zip)\n\n• Load custom or community card games directly as .pck or .zip from the module slot.\n• Valid cartridges register automatically in the game gallery.\n• Create custom cards & card designs in '🎨 Pack Editor' and share them via .cardpack or .json export/import.",
+  "ui.gallery.online_help_only": "🌐 SETTING UP ONLINE & LAN PLAY\n\n1. Same Wi-Fi (Phone / Tablet / PC):\n   • Click 'Start LAN / QR Host' in Match Setup.\n   • Scan the QR code or enter the short URL (e.g. http://192.168.x.x:8080).\n   • Reassign player / table display roles in the Lobby Roster.\n\n2. Over the Internet (P2P / TURN):\n   • STUN is active by default. For strict NAT/mobile networks, configure a TURN relay in '⚙ Settings'.",
+  "ui.settings.preview_3d_title": "🎥 Live 3D Preview: Table Theme & Location"
 }

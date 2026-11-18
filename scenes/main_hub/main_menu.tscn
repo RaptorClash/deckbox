@@ -106,6 +106,7 @@ layout_mode = 2
 text = "⬇ Updater"
 
 [node name="ContentStack" type="Control" parent="HubShell"]
+clip_contents = true
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -119,7 +120,7 @@ grow_vertical = 2
 
 [node name="GameSelectorView" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 10
 
 [node name="GalleryHeaderPanel" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView"]
 layout_mode = 2
@@ -128,20 +129,26 @@ layout_mode = 2
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="GalleryTitle" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GalleryHeaderPanel/HeaderBox"]
+[node name="HeaderRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GalleryHeaderPanel/HeaderBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+theme_override_constants/separation = 12
+
+[node name="GalleryTitle" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GalleryHeaderPanel/HeaderBox/HeaderRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
 text = "Kartenspielsammlung — Wähle dein Spiel"
+
+[node name="GameSearchEdit" type="LineEdit" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GalleryHeaderPanel/HeaderBox/HeaderRow"]
+custom_minimum_size = Vector2(260, 32)
+layout_mode = 2
+placeholder_text = "🔍 Spiele durchsuchen..."
 
 [node name="GallerySubtitle" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GalleryHeaderPanel/HeaderBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.74, 0.82, 0.94, 1)
-theme_override_font_sizes/font_size = 14
-text = "Wähle zuerst ein Spiel für deine Runde oder tritt direkt einem laufenden LAN-/PC-Spiel bei. Grafik & Tisch findest du unter ⚙ Einstellungen."
-
-[node name="GameSearchEdit" type="LineEdit" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GalleryHeaderPanel/HeaderBox"]
-layout_mode = 2
-placeholder_text = "🔍 Spiele durchsuchen..."
+theme_override_font_sizes/font_size = 12
+text = "Wähle ein Spiel für deine Runde oder tritt einem LAN-/Online-Spiel bei. Optik, 3D-Orte & Musik unter ⚙ Einstellungen."
 
 [node name="GamesScroll" type="ScrollContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView"]
 layout_mode = 2
@@ -152,153 +159,221 @@ horizontal_scroll_mode = 0
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/h_separation = 16
-theme_override_constants/v_separation = 16
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
 columns = 4
 
 [node name="AlleAblegenCard" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid"]
-custom_minimum_size = Vector2(240, 185)
+custom_minimum_size = Vector2(215, 162)
 layout_mode = 2
 size_flags_horizontal = 0
 
 [node name="CardBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/AlleAblegenCard"]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 4
 
 [node name="Badge" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/AlleAblegenCard/CardBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.32, 0.95, 0.65, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 10
 text = "● SPIELBEREIT • 2–32+ SPIELER"
 
 [node name="Title" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/AlleAblegenCard/CardBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 19
+theme_override_font_sizes/font_size = 17
 text = "🃏 Alle Ablegen!"
 
 [node name="Desc" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/AlleAblegenCard/CardBox"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.8, 0.86, 0.96, 1)
-theme_override_font_sizes/font_size = 12
-text = "Der schnelle Ablege-Klassiker in 3D & Web-Lite. Inklusive kombinierbarer Modi:
-• 🔥 Gnadenlos (+6 / +10 / Alle ablegen / KO-Limit)
-• 🔄 Flip! (Doppelseitige Karten: Hell & Dunkel)
-• 🃏 Eigene Karten aus dem Editor"
+theme_override_font_sizes/font_size = 11
+text = "Ablege-Klassiker in 3D & Web-Lite. Inkl. Gnadenlos, Flip! & eigenen Editor-Karten."
 autowrap_mode = 3
 
 [node name="SelectUnoBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/AlleAblegenCard/CardBox"]
-custom_minimum_size = Vector2(0, 38)
+custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 13
 text = "▶ Alle Ablegen! auswählen"
 
 [node name="WizardCard" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid"]
-custom_minimum_size = Vector2(240, 185)
+custom_minimum_size = Vector2(215, 162)
 layout_mode = 2
 size_flags_horizontal = 0
 
 [node name="CardBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/WizardCard"]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 4
 
 [node name="Badge" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/WizardCard/CardBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.98, 0.78, 0.24, 1)
-theme_override_font_sizes/font_size = 11
-text = "◌ MODUL-VORSCHAU • 3–6 SPIELER"
+theme_override_font_sizes/font_size = 10
+text = "◌ MODUL-VORSCHAU • 3–6"
 
 [node name="Title" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/WizardCard/CardBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 19
+theme_override_font_sizes/font_size = 17
 text = "🧙 Zauber-Stiche"
 
 [node name="Desc" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/WizardCard/CardBox"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.7, 0.76, 0.88, 1)
-theme_override_font_sizes/font_size = 12
-text = "Taktisches Stichspiel mit Vorhersage der genauen Stichzahl vor jeder Runde. Die Cartridge-Schnittstelle ist vorbereitet."
+theme_override_font_sizes/font_size = 11
+text = "Taktisches Stichspiel mit exakter Stich-Vorhersage. Modul-Slot vorbereitet."
 autowrap_mode = 3
 
 [node name="SoonBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/WizardCard/CardBox"]
-custom_minimum_size = Vector2(0, 36)
+custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 12
 disabled = true
-text = "In Vorbereitung (Modul-Slot)"
+text = "In Vorbereitung"
 
 [node name="DoppelkopfCard" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid"]
-custom_minimum_size = Vector2(240, 185)
+custom_minimum_size = Vector2(215, 162)
 layout_mode = 2
 size_flags_horizontal = 0
 
 [node name="CardBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/DoppelkopfCard"]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 4
 
 [node name="Badge" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/DoppelkopfCard/CardBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.98, 0.78, 0.24, 1)
-theme_override_font_sizes/font_size = 11
-text = "◌ MODUL-VORSCHAU • 4 SPIELER"
+theme_override_font_sizes/font_size = 10
+text = "◌ MODUL-VORSCHAU • 4"
 
 [node name="Title" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/DoppelkopfCard/CardBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 19
+theme_override_font_sizes/font_size = 17
 text = "👑 Doppelkopf"
 
 [node name="Desc" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/DoppelkopfCard/CardBox"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.7, 0.76, 0.88, 1)
-theme_override_font_sizes/font_size = 12
-text = "Das traditionsreiche deutsche Team-Stichspiel mit Hochzeiten, Soli und Sonderpunkten. Modul-Schnittstelle aktiv."
+theme_override_font_sizes/font_size = 11
+text = "Deutsches Team-Stichspiel mit Hochzeiten & Soli. Modul-Slot aktiv."
 autowrap_mode = 3
 
 [node name="SoonBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/DoppelkopfCard/CardBox"]
-custom_minimum_size = Vector2(0, 36)
+custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 12
 disabled = true
-text = "In Vorbereitung (Modul-Slot)"
+text = "In Vorbereitung"
+
+[node name="ExternalModuleCard" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid"]
+custom_minimum_size = Vector2(215, 162)
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="CardBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/ExternalModuleCard"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Badge" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/ExternalModuleCard/CardBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 10
+text = "📦 MODUL • .PCK / .ZIP"
+
+[node name="Title" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/ExternalModuleCard/CardBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "📦 Externes Modul"
+
+[node name="ExternalRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/ExternalModuleCard/CardBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="PckPathEdit" type="LineEdit" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/ExternalModuleCard/CardBox/ExternalRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 11
+placeholder_text = "Pfad (.pck / .zip)"
+
+[node name="LoadPckBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/ExternalModuleCard/CardBox/ExternalRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Laden"
+
+[node name="ExternalStatusLabel" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/ExternalModuleCard/CardBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.74, 0.84, 0.96, 1)
+theme_override_font_sizes/font_size = 10
+text = "Community-Spiele als .pck / .zip direkt hinzufügen."
+autowrap_mode = 3
+
+[node name="ModHelpBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/ExternalModuleCard/CardBox"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "ℹ Anleitung: Spielmodule"
 
 [node name="BottomJoinRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 12
 
 [node name="QuickJoinPanel" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="JoinBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel"]
+[node name="JoinBox" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 14
 
-[node name="JoinTitle" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 17
-text = "🌐 Spiel beitreten (PC, Tablet & LAN-Browser)"
-
-[node name="JoinAddressRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="JoinAddressEdit" type="LineEdit" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/JoinAddressRow"]
+[node name="JoinDirectCol" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox"]
 layout_mode = 2
 size_flags_horizontal = 3
-placeholder_text = "Host-IP oder Kurz-URL eingeben (z. B. 192.168.178.25)"
+theme_override_constants/separation = 6
 
-[node name="JoinDirectBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/JoinAddressRow"]
+[node name="JoinHeaderRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/JoinDirectCol"]
 layout_mode = 2
-text = "Im Browser beitreten"
+theme_override_constants/separation = 8
+
+[node name="JoinTitle" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/JoinDirectCol/JoinHeaderRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 15
+text = "🌐 Online- & LAN-Spiel beitreten"
+
+[node name="OnlineHelpBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/JoinDirectCol/JoinHeaderRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "ℹ Anleitung: Online-Spiel"
+
+[node name="JoinAddressRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/JoinDirectCol"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="JoinAddressEdit" type="LineEdit" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/JoinDirectCol/JoinAddressRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Host-IP, PIN oder Kurz-URL (z. B. 192.168.178.25)"
+
+[node name="JoinDirectBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/JoinDirectCol/JoinAddressRow"]
+layout_mode = 2
+text = "▶ Im Browser beitreten"
+
+[node name="JoinStatusLabel" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/JoinDirectCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.68, 0.78, 0.92, 1)
+theme_override_font_sizes/font_size = 11
+text = "Tipp: Kurz-URL (z. B. http://192.168.178.25:8080) auf Handy oder PC eingeben."
 
 [node name="LanRoomsRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox"]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
 [node name="LanRoomsList" type="ItemList" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/LanRoomsRow"]
-custom_minimum_size = Vector2(0, 62)
+custom_minimum_size = Vector2(0, 68)
 layout_mode = 2
 size_flags_horizontal = 3
 
@@ -313,54 +388,6 @@ text = "Raum öffnen"
 [node name="RefreshLanBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/LanRoomsRow/LanJoinBtns"]
 layout_mode = 2
 text = "🔄 LAN suchen"
-
-[node name="JoinStatusLabel" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.68, 0.78, 0.92, 1)
-theme_override_font_sizes/font_size = 12
-text = "Tipp: Gib die Kurz-URL (z. B. http://192.168.178.25:8080) auf Handy oder PC ein."
-
-[node name="ExternalModulePanel" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="ModBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="ModTitle" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 17
-text = "📦 Externes Spielmodul laden (.pck / .zip)"
-
-[node name="ModHint" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.72, 0.8, 0.92, 1)
-theme_override_font_sizes/font_size = 13
-text = "Lade zusätzliche Community- oder eigene Kartenspiele direkt in deine Sammlung."
-autowrap_mode = 3
-
-[node name="ExternalRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="PckPathEdit" type="LineEdit" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox/ExternalRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "Pfad zur .pck oder .zip Modul-Datei"
-
-[node name="LoadPckBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox/ExternalRow"]
-layout_mode = 2
-text = "Modul laden"
-
-[node name="ExternalStatusLabel" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.74, 0.84, 0.96, 1)
-text = "Bereit: Alle Ablegen! • Modul-Schnittstelle aktiv"
-
-[node name="ModHelpBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox"]
-layout_mode = 2
-text = "ℹ Anleitung: Module & Online-Spiel"
 
 [node name="MatchSetupView" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab"]
 visible = false
@@ -761,150 +788,216 @@ theme_override_constants/separation = 18
 [node name="VisualSettingsPanel" type="PanelContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns"]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.15
 
-[node name="VisualBox" type="VBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel"]
+[node name="LeftOuterVBox" type="VBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="VisualTitle" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+[node name="SettingsLeftScroll" type="ScrollContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "🎨 Darstellung, 3D-Tisch & Spielgefühl"
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
 
-[node name="LanguageRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+[node name="VisualBox" type="VBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="VisualTitle" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "⚙ Einstellungen, Steuerung & Netzwerk"
+
+[node name="LanguageRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox"]
 layout_mode = 2
 
-[node name="LanguageLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/LanguageRow"]
+[node name="LanguageLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/LanguageRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Sprache / Language:"
 
-[node name="LanguageOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/LanguageRow"]
-custom_minimum_size = Vector2(220, 34)
+[node name="LanguageOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/LanguageRow"]
+custom_minimum_size = Vector2(215, 32)
 layout_mode = 2
 
-[node name="ViewModeRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+[node name="ViewModeRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox"]
 layout_mode = 2
 
-[node name="ViewLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/ViewModeRow"]
+[node name="ViewLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/ViewModeRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Standard-Ansichtsmodus:"
 
-[node name="ViewModeOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/ViewModeRow"]
-custom_minimum_size = Vector2(220, 34)
+[node name="ViewModeOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/ViewModeRow"]
+custom_minimum_size = Vector2(215, 32)
 layout_mode = 2
 
-[node name="SkinRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+[node name="SkinRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox"]
 layout_mode = 2
 
-[node name="SkinLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/SkinRow"]
+[node name="SkinLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/SkinRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Karten-Design:"
 
-[node name="SkinOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/SkinRow"]
-custom_minimum_size = Vector2(220, 34)
+[node name="SkinOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/SkinRow"]
+custom_minimum_size = Vector2(215, 32)
 layout_mode = 2
 
-[node name="ThemeRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+[node name="ThemeRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox"]
 layout_mode = 2
 
-[node name="ThemeLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/ThemeRow"]
+[node name="ThemeLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/ThemeRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "3D-Tisch-Theme:"
 
-[node name="ThemeOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/ThemeRow"]
-custom_minimum_size = Vector2(220, 34)
+[node name="ThemeOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/ThemeRow"]
+custom_minimum_size = Vector2(215, 32)
 layout_mode = 2
 
-[node name="LocationRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+[node name="LocationRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox"]
 layout_mode = 2
 
-[node name="LocationLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/LocationRow"]
+[node name="LocationLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/LocationRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Umgebung / Ort:"
 
-[node name="LocationOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/LocationRow"]
-custom_minimum_size = Vector2(220, 34)
+[node name="LocationOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/LocationRow"]
+custom_minimum_size = Vector2(215, 32)
 layout_mode = 2
 
-[node name="JukeboxRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+[node name="JukeboxRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox"]
 layout_mode = 2
 
-[node name="JukeboxLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/JukeboxRow"]
+[node name="JukeboxLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/JukeboxRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "🎵 Jukebox (Musik):"
 
-[node name="JukeboxOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/JukeboxRow"]
-custom_minimum_size = Vector2(220, 34)
+[node name="JukeboxOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/JukeboxRow"]
+custom_minimum_size = Vector2(215, 32)
 layout_mode = 2
 
-[node name="QualityRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+[node name="QualityRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox"]
 layout_mode = 2
 
-[node name="QualityLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/QualityRow"]
+[node name="QualityLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/QualityRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Grafik-Qualität:"
 
-[node name="QualityOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/QualityRow"]
-custom_minimum_size = Vector2(220, 34)
+[node name="QualityOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/QualityRow"]
+custom_minimum_size = Vector2(215, 32)
 layout_mode = 2
 
-[node name="SpeedRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+[node name="SpeedRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox"]
 layout_mode = 2
 
-[node name="SpeedLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/SpeedRow"]
+[node name="SpeedLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/SpeedRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "KI-Spieltempo:"
 
-[node name="BotSpeedOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/SpeedRow"]
-custom_minimum_size = Vector2(220, 34)
+[node name="BotSpeedOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/SpeedRow"]
+custom_minimum_size = Vector2(215, 32)
 layout_mode = 2
 
-[node name="ColorblindCheck" type="CheckButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+[node name="ColorblindCheck" type="CheckButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox"]
 layout_mode = 2
 button_pressed = true
 text = "Farbenblind-Symbole auf Karten & Farbrad aktivieren"
 
-[node name="KeybindsTitle" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+[node name="KeybindsTitle" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "⌨ Tastaturkürzel & Steuerung (Klicken zum Ändern)"
 
-[node name="KeybindsHint" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+[node name="KeybindsHint" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.78, 0.9, 1)
 theme_override_font_sizes/font_size = 11
 text = "Klicke auf eine Taste, um sie neu zu belegen (1–9 wählt direkt Handkarten)."
 autowrap_mode = 3
 
-[node name="KeybindsScroll" type="ScrollContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
-custom_minimum_size = Vector2(0, 120)
-layout_mode = 2
-size_flags_vertical = 3
-horizontal_scroll_mode = 0
-
-[node name="KeybindsBox" type="VBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/KeybindsScroll"]
+[node name="KeybindsBox" type="VBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
-[node name="KeybindsResetBtn" type="Button" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+[node name="KeybindsResetBtn" type="Button" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox"]
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "↺ Standard-Tasten wiederherstellen"
 
-[node name="SaveVisualSettingsBtn" type="Button" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
-custom_minimum_size = Vector2(0, 40)
+[node name="TurnTitle" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox"]
 layout_mode = 2
-text = "💾 Darstellung & Einstellungen speichern"
+theme_override_font_sizes/font_size = 14
+text = "🌐 Online-Netzwerk & TURN-Server"
+
+[node name="TurnUrlLbl" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Eigener TURN-Server (optional, für strikte Router/Mobilfunk):"
+
+[node name="TurnUrlEdit" type="LineEdit" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox"]
+layout_mode = 2
+placeholder_text = "z. B. turn:openrelay.metered.ca:80 oder turn:dein-server.de:3478"
+
+[node name="TurnCredsRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TurnUserEdit" type="LineEdit" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/TurnCredsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "TURN-Benutzername (optional)"
+
+[node name="TurnPassEdit" type="LineEdit" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/TurnCredsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+secret = true
+placeholder_text = "TURN-Passwort / Token"
+
+[node name="ExportImportHeader" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "📦 Einstellungen & Profil sichern (Gerätewechsel / Update)"
+
+[node name="SettingsTransferRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SettingsTransferEdit" type="LineEdit" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/SettingsTransferRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "user://deckbox_settings_export.json"
+
+[node name="ExportSettingsBtn" type="Button" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/SettingsTransferRow"]
+layout_mode = 2
+text = "📤 Export"
+
+[node name="ImportSettingsBtn" type="Button" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/SettingsTransferRow"]
+layout_mode = 2
+text = "📥 Import"
+
+[node name="SettingsFooterRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SaveVisualSettingsBtn" type="Button" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsFooterRow"]
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "💾 Alle Einstellungen & TURN speichern"
+
+[node name="SettingsStatusLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsFooterRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.92, 0.68, 1)
+text = ""
 
 [node name="NetworkSettingsPanel" type="PanelContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns"]
 layout_mode = 2
@@ -912,49 +1005,51 @@ size_flags_horizontal = 3
 
 [node name="NetBox" type="VBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 8
 
 [node name="NetTitle" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "🌐 Online-Netzwerk, LAN-Hilfe & TURN-Server"
+theme_override_font_sizes/font_size = 18
+text = "🎥 Live 3D-Vorschau: Tisch-Theme & Umgebung"
 
-[node name="TurnUrlLbl" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox"]
-layout_mode = 2
-text = "Eigener TURN-Server (optional, für strikte Router/Mobilfunk):"
-
-[node name="TurnUrlEdit" type="LineEdit" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox"]
-layout_mode = 2
-placeholder_text = "z. B. turn:openrelay.metered.ca:80 oder turn:dein-server.de:3478"
-
-[node name="TurnCredsRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="TurnUserEdit" type="LineEdit" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/TurnCredsRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "TURN-Benutzername (optional)"
-
-[node name="TurnPassEdit" type="LineEdit" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/TurnCredsRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-secret = true
-placeholder_text = "TURN-Passwort / Token"
-
-[node name="SaveNetworkSettingsBtn" type="Button" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox"]
-custom_minimum_size = Vector2(0, 42)
-layout_mode = 2
-text = "💾 Netzwerk & TURN speichern"
-
-[node name="SettingsStatusLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.45, 0.92, 0.68, 1)
-text = ""
-
-[node name="TurnHelpPanel" type="PanelContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox"]
+[node name="SettingsPreviewContainer" type="SubViewportContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox"]
+custom_minimum_size = Vector2(0, 230)
 layout_mode = 2
 size_flags_vertical = 3
+stretch = true
+
+[node name="SettingsPreviewViewport" type="SubViewport" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/SettingsPreviewContainer"]
+own_world_3d = true
+handle_input_locally = false
+msaa_3d = 2
+size = Vector2i(560, 240)
+render_target_update_mode = 4
+
+[node name="PreviewSwitchersRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="PrevThemeBtn" type="Button" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/PreviewSwitchersRow"]
+layout_mode = 2
+text = "◀ Tisch"
+
+[node name="PreviewThemeBtn" type="Button" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/PreviewSwitchersRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Tisch: Arcade PS5 ▶"
+
+[node name="PrevLocBtn" type="Button" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/PreviewSwitchersRow"]
+layout_mode = 2
+text = "◀ Ort"
+
+[node name="PreviewLocBtn" type="Button" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/PreviewSwitchersRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Ort: Haus ▶"
+
+[node name="TurnHelpPanel" type="PanelContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox"]
+custom_minimum_size = Vector2(0, 145)
+layout_mode = 2
 
 [node name="TurnHelpScroll" type="ScrollContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/TurnHelpPanel"]
 layout_mode = 2
@@ -964,17 +1059,14 @@ horizontal_scroll_mode = 0
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.8, 0.87, 0.96, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 12
 text = "📘 So funktionieren LAN-QR, STUN und TURN einfach erklärt:
 
-1. Im selben WLAN (QR-Code / Kurz-URL):
-Du brauchst KEINEN TURN-Server! Starte im Match-Setup den LAN-Host — DeckBox wählt automatisch deine echte WLAN-IP (z. B. 192.168.178.x) und zeigt die kurze Adresse http://<IP>:8080 an. Falls die Seite auf dem Handy nicht lädt: (a) VPN auf dem PC pausieren oder im Lobby-Dropdown die richtige WLAN-IP wählen, (b) in der Windows-Firewall eingehende Verbindungen für DeckBox auf Port 8080 & 8081 erlauben.
+1. Im selben WLAN (QR-Code / Kurz-URL): Du brauchst KEINEN TURN-Server! Starte im Match-Setup den LAN-Host — DeckBox wählt deine WLAN-IP und zeigt http://<IP>:8080.
 
-2. Online über das Internet (STUN — standardmäßig aktiv):
-STUN (Google & Cloudflare) hilft zwei PCs dabei, ihre öffentliche Adresse zu finden und sich direkt miteinander zu verbinden.
+2. Online über Internet (STUN — aktiv): Hilft zwei PCs bei der Direktverbindung.
 
-3. Wann brauche ich einen TURN-Server?
-Manche Router oder Mobilfunk-Netze (Symmetric NAT) blockieren direkte Verbindungen. Ein TURN-Server springt dann als verschlüsselte Brücke ein. Du kannst hier z. B. kostenlose Zugangsdaten von Metered OpenRelay, Cloudflare Calls oder einen eigenen coturn-Server eintragen."
+3. TURN-Server: Bei strikten Routern/Mobilfunk als Brücke links eintragen."
 autowrap_mode = 3
 
 [node name="UpdaterTab" type="PanelContainer" parent="HubShell/ContentStack"]
@@ -1062,13 +1154,14 @@ mouse_filter = 1
 [connection signal="pressed" from="HubShell/TopBarPanel/TopBar/StatsTabBtn" to="." method="select_tab" binds= ["stats"]]
 [connection signal="pressed" from="HubShell/TopBarPanel/TopBar/SettingsTabBtn" to="." method="select_tab" binds= ["settings"]]
 [connection signal="pressed" from="HubShell/TopBarPanel/TopBar/UpdaterTabBtn" to="." method="select_tab" binds= ["updater"]]
-[connection signal="text_changed" from="HubShell/ContentStack/PlayTab/GameSelectorView/GalleryHeaderPanel/HeaderBox/GameSearchEdit" to="." method="_on_game_search_changed"]
+[connection signal="text_changed" from="HubShell/ContentStack/PlayTab/GameSelectorView/GalleryHeaderPanel/HeaderBox/HeaderRow/GameSearchEdit" to="." method="_on_game_search_changed"]
 [connection signal="pressed" from="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/AlleAblegenCard/CardBox/SelectUnoBtn" to="." method="select_game" binds= ["uno"]]
-[connection signal="pressed" from="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/JoinAddressRow/JoinDirectBtn" to="." method="_on_join_direct_pressed"]
+[connection signal="pressed" from="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/ExternalModuleCard/CardBox/ExternalRow/LoadPckBtn" to="." method="_on_load_external_pck_pressed"]
+[connection signal="pressed" from="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/ExternalModuleCard/CardBox/ModHelpBtn" to="." method="_on_toggle_mod_help_pressed"]
+[connection signal="pressed" from="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/JoinDirectCol/JoinHeaderRow/OnlineHelpBtn" to="." method="_on_toggle_online_help_pressed"]
+[connection signal="pressed" from="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/JoinDirectCol/JoinAddressRow/JoinDirectBtn" to="." method="_on_join_direct_pressed"]
 [connection signal="pressed" from="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/LanRoomsRow/LanJoinBtns/JoinLanRoomBtn" to="." method="_on_join_selected_lan_room_pressed"]
 [connection signal="pressed" from="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/LanRoomsRow/LanJoinBtns/RefreshLanBtn" to="." method="_on_refresh_lan_rooms_pressed"]
-[connection signal="pressed" from="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox/ExternalRow/LoadPckBtn" to="." method="_on_load_external_pck_pressed"]
-[connection signal="pressed" from="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox/ModHelpBtn" to="." method="_on_toggle_mod_help_pressed"]
 [connection signal="pressed" from="ModHelpOverlay/HelpBox/CloseModHelpBtn" to="." method="_on_toggle_mod_help_pressed"]
 [connection signal="pressed" from="HubShell/ContentStack/PlayTab/MatchSetupView/SetupTopBar/BarRow/BackToGamesBtn" to="." method="show_game_selector"]
 [connection signal="pressed" from="HubShell/ContentStack/PlayTab/MatchSetupView/SetupTopBar/BarRow/OpenSettingsShortcutBtn" to="." method="select_tab" binds= ["settings"]]
@@ -1081,15 +1174,20 @@ mouse_filter = 1
 [connection signal="pressed" from="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/HostControlsRow/HostLanBtn" to="." method="_on_host_lan_btn_pressed"]
 [connection signal="item_selected" from="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/HostControlsRow/LanIpOption" to="." method="_on_lan_ip_selected"]
 [connection signal="pressed" from="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/JoinUrlRow/CopyJoinUrlBtn" to="." method="_on_copy_join_url_pressed"]
-[connection signal="item_selected" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/LanguageRow/LanguageOption" to="." method="_on_language_option_selected"]
-[connection signal="item_selected" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/SkinRow/SkinOption" to="." method="_on_preview_setting_changed"]
-[connection signal="item_selected" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/ThemeRow/ThemeOption" to="." method="_on_preview_setting_changed"]
-[connection signal="item_selected" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/LocationRow/LocationOption" to="." method="_on_preview_setting_changed"]
-[connection signal="item_selected" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/JukeboxRow/JukeboxOption" to="." method="_on_jukebox_option_selected"]
-[connection signal="item_selected" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/QualityRow/QualityOption" to="." method="_on_preview_setting_changed"]
-[connection signal="pressed" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/KeybindsResetBtn" to="." method="_on_reset_keybinds_pressed"]
-[connection signal="pressed" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/SaveVisualSettingsBtn" to="." method="save_settings"]
-[connection signal="pressed" from="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/SaveNetworkSettingsBtn" to="." method="save_settings"]
+[connection signal="item_selected" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/LanguageRow/LanguageOption" to="." method="_on_language_option_selected"]
+[connection signal="item_selected" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/SkinRow/SkinOption" to="." method="_on_preview_setting_changed"]
+[connection signal="item_selected" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/ThemeRow/ThemeOption" to="." method="_on_preview_setting_changed"]
+[connection signal="item_selected" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/LocationRow/LocationOption" to="." method="_on_preview_setting_changed"]
+[connection signal="item_selected" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/JukeboxRow/JukeboxOption" to="." method="_on_jukebox_option_selected"]
+[connection signal="item_selected" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/QualityRow/QualityOption" to="." method="_on_preview_setting_changed"]
+[connection signal="pressed" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/KeybindsResetBtn" to="." method="_on_reset_keybinds_pressed"]
+[connection signal="pressed" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/SettingsTransferRow/ExportSettingsBtn" to="." method="_on_export_settings_btn_pressed"]
+[connection signal="pressed" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsLeftScroll/VisualBox/SettingsTransferRow/ImportSettingsBtn" to="." method="_on_import_settings_btn_pressed"]
+[connection signal="pressed" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/LeftOuterVBox/SettingsFooterRow/SaveVisualSettingsBtn" to="." method="save_settings"]
+[connection signal="pressed" from="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/PreviewSwitchersRow/PrevThemeBtn" to="." method="preview_prev_theme"]
+[connection signal="pressed" from="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/PreviewSwitchersRow/PreviewThemeBtn" to="." method="preview_next_theme"]
+[connection signal="pressed" from="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/PreviewSwitchersRow/PrevLocBtn" to="." method="preview_prev_location"]
+[connection signal="pressed" from="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/PreviewSwitchersRow/PreviewLocBtn" to="." method="preview_next_location"]
 [connection signal="pressed" from="HubShell/ContentStack/FriendsTab/FriendsBox/AddFriendRow/AddFriendBtn" to="." method="_on_add_friend_pressed"]
 [connection signal="pressed" from="HubShell/ContentStack/UpdaterTab/UpdaterBox/CheckUpdatesBtn" to="." method="_on_check_updates_pressed"]
 [connection signal="request_completed" from="GitHubReleasesRequest" to="." method="_on_github_releases_completed"]

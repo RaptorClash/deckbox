@@ -334,6 +334,43 @@ func test_locations_jukebox_keybinds_timed_reactions_and_compact_gallery() -> vo
 	game_scene._tick_reaction_timer(5.0)
 	assert_false(game_scene.center_reaction_panel.visible, "CenterReactionPanel must auto-hide once countdown expires")
 
+func test_hub_layout_clipping_inline_module_online_help_and_settings_3d_preview() -> void:
+	var menu = load(MAIN_MENU_PATH).instantiate()
+	add_child_autofree(menu)
+
+	# 1. ContentStack must clip contents so SettingsTab never overlaps TopBarPanel
+	var content_stack: Control = menu.get_node("HubShell/ContentStack")
+	assert_true(content_stack.clip_contents, "ContentStack must enable clip_contents to protect TopBar tabs")
+
+	# 2. ExternalModuleCard lives inside GamesGrid, separate Online Help lives in QuickJoinPanel
+	assert_not_null(menu.games_grid.get_node_or_null("ExternalModuleCard"), "External module loader must live inside GamesGrid")
+	assert_not_null(menu.mod_help_btn, "Module card must expose module-only help button")
+	assert_not_null(menu.online_help_btn, "QuickJoinPanel must expose dedicated Online-Play help button")
+	assert_lte(int(menu.alle_ablegen_card.custom_minimum_size.y), 180, "Game tiles must be compact in fullscreen view")
+
+	# 3. SettingsTab left column holds TURN & Export/Import; right column holds 3D Preview
+	var left_panel: Control = menu.get_node_or_null("HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel")
+	assert_not_null(left_panel)
+	assert_true(left_panel.is_ancestor_of(menu.turn_url_edit), "TURN server inputs must reside inside left Settings panel")
+	assert_not_null(menu.settings_preview_viewport, "Right Settings column must expose live 3D preview SubViewport")
+	menu.preview_next_location()
+	var after_loc := str(menu.location_option.get_item_metadata(menu.location_option.selected))
+	assert_ne(after_loc, "cozy_house", "Cycling preview location must advance active location")
+
+	# 4. Profile & Settings full export/import roundtrip (including display_name & keybinds)
+	var settings_path := "user://test_deckbox_settings_export.json"
+	menu._profile_svc.update_profile({ "display_name": "MarvinPro", "location_id": "bowling_alley", "jukebox_mode": "shuffle" })
+	assert_true(menu.export_settings_to_file(settings_path), "Exporting settings + display_name must succeed")
+	menu._profile_svc.update_profile({ "display_name": "ResetUser", "location_id": "cozy_house", "jukebox_mode": "auto" })
+	assert_true(menu.import_settings_from_file(settings_path), "Importing settings must succeed")
+	var restored: Dictionary = menu._profile_svc.get_profile()
+	assert_eq(str(restored.get("display_name", "")), "MarvinPro", "Imported settings must restore profile display_name")
+	assert_eq(str(restored.get("location_id", "")), "bowling_alley", "Imported settings must restore 3D location")
+
+	var prof_screen = load("res://scenes/main_hub/profile.tscn").instantiate()
+	add_child_autofree(prof_screen)
+	assert_true(prof_screen.has_method("import_backup_from_path"), "ProfileScreen must support backup import")
+
 func _find_mesh_in_node(n: Node) -> MeshInstance3D:
 	if n is MeshInstance3D:
 		return n

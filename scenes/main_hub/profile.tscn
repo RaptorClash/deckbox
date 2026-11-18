@@ -157,11 +157,45 @@ theme_override_constants/margin_bottom = 20
 
 [node name="VBox" type="VBoxContainer" parent="VBoxContainer/TabContainer/Backup"]
 layout_mode = 2
-theme_override_constants/separation = 15
+theme_override_constants/separation = 12
+
+[node name="BackupInfo" type="Label" parent="VBoxContainer/TabContainer/Backup/VBox"]
+layout_mode = 2
+text = "Exportiere dein Profil, alle Einstellungen (Tastatur, Ort, Musik, TURN), Statistiken, Freunde und Karten-Designs für Gerätewechsel oder Updates."
+autowrap_mode = 3
 
 [node name="ExportBtn" type="Button" parent="VBoxContainer/TabContainer/Backup/VBox"]
+custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
-text = "Export Backup Archive (.deckbox-backup.zip)"
+text = "📤 Backup-Archiv exportieren (.deckbox-backup.zip)"
+
+[node name="ImportRow" type="HBoxContainer" parent="VBoxContainer/TabContainer/Backup/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ImportPathEdit" type="LineEdit" parent="VBoxContainer/TabContainer/Backup/VBox/ImportRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Pfad zum .deckbox-backup.zip oder .json Einstellungs-Export"
+
+[node name="ImportBtn" type="Button" parent="VBoxContainer/TabContainer/Backup/VBox/ImportRow"]
+custom_minimum_size = Vector2(180, 40)
+layout_mode = 2
+text = "📥 Backup importieren"
+
+[node name="SettingsJsonRow" type="HBoxContainer" parent="VBoxContainer/TabContainer/Backup/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ExportSettingsJsonBtn" type="Button" parent="VBoxContainer/TabContainer/Backup/VBox/SettingsJsonRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "📄 Nur Einstellungen + Name exportieren (.json)"
+
+[node name="ImportSettingsJsonBtn" type="Button" parent="VBoxContainer/TabContainer/Backup/VBox/SettingsJsonRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "📄 Einstellungen (.json) importieren"
 
 [node name="Footer" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
@@ -173,3 +207,6 @@ text = "Ready"
 [connection signal="pressed" from="VBoxContainer/Header/BackButton" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="VBoxContainer/Header/SaveButton" to="." method="_on_save_pressed"]
 [connection signal="pressed" from="VBoxContainer/TabContainer/Backup/VBox/ExportBtn" to="." method="export_backup"]
+[connection signal="pressed" from="VBoxContainer/TabContainer/Backup/VBox/ImportRow/ImportBtn" to="." method="_on_import_backup_pressed"]
+[connection signal="pressed" from="VBoxContainer/TabContainer/Backup/VBox/SettingsJsonRow/ExportSettingsJsonBtn" to="." method="_on_export_settings_json_pressed"]
+[connection signal="pressed" from="VBoxContainer/TabContainer/Backup/VBox/SettingsJsonRow/ImportSettingsJsonBtn" to="." method="_on_import_settings_json_pressed"]

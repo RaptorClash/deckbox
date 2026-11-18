@@ -1,6 +1,16 @@
-[gd_scene load_steps=2 format=3 uid="uid://bpe1packeditor001"]
+[gd_scene load_steps=4 format=3 uid="uid://bpe1packeditor001"]
 
 [ext_resource type="Script" path="res://scenes/main_hub/pack_editor.gd" id="1_script"]
+
+[sub_resource type="Environment" id="Environment_card3d"]
+background_mode = 1
+background_color = Color(0.05, 0.07, 0.12, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.88, 0.92, 1.0, 1)
+ambient_light_energy = 0.85
+
+[sub_resource type="World3D" id="World3D_card3d"]
+environment = SubResource("Environment_card3d")
 
 [node name="PackEditor" type="Control"]
 layout_mode = 3
@@ -18,7 +28,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 8
 
 [node name="Header" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
@@ -27,179 +37,375 @@ theme_override_constants/separation = 8
 [node name="Title" type="Label" parent="VBoxContainer/Header"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 20
-text = "Karten- & Regel-Editor (Custom Cards)"
+theme_override_font_sizes/font_size = 19
+text = "🎨 Karten- & Design-Editor (3D Studio)"
+
+[node name="GameTargetLbl" type="Label" parent="VBoxContainer/Header"]
+layout_mode = 2
+text = "🎯 Spiel:"
+
+[node name="TargetGameOpt" type="OptionButton" parent="VBoxContainer/Header"]
+custom_minimum_size = Vector2(180, 34)
+layout_mode = 2
 
 [node name="NewButton" type="Button" parent="VBoxContainer/Header"]
 layout_mode = 2
-text = "Neu"
+text = "✨ Neu"
 
 [node name="ValidateButton" type="Button" parent="VBoxContainer/Header"]
 layout_mode = 2
-text = "Prüfen"
+text = "✔ Prüfen"
+
+[node name="ImportButton" type="Button" parent="VBoxContainer/Header"]
+layout_mode = 2
+text = "📥 Import"
 
 [node name="ExportButton" type="Button" parent="VBoxContainer/Header"]
 layout_mode = 2
-text = "Export .cardpack"
+text = "📤 Export"
 
-[node name="TabContainer" type="TabContainer" parent="VBoxContainer"]
+[node name="MainColumns" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_constants/separation = 14
+
+[node name="TabContainer" type="TabContainer" parent="VBoxContainer/MainColumns"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
 current_tab = 1
 
-[node name="Metadata" type="MarginContainer" parent="VBoxContainer/TabContainer"]
+[node name="Metadata" type="MarginContainer" parent="VBoxContainer/MainColumns/TabContainer"]
 visible = false
 layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
 
-[node name="GridContainer" type="GridContainer" parent="VBoxContainer/TabContainer/Metadata"]
+[node name="GridContainer" type="GridContainer" parent="VBoxContainer/MainColumns/TabContainer/Metadata"]
 layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 8
 columns = 2
 
-[node name="IdLabel" type="Label" parent="VBoxContainer/TabContainer/Metadata/GridContainer"]
+[node name="IdLabel" type="Label" parent="VBoxContainer/MainColumns/TabContainer/Metadata/GridContainer"]
 layout_mode = 2
 text = "Pack ID:"
 
-[node name="IdEdit" type="LineEdit" parent="VBoxContainer/TabContainer/Metadata/GridContainer"]
+[node name="IdEdit" type="LineEdit" parent="VBoxContainer/MainColumns/TabContainer/Metadata/GridContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="NameLabel" type="Label" parent="VBoxContainer/TabContainer/Metadata/GridContainer"]
+[node name="NameLabel" type="Label" parent="VBoxContainer/MainColumns/TabContainer/Metadata/GridContainer"]
 layout_mode = 2
 text = "Name:"
 
-[node name="NameEdit" type="LineEdit" parent="VBoxContainer/TabContainer/Metadata/GridContainer"]
+[node name="NameEdit" type="LineEdit" parent="VBoxContainer/MainColumns/TabContainer/Metadata/GridContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="AuthorLabel" type="Label" parent="VBoxContainer/TabContainer/Metadata/GridContainer"]
+[node name="AuthorLabel" type="Label" parent="VBoxContainer/MainColumns/TabContainer/Metadata/GridContainer"]
 layout_mode = 2
 text = "Autor:"
 
-[node name="AuthorEdit" type="LineEdit" parent="VBoxContainer/TabContainer/Metadata/GridContainer"]
+[node name="AuthorEdit" type="LineEdit" parent="VBoxContainer/MainColumns/TabContainer/Metadata/GridContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="VersionLabel" type="Label" parent="VBoxContainer/TabContainer/Metadata/GridContainer"]
+[node name="VersionLabel" type="Label" parent="VBoxContainer/MainColumns/TabContainer/Metadata/GridContainer"]
 layout_mode = 2
 text = "Version:"
 
-[node name="VersionEdit" type="LineEdit" parent="VBoxContainer/TabContainer/Metadata/GridContainer"]
+[node name="VersionEdit" type="LineEdit" parent="VBoxContainer/MainColumns/TabContainer/Metadata/GridContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="DescLabel" type="Label" parent="VBoxContainer/TabContainer/Metadata/GridContainer"]
+[node name="DescLabel" type="Label" parent="VBoxContainer/MainColumns/TabContainer/Metadata/GridContainer"]
 layout_mode = 2
 text = "Beschreibung:"
 
-[node name="DescEdit" type="TextEdit" parent="VBoxContainer/TabContainer/Metadata/GridContainer"]
+[node name="DescEdit" type="TextEdit" parent="VBoxContainer/MainColumns/TabContainer/Metadata/GridContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="Cards" type="MarginContainer" parent="VBoxContainer/TabContainer"]
+[node name="Cards" type="MarginContainer" parent="VBoxContainer/MainColumns/TabContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="HSplitContainer" type="HSplitContainer" parent="VBoxContainer/MainColumns/TabContainer/Cards"]
 layout_mode = 2
 
-[node name="HSplitContainer" type="HSplitContainer" parent="VBoxContainer/TabContainer/Cards"]
-layout_mode = 2
-
-[node name="CardList" type="ItemList" parent="VBoxContainer/TabContainer/Cards/HSplitContainer"]
-custom_minimum_size = Vector2(240, 0)
+[node name="CardListCol" type="VBoxContainer" parent="VBoxContainer/MainColumns/TabContainer/Cards/HSplitContainer"]
+custom_minimum_size = Vector2(210, 0)
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_constants/separation = 6
 
-[node name="CardDetails" type="VBoxContainer" parent="VBoxContainer/TabContainer/Cards/HSplitContainer"]
+[node name="CardList" type="ItemList" parent="VBoxContainer/MainColumns/TabContainer/Cards/HSplitContainer/CardListCol"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="RemoveCardBtn" type="Button" parent="VBoxContainer/MainColumns/TabContainer/Cards/HSplitContainer/CardListCol"]
+layout_mode = 2
+text = "🗑 Ausgewählte Karte entfernen"
+
+[node name="CardDetails" type="VBoxContainer" parent="VBoxContainer/MainColumns/TabContainer/Cards/HSplitContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.6
+theme_override_constants/separation = 8
+
+[node name="PreviewRow" type="HBoxContainer" parent="VBoxContainer/MainColumns/TabContainer/Cards/HSplitContainer/CardDetails"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="FieldsCol" type="VBoxContainer" parent="VBoxContainer/MainColumns/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="PreviewRow" type="HBoxContainer" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails"]
+[node name="CardIdEdit" type="LineEdit" parent="VBoxContainer/MainColumns/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol"]
 layout_mode = 2
-theme_override_constants/separation = 14
+placeholder_text = "🏷 Karten-ID (z. B. schild_0, blitz_4 — ohne Leerzeichen)"
 
-[node name="FieldsCol" type="VBoxContainer" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow"]
+[node name="CardNameEdit" type="LineEdit" parent="VBoxContainer/MainColumns/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol"]
 layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 7
+placeholder_text = "📝 Anzeigename der Karte (z. B. Energieschild)"
 
-[node name="CardIdEdit" type="LineEdit" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol"]
-layout_mode = 2
-placeholder_text = "Karten-ID (z.B. mega_plus_8)"
-
-[node name="CardNameEdit" type="LineEdit" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol"]
-layout_mode = 2
-placeholder_text = "Karten-Name (z.B. Mega +8)"
-
-[node name="ColorCountRow" type="HBoxContainer" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol"]
+[node name="ColorCountRow" type="HBoxContainer" parent="VBoxContainer/MainColumns/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="CardColorOpt" type="OptionButton" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol/ColorCountRow"]
+[node name="ColorLbl" type="Label" parent="VBoxContainer/MainColumns/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol/ColorCountRow"]
+layout_mode = 2
+text = "🎨 Farbe:"
+
+[node name="CardColorOpt" type="OptionButton" parent="VBoxContainer/MainColumns/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol/ColorCountRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CountLbl" type="Label" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol/ColorCountRow"]
+[node name="CountLbl" type="Label" parent="VBoxContainer/MainColumns/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol/ColorCountRow"]
 layout_mode = 2
-text = "Anzahl:"
+text = "🃏 Anzahl im Deck:"
 
-[node name="CardCountSpin" type="SpinBox" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol/ColorCountRow"]
+[node name="CardCountSpin" type="SpinBox" parent="VBoxContainer/MainColumns/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol/ColorCountRow"]
 layout_mode = 2
 min_value = 1.0
 max_value = 20.0
 value = 2.0
 
-[node name="CardEffectOpt" type="OptionButton" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol"]
+[node name="EffectLbl" type="Label" parent="VBoxContainer/MainColumns/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol"]
+layout_mode = 2
+text = "⚡ Karteneffekt (Was passiert beim Ausspielen?):"
+
+[node name="CardEffectOpt" type="OptionButton" parent="VBoxContainer/MainColumns/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol"]
 layout_mode = 2
 
-[node name="PowerRow" type="HBoxContainer" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol"]
+[node name="EffectExplainLbl" type="Label" parent="VBoxContainer/MainColumns/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.84, 0.96, 1)
+theme_override_font_sizes/font_size = 12
+text = "ℹ Erklärender Hinweis zum gewählten Effekt."
+autowrap_mode = 3
+
+[node name="PowerRow" type="HBoxContainer" parent="VBoxContainer/MainColumns/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="PowerLbl" type="Label" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol/PowerRow"]
+[node name="PowerLbl" type="Label" parent="VBoxContainer/MainColumns/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol/PowerRow"]
 layout_mode = 2
-text = "Stärke (+Karten/Skip):"
+text = "🔢 Stärke (Karten/Plätze):"
 
-[node name="CardPowerSpin" type="SpinBox" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol/PowerRow"]
+[node name="CardPowerSpin" type="SpinBox" parent="VBoxContainer/MainColumns/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol/PowerRow"]
 layout_mode = 2
 min_value = 1.0
 max_value = 20.0
-value = 8.0
+value = 4.0
 
-[node name="CardTargetOpt" type="OptionButton" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol/PowerRow"]
+[node name="TargetLbl" type="Label" parent="VBoxContainer/MainColumns/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol/PowerRow"]
+layout_mode = 2
+text = "🎯 Ziel:"
+
+[node name="CardTargetOpt" type="OptionButton" parent="VBoxContainer/MainColumns/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol/PowerRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="AddCardButton" type="Button" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol"]
+[node name="AddCardButton" type="Button" parent="VBoxContainer/MainColumns/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol"]
+custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
-text = "Karte zum Deck hinzufügen"
+text = "➕ Karte zum Deck hinzufügen"
 
-[node name="CardPreviewBox" type="PanelContainer" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow"]
+[node name="Design" type="MarginContainer" parent="VBoxContainer/MainColumns/TabContainer"]
+visible = false
 layout_mode = 2
-size_flags_vertical = 4
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
 
-[node name="CardPreviewRect" type="TextureRect" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/CardPreviewBox"]
-custom_minimum_size = Vector2(144, 204)
+[node name="DesignScroll" type="ScrollContainer" parent="VBoxContainer/MainColumns/TabContainer/Design"]
 layout_mode = 2
-stretch_mode = 5
+horizontal_scroll_mode = 0
 
-[node name="PresetsRow" type="HBoxContainer" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails"]
+[node name="DesignBox" type="VBoxContainer" parent="VBoxContainer/MainColumns/TabContainer/Design/DesignScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="DesignHeader" type="Label" parent="VBoxContainer/MainColumns/TabContainer/Design/DesignScroll/DesignBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "🎨 Eigenes Karten-Design & Rückseiten-Stil erstellen"
+
+[node name="DesignIdRow" type="HBoxContainer" parent="VBoxContainer/MainColumns/TabContainer/Design/DesignScroll/DesignBox"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="PresetsLbl" type="Label" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PresetsRow"]
+[node name="DesignIdEdit" type="LineEdit" parent="VBoxContainer/MainColumns/TabContainer/Design/DesignScroll/DesignBox/DesignIdRow"]
 layout_mode = 2
-text = "Schnell-Vorlagen:"
+size_flags_horizontal = 3
+placeholder_text = "Design-ID (z. B. royal_gold)"
 
-[node name="PresetPlus8Btn" type="Button" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PresetsRow"]
+[node name="DesignNameEdit" type="LineEdit" parent="VBoxContainer/MainColumns/TabContainer/Design/DesignScroll/DesignBox/DesignIdRow"]
 layout_mode = 2
-text = "+8 Ultra Wild"
+size_flags_horizontal = 3
+placeholder_text = "Design-Name (z. B. Royal Gold)"
 
-[node name="PresetShieldBtn" type="Button" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PresetsRow"]
+[node name="DesignEmblemEdit" type="LineEdit" parent="VBoxContainer/MainColumns/TabContainer/Design/DesignScroll/DesignBox/DesignIdRow"]
+custom_minimum_size = Vector2(110, 0)
 layout_mode = 2
-text = "🛡 Schild (0 Strafe)"
+max_length = 3
+placeholder_text = "Emblem (DB)"
+text = "DB"
 
-[node name="PresetSwapBtn" type="Button" parent="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PresetsRow"]
+[node name="ColorsGrid" type="GridContainer" parent="VBoxContainer/MainColumns/TabContainer/Design/DesignScroll/DesignBox"]
 layout_mode = 2
-text = "🌪 Hände tauschen"
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 8
+columns = 2
+
+[node name="FrameColorLbl" type="Label" parent="VBoxContainer/MainColumns/TabContainer/Design/DesignScroll/DesignBox/ColorsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🖼 Rahmen-Farbe (Kartenrand):"
+
+[node name="FrameColorPicker" type="ColorPickerButton" parent="VBoxContainer/MainColumns/TabContainer/Design/DesignScroll/DesignBox/ColorsGrid"]
+custom_minimum_size = Vector2(90, 32)
+layout_mode = 2
+color = Color(0.96, 0.96, 0.94, 1)
+
+[node name="BgColorLbl" type="Label" parent="VBoxContainer/MainColumns/TabContainer/Design/DesignScroll/DesignBox/ColorsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🌑 Hintergrund-Ton (Kartenkörper):"
+
+[node name="BgColorPicker" type="ColorPickerButton" parent="VBoxContainer/MainColumns/TabContainer/Design/DesignScroll/DesignBox/ColorsGrid"]
+custom_minimum_size = Vector2(90, 32)
+layout_mode = 2
+color = Color(0.08, 0.1, 0.16, 1)
+
+[node name="AccentColorLbl" type="Label" parent="VBoxContainer/MainColumns/TabContainer/Design/DesignScroll/DesignBox/ColorsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "✨ Akzent- & Oval-Farbe:"
+
+[node name="AccentColorPicker" type="ColorPickerButton" parent="VBoxContainer/MainColumns/TabContainer/Design/DesignScroll/DesignBox/ColorsGrid"]
+custom_minimum_size = Vector2(90, 32)
+layout_mode = 2
+color = Color(0.95, 0.76, 0.22, 1)
+
+[node name="BackPrimaryLbl" type="Label" parent="VBoxContainer/MainColumns/TabContainer/Design/DesignScroll/DesignBox/ColorsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🎴 Rückseite Hauptfarbe:"
+
+[node name="BackPrimaryPicker" type="ColorPickerButton" parent="VBoxContainer/MainColumns/TabContainer/Design/DesignScroll/DesignBox/ColorsGrid"]
+custom_minimum_size = Vector2(90, 32)
+layout_mode = 2
+color = Color(0.1, 0.14, 0.26, 1)
+
+[node name="BackSecondaryLbl" type="Label" parent="VBoxContainer/MainColumns/TabContainer/Design/DesignScroll/DesignBox/ColorsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "💠 Rückseite Emblem-Farbe:"
+
+[node name="BackSecondaryPicker" type="ColorPickerButton" parent="VBoxContainer/MainColumns/TabContainer/Design/DesignScroll/DesignBox/ColorsGrid"]
+custom_minimum_size = Vector2(90, 32)
+layout_mode = 2
+color = Color(0.95, 0.76, 0.22, 1)
+
+[node name="DesignActionsRow" type="HBoxContainer" parent="VBoxContainer/MainColumns/TabContainer/Design/DesignScroll/DesignBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SaveDesignBtn" type="Button" parent="VBoxContainer/MainColumns/TabContainer/Design/DesignScroll/DesignBox/DesignActionsRow"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "💾 Design speichern & aktivieren"
+
+[node name="ExportDesignBtn" type="Button" parent="VBoxContainer/MainColumns/TabContainer/Design/DesignScroll/DesignBox/DesignActionsRow"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "📤 Design teilen (.json)"
+
+[node name="CardPreviewPanel" type="PanelContainer" parent="VBoxContainer/MainColumns"]
+custom_minimum_size = Vector2(270, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PreviewBox" type="VBoxContainer" parent="VBoxContainer/MainColumns/CardPreviewPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PreviewTitle" type="Label" parent="VBoxContainer/MainColumns/CardPreviewPanel/PreviewBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+horizontal_alignment = 1
+text = "🃏 3D Karten- & Design-Vorschau"
+
+[node name="CardPreview3DContainer" type="SubViewportContainer" parent="VBoxContainer/MainColumns/CardPreviewPanel/PreviewBox"]
+custom_minimum_size = Vector2(240, 260)
+layout_mode = 2
+size_flags_vertical = 3
+stretch = true
+
+[node name="CardPreview3DViewport" type="SubViewport" parent="VBoxContainer/MainColumns/CardPreviewPanel/PreviewBox/CardPreview3DContainer"]
+own_world_3d = true
+world_3d = SubResource("World3D_card3d")
+handle_input_locally = false
+msaa_3d = 2
+size = Vector2i(260, 280)
+render_target_update_mode = 4
+
+[node name="PreviewControlsRow" type="HBoxContainer" parent="VBoxContainer/MainColumns/CardPreviewPanel/PreviewBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="PreviewFlipBtn" type="Button" parent="VBoxContainer/MainColumns/CardPreviewPanel/PreviewBox/PreviewControlsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🔄 Rückseite zeigen"
+
+[node name="PreviewRotateCheck" type="CheckButton" parent="VBoxContainer/MainColumns/CardPreviewPanel/PreviewBox/PreviewControlsRow"]
+layout_mode = 2
+button_pressed = true
+text = "↻ Drehen"
+
+[node name="SharePathRow" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SharePathEdit" type="LineEdit" parent="VBoxContainer/SharePathRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Dateipfad für Import/Export (.cardpack oder .json)"
 
 [node name="Footer" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
@@ -207,17 +413,29 @@ layout_mode = 2
 [node name="StatusLabel" type="Label" parent="VBoxContainer/Footer"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Bereit. Erstellte Karten werden automatisch im Match gemischt."
+text = "Bereit. Erstelle Karten für dein Wunschspiel oder eigene Karten-Designs in 3D."
 
+[connection signal="tab_changed" from="VBoxContainer/MainColumns/TabContainer" to="." method="_on_editor_tab_changed"]
+[connection signal="item_selected" from="VBoxContainer/Header/TargetGameOpt" to="." method="_on_target_game_selected"]
 [connection signal="pressed" from="VBoxContainer/Header/NewButton" to="." method="_on_new_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/Header/ValidateButton" to="." method="_on_validate_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/Header/ImportButton" to="." method="_on_import_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/Header/ExportButton" to="." method="_on_export_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/TabContainer/Cards/HSplitContainer/CardListCol/RemoveCardBtn" to="." method="_on_remove_card_pressed"]
 [connection signal="text_changed" from="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol/CardIdEdit" to="." method="_on_preview_field_changed"]
 [connection signal="text_changed" from="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol/CardNameEdit" to="." method="_on_preview_field_changed"]
 [connection signal="item_selected" from="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol/ColorCountRow/CardColorOpt" to="." method="_on_preview_opt_changed"]
 [connection signal="item_selected" from="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol/CardEffectOpt" to="." method="_on_preview_opt_changed"]
 [connection signal="value_changed" from="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol/PowerRow/CardPowerSpin" to="." method="_on_preview_val_changed"]
 [connection signal="pressed" from="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PreviewRow/FieldsCol/AddCardButton" to="." method="_on_add_card_pressed"]
-[connection signal="pressed" from="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PresetsRow/PresetPlus8Btn" to="." method="_on_preset_plus8_pressed"]
-[connection signal="pressed" from="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PresetsRow/PresetShieldBtn" to="." method="_on_preset_shield_pressed"]
-[connection signal="pressed" from="VBoxContainer/TabContainer/Cards/HSplitContainer/CardDetails/PresetsRow/PresetSwapBtn" to="." method="_on_preset_swap_pressed"]
+[connection signal="text_changed" from="VBoxContainer/TabContainer/Design/DesignScroll/DesignBox/DesignIdRow/DesignIdEdit" to="." method="_on_preview_field_changed"]
+[connection signal="text_changed" from="VBoxContainer/TabContainer/Design/DesignScroll/DesignBox/DesignIdRow/DesignNameEdit" to="." method="_on_preview_field_changed"]
+[connection signal="text_changed" from="VBoxContainer/TabContainer/Design/DesignScroll/DesignBox/DesignIdRow/DesignEmblemEdit" to="." method="_on_preview_field_changed"]
+[connection signal="color_changed" from="VBoxContainer/TabContainer/Design/DesignScroll/DesignBox/ColorsGrid/FrameColorPicker" to="." method="_on_design_color_changed"]
+[connection signal="color_changed" from="VBoxContainer/TabContainer/Design/DesignScroll/DesignBox/ColorsGrid/BgColorPicker" to="." method="_on_design_color_changed"]
+[connection signal="color_changed" from="VBoxContainer/TabContainer/Design/DesignScroll/DesignBox/ColorsGrid/AccentColorPicker" to="." method="_on_design_color_changed"]
+[connection signal="color_changed" from="VBoxContainer/TabContainer/Design/DesignScroll/DesignBox/ColorsGrid/BackPrimaryPicker" to="." method="_on_design_color_changed"]
+[connection signal="color_changed" from="VBoxContainer/TabContainer/Design/DesignScroll/DesignBox/ColorsGrid/BackSecondaryPicker" to="." method="_on_design_color_changed"]
+[connection signal="pressed" from="VBoxContainer/TabContainer/Design/DesignScroll/DesignBox/DesignActionsRow/SaveDesignBtn" to="." method="_on_save_design_pressed"]
+[connection signal="pressed" from="VBoxContainer/TabContainer/Design/DesignScroll/DesignBox/DesignActionsRow/ExportDesignBtn" to="." method="_on_export_design_pressed"]
+[connection signal="pressed" from="VBoxContainer/MainColumns/CardPreviewPanel/PreviewBox/PreviewControlsRow/PreviewFlipBtn" to="." method="_on_preview_flip_toggled"]

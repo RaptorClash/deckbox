@@ -52,6 +52,10 @@ func create_default_profile(display_name: String = "Player") -> Dictionary:
 		"location_id": "cozy_house",
 		"jukebox_mode": "auto",
 		"keybinds": {},
+		"master_volume": 1.0,
+		"music_volume": 0.8,
+		"sfx_volume": 0.9,
+		"animation_speed": 1.0,
 		"colorblind_mode": false,
 		"created_at": now,
 		"updated_at": now,
@@ -190,6 +194,14 @@ func migrate_schema(data: Dictionary) -> Dictionary:
 			migrated["jukebox_mode"] = "auto"
 		if not migrated.has("keybinds") or not (migrated.get("keybinds", null) is Dictionary):
 			migrated["keybinds"] = {}
+		if not migrated.has("master_volume"):
+			migrated["master_volume"] = 1.0
+		if not migrated.has("music_volume"):
+			migrated["music_volume"] = 0.8
+		if not migrated.has("sfx_volume"):
+			migrated["sfx_volume"] = 0.9
+		if not migrated.has("animation_speed"):
+			migrated["animation_speed"] = 1.0
 
 	return migrated
 
@@ -208,6 +220,67 @@ func get_profile() -> Dictionary:
 	if _profile_data.is_empty():
 		return load_profile()
 	return _profile_data.duplicate(true)
+
+func export_settings_json(file_path: String) -> bool:
+	var gpath := ProjectSettings.globalize_path(file_path)
+	DirAccess.make_dir_recursive_absolute(gpath.get_base_dir())
+	var prof := get_profile()
+	var payload := {
+		"export_type": "deckbox_settings_v1",
+		"exported_at": int(Time.get_unix_time_from_system()),
+		"display_name": str(prof.get("display_name", "Player")),
+		"avatar_id": str(prof.get("avatar_id", DEFAULT_AVATAR_ID)),
+		"preferred_card_back": str(prof.get("preferred_card_back", DEFAULT_CARD_BACK)),
+		"theme_preset": str(prof.get("theme_preset", DEFAULT_THEME_PRESET)),
+		"quality_preset": str(prof.get("quality_preset", DEFAULT_QUALITY_PRESET)),
+		"view_mode": str(prof.get("view_mode", "full_3d")),
+		"card_skin": str(prof.get("card_skin", "classic_arcade")),
+		"bot_speed": str(prof.get("bot_speed", "normal")),
+		"turn_url": str(prof.get("turn_url", "")),
+		"turn_username": str(prof.get("turn_username", "")),
+		"turn_credential": str(prof.get("turn_credential", "")),
+		"language": str(prof.get("language", "")),
+		"location_id": str(prof.get("location_id", "cozy_house")),
+		"jukebox_mode": str(prof.get("jukebox_mode", "auto")),
+		"keybinds": prof.get("keybinds", {}),
+		"master_volume": float(prof.get("master_volume", 1.0)),
+		"music_volume": float(prof.get("music_volume", 0.8)),
+		"sfx_volume": float(prof.get("sfx_volume", 0.9)),
+		"animation_speed": float(prof.get("animation_speed", 1.0)),
+		"colorblind_mode": bool(prof.get("colorblind_mode", false))
+	}
+	var f := FileAccess.open(gpath, FileAccess.WRITE)
+	if f == null:
+		return false
+	f.store_string(JSON.stringify(payload, "\t"))
+	f.close()
+	return true
+
+func import_settings_json(file_path: String) -> bool:
+	var gpath := ProjectSettings.globalize_path(file_path)
+	if not FileAccess.file_exists(gpath):
+		return false
+	var f := FileAccess.open(gpath, FileAccess.READ)
+	if f == null:
+		return false
+	var parsed = JSON.parse_string(f.get_as_text())
+	f.close()
+	if not (parsed is Dictionary):
+		return false
+	var allowed_keys := [
+		"display_name", "avatar_id", "preferred_card_back", "theme_preset",
+		"quality_preset", "view_mode", "card_skin", "bot_speed",
+		"turn_url", "turn_username", "turn_credential", "language",
+		"location_id", "jukebox_mode", "keybinds", "master_volume",
+		"music_volume", "sfx_volume", "animation_speed", "colorblind_mode"
+	]
+	var patch := {}
+	for k in allowed_keys:
+		if parsed.has(k):
+			patch[k] = parsed[k]
+	if patch.is_empty():
+		return false
+	return update_profile(patch)
 
 func _read_json_file(path: String):
 	if not FileAccess.file_exists(path):

@@ -20,6 +20,7 @@ func new_pack(id: String, name: String, author: String) -> void:
 		"author": author,
 		"version": "1.0.0",
 		"description": "",
+		"target_game": "uno",
 		"colors": {
 			"red": "#FF4444",
 			"blue": "#3388FF",
@@ -40,8 +41,20 @@ func load_from_dict(data: Dictionary) -> void:
 		_draft_pack["custom_cards"] = []
 	if not _draft_pack.has("assets") or not (_draft_pack["assets"] is Dictionary):
 		_draft_pack["assets"] = {}
+	if not _draft_pack.has("target_game"):
+		_draft_pack["target_game"] = "uno"
 	_asset_bytes = {}
 	_is_dirty = false
+
+func set_target_game(game_id: String) -> void:
+	var gid := game_id.strip_edges().to_lower()
+	if gid.is_empty():
+		gid = "uno"
+	_draft_pack["target_game"] = gid
+	_is_dirty = true
+
+func get_target_game() -> String:
+	return str(_draft_pack.get("target_game", "uno"))
 
 func get_pack_data() -> Dictionary:
 	return _draft_pack.duplicate(true)

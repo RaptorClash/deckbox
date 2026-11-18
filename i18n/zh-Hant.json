@@ -195,5 +195,9 @@
   "ui.game.jump_in_btn": "⚡ 搶先出牌！({card})",
   "ui.game.skip_banner": "🚫 跳過！{player} 暫停一輪！",
   "ui.game.player_finished_toast": "🏁 {player} 已出完手牌（第 {place} 名）！",
-  "ui.game.podium_header": "🏆 最終排名（玩到最後）:"
+  "ui.game.podium_header": "🏆 最終排名（玩到最後）:",
+  "ui.gallery.online_help_btn": "ℹ 線上連線指南",
+  "ui.gallery.mod_help_only": "📦 外部遊戲模組 (.pck / .zip)\n\n• 可在模組卡片中直接載入 .pck 或 .zip 社群卡牌遊戲。\n• 在編輯器中製作自訂卡牌與卡背設計，並匯出為 .cardpack 或 .json 分享。",
+  "ui.gallery.online_help_only": "🌐 設定線上與區域網路連線\n\n1. 同一 Wi-Fi（手機 / 平板 / 電腦）:\n   • 在對戰設定中啟動 LAN / QR 主機。\n   • 掃碼或輸入短網址 (http://192.168.x.x:8080) 即可加入。\n\n2. 網際網路連線 (P2P / TURN):\n   • 預設啟用 STUN；如遇嚴格 NAT 網路，可在設定中填寫 TURN 伺服器。",
+  "ui.settings.preview_3d_title": "🎥 即時 3D 預覽：牌桌主題與場景"
 }

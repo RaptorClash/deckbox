@@ -37,10 +37,13 @@ func export_backup(target_path: String) -> Dictionary:
 		stats_bytes = JSON.stringify(stats_svc._data, "\t").to_utf8_buffer()
 	files_to_bundle["stats.json"] = stats_bytes
 
-	# 3. Gather friends.json if present
+	# 3. Gather friends.json and custom_designs.json if present
 	var friends_bytes = _read_file_bytes("user://database/friends.json")
 	if not friends_bytes.is_empty():
 		files_to_bundle["friends.json"] = friends_bytes
+	var designs_bytes = _read_file_bytes("user://database/custom_designs.json")
+	if not designs_bytes.is_empty():
+		files_to_bundle["custom_designs.json"] = designs_bytes
 
 	# 4. Compute SHA-256 checksums
 	var checksums: Dictionary = {}
@@ -202,7 +205,7 @@ func import_backup(source_path: String, strategy: Variant = "MERGE_PRESERVE") ->
 					_merge_stats(out_path, backup_data, true)
 				elif fname == "friends.json":
 					_merge_friends(out_path, backup_data, true)
-				elif fname == "profile.json":
+				elif fname == "profile.json" or fname == "custom_designs.json":
 					var f = FileAccess.open(out_path, FileAccess.WRITE)
 					if f != null:
 						f.store_buffer(backup_data)

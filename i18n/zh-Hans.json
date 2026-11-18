@@ -195,5 +195,9 @@
   "ui.game.jump_in_btn": "⚡ 抢先出牌！({card})",
   "ui.game.skip_banner": "🚫 跳过！{player} 暂停一轮！",
   "ui.game.player_finished_toast": "🏁 {player} 已出完手牌（第 {place} 名）！",
-  "ui.game.podium_header": "🏆 最终排名（玩到最后）:"
+  "ui.game.podium_header": "🏆 最终排名（玩到最后）:",
+  "ui.gallery.online_help_btn": "ℹ 在线联机指南",
+  "ui.gallery.mod_help_only": "📦 外部游戏模块 (.pck / .zip)\n\n• 可在模块卡片中直接加载 .pck 或 .zip 社区卡牌游戏。\n• 在编辑器中制作自定义卡牌与卡背设计，并导出为 .cardpack 或 .json 分享。",
+  "ui.gallery.online_help_only": "🌐 设置在线与局域网联机\n\n1. 同一 Wi-Fi（手机 / 平板 / 电脑）:\n   • 在对局设置中启动 LAN / QR 主机。\n   • 扫码或输入短链接 (http://192.168.x.x:8080) 即可加入。\n\n2. 互联网联机 (P2P / TURN):\n   • 默认开启 STUN；如遇严格 NAT 网络，可在设置中填写 TURN 服务器。",
+  "ui.settings.preview_3d_title": "🎥 实时 3D 预览：牌桌主题与场景"
 }

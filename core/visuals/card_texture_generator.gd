@@ -76,12 +76,104 @@ const FONT_5X7: Dictionary = {
 	"?": ["01110", "10001", "00001", "00110", "00100", "00000", "00100"]
 }
 
+const CUSTOM_DESIGNS_PATH: String = "user://database/custom_designs.json"
+
 static var _front_tex_cache: Dictionary = {}
 static var _back_tex_cache: Dictionary = {}
 static var _mat_cache: Dictionary = {}
+static var _custom_skins: Dictionary = {}
+static var _custom_skins_loaded: bool = false
+
+static func _ensure_custom_skins_loaded() -> void:
+	if _custom_skins_loaded:
+		return
+	_custom_skins_loaded = true
+	load_custom_skins_from_disk()
+
+static func register_custom_skin(skin_dict: Dictionary, persist: bool = true) -> bool:
+	_ensure_custom_skins_loaded()
+	var sid := str(skin_dict.get("id", "")).strip_edges().to_lower()
+	if sid.is_empty():
+		return false
+	var regex := RegEx.new()
+	regex.compile("^[a-zA-Z0-9_-]+$")
+	if not regex.search(sid):
+		return false
+	var entry := {
+		"id": sid,
+		"name": str(skin_dict.get("name", sid)).strip_edges(),
+		"frame_color": str(skin_dict.get("frame_color", "#F5F5F0")),
+		"bg_color": str(skin_dict.get("bg_color", "#141824")),
+		"accent_color": str(skin_dict.get("accent_color", "#F2C138")),
+		"back_primary": str(skin_dict.get("back_primary", "#18243E")),
+		"back_secondary": str(skin_dict.get("back_secondary", "#F2C138")),
+		"back_emblem": str(skin_dict.get("back_emblem", "DB")).substr(0, 3).to_upper()
+	}
+	if str(entry["name"]).is_empty():
+		entry["name"] = sid
+	if str(entry["back_emblem"]).is_empty():
+		entry["back_emblem"] = "DB"
+	_custom_skins[sid] = entry
+	clear_cache()
+	if persist:
+		save_custom_skins_to_disk()
+	return true
+
+static func get_custom_skins() -> Dictionary:
+	_ensure_custom_skins_loaded()
+	return _custom_skins.duplicate(true)
+
+static func get_available_skin_ids() -> Array[String]:
+	_ensure_custom_skins_loaded()
+	var ids: Array[String] = ["classic_arcade", "minimal_dark"]
+	var custom_keys := _custom_skins.keys()
+	custom_keys.sort()
+	for k in custom_keys:
+		ids.append(str(k))
+	return ids
+
+static func get_skin_display_name(skin_id: String) -> String:
+	_ensure_custom_skins_loaded()
+	if skin_id == "classic_arcade":
+		return "Classic Arcade"
+	if skin_id == "minimal_dark":
+		return "Minimal Dark"
+	if _custom_skins.has(skin_id):
+		return "🎨 %s" % str(_custom_skins[skin_id].get("name", skin_id))
+	return skin_id
+
+static func save_custom_skins_to_disk() -> bool:
+	var gpath := ProjectSettings.globalize_path(CUSTOM_DESIGNS_PATH)
+	DirAccess.make_dir_recursive_absolute(gpath.get_base_dir())
+	var f := FileAccess.open(gpath, FileAccess.WRITE)
+	if f == null:
+		return false
+	f.store_string(JSON.stringify(_custom_skins, "\t"))
+	f.close()
+	return true
+
+static func load_custom_skins_from_disk() -> void:
+	var gpath := ProjectSettings.globalize_path(CUSTOM_DESIGNS_PATH)
+	if not FileAccess.file_exists(gpath):
+		return
+	var f := FileAccess.open(gpath, FileAccess.READ)
+	if f == null:
+		return
+	var parsed = JSON.parse_string(f.get_as_text())
+	f.close()
+	if parsed is Dictionary:
+		for k in parsed.keys():
+			if parsed[k] is Dictionary:
+				var d: Dictionary = parsed[k]
+				d["id"] = str(d.get("id", k)).strip_edges().to_lower()
+				if not str(d["id"]).is_empty():
+					_custom_skins[d["id"]] = d
 
 static func normalize_skin(skin_id: String) -> String:
+	_ensure_custom_skins_loaded()
 	var s = skin_id.to_lower().strip_edges()
+	if _custom_skins.has(s):
+		return s
 	if s == "minimal_dark" or s == "minimal":
 		return "minimal_dark"
 	return "classic_arcade"
@@ -214,18 +306,49 @@ static func _get_or_create_edge_material(skin: String) -> StandardMaterial3D:
 	if _mat_cache.has(cache_key):
 		return _mat_cache[cache_key]
 	var mat = StandardMaterial3D.new()
-	mat.albedo_color = Color(0.12, 0.14, 0.20) if skin == "minimal_dark" else Color(0.95, 0.94, 0.91)
+	if _custom_skins.has(skin):
+		mat.albedo_color = Color.html(str(_custom_skins[skin].get("frame_color", "#F5F5F0")))
+	else:
+		mat.albedo_color = Color(0.12, 0.14, 0.20) if skin == "minimal_dark" else Color(0.95, 0.94, 0.91)
 	mat.roughness = 0.5
 	_mat_cache[cache_key] = mat
 	return mat
 
 static func _render_front_image(col_name: String, val_name: String, skin: String, colorblind: bool) -> Image:
 	var img = Image.create(TEX_W, TEX_H, false, Image.FORMAT_RGBA8)
-	if skin == "minimal_dark":
+	if _custom_skins.has(skin):
+		_draw_custom_skin_front(img, col_name, val_name, _custom_skins[skin], colorblind)
+	elif skin == "minimal_dark":
 		_draw_minimal_dark_front(img, col_name, val_name, colorblind)
 	else:
 		_draw_classic_arcade_front(img, col_name, val_name, colorblind)
 	return img
+
+static func _draw_custom_skin_front(img: Image, col_name: String, val_name: String, skin_cfg: Dictionary, colorblind: bool) -> void:
+	var frame_col := Color.html(str(skin_cfg.get("frame_color", "#F5F5F0")))
+	var custom_bg := Color.html(str(skin_cfg.get("bg_color", "#141824")))
+	var accent_col := Color.html(str(skin_cfg.get("accent_color", "#F2C138")))
+	var card_col: Color = CLASSIC_COLORS.get(col_name, CLASSIC_COLORS["wild"])
+	var blended_body: Color = custom_bg.lerp(card_col, 0.22 if col_name == "wild" else 0.56)
+	var shadow := Color(0.03, 0.04, 0.07, 0.88)
+	var fg := accent_col.lightened(0.25) if col_name == "wild" else Color(0.98, 0.98, 0.96, 1.0)
+	var cx := TEX_W * 0.5
+	var cy := TEX_H * 0.5
+
+	img.fill(frame_col)
+	_fill_rounded_rect(img, Rect2i(10, 10, TEX_W - 20, TEX_H - 20), 14, blended_body)
+	_fill_rounded_rect(img, Rect2i(14, 14, TEX_W - 28, TEX_H - 28), 11, blended_body.darkened(0.12))
+	if col_name == "wild":
+		_draw_wild_tilted_oval(img, cx, cy, 56.0, 82.0, -0.34, accent_col, 5.0)
+	else:
+		_draw_tilted_oval(img, cx, cy, 56.0, 82.0, -0.34, blended_body.darkened(0.18), accent_col, 5.0)
+	_draw_center_symbol(img, val_name, cx, cy, fg, shadow, false)
+	var corner_text := _get_corner_label(val_name)
+	_draw_text(img, corner_text, 20, 20, 3, fg, shadow)
+	_draw_text_rotated_180(img, corner_text, TEX_W - 20, TEX_H - 20, 3, fg, shadow)
+	if colorblind:
+		_draw_cb_shape(img, col_name, TEX_W - 30, 30, 9.0, accent_col.lightened(0.2))
+		_draw_cb_shape(img, col_name, 30, TEX_H - 30, 9.0, accent_col.lightened(0.2))
 
 static func _draw_classic_arcade_front(img: Image, col_name: String, val_name: String, colorblind: bool) -> void:
 	var is_dark_side = col_name in DARK_SIDE_COLORS
@@ -315,7 +438,20 @@ static func _render_back_image(skin: String) -> Image:
 	var img = Image.create(TEX_W, TEX_H, false, Image.FORMAT_RGBA8)
 	var cx = TEX_W * 0.5
 	var cy = TEX_H * 0.5
-	if skin == "minimal_dark":
+	if _custom_skins.has(skin):
+		var sc: Dictionary = _custom_skins[skin]
+		var frame_col := Color.html(str(sc.get("frame_color", "#F5F5F0")))
+		var p_col := Color.html(str(sc.get("back_primary", "#18243E")))
+		var s_col := Color.html(str(sc.get("back_secondary", "#F2C138")))
+		var emblem := str(sc.get("back_emblem", "DB")).substr(0, 3).to_upper()
+		img.fill(frame_col)
+		_fill_rounded_rect(img, Rect2i(10, 10, TEX_W - 20, TEX_H - 20), 14, p_col)
+		_draw_ring(img, cx, cy, 48.0, 53.0, s_col)
+		_draw_tilted_oval(img, cx, cy, 52.0, 76.0, -0.34, p_col.darkened(0.22), s_col, 4.0)
+		var em_scale := 4 if emblem.length() >= 3 else 5
+		var em_w := emblem.length() * 6 * em_scale
+		_draw_text(img, emblem, int(cx - float(em_w) * 0.5), int(cy) - (em_scale * 3 + 2), em_scale, s_col, Color(0.03, 0.04, 0.07, 0.9))
+	elif skin == "minimal_dark":
 		var bg = Color(0.055, 0.065, 0.105, 1.0)
 		var cyan = Color(0.0, 0.85, 1.0, 1.0)
 		var gold = Color(0.98, 0.78, 0.24, 1.0)
