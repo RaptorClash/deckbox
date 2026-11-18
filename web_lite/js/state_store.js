@@ -12,6 +12,8 @@ export class StateStore {
       seq: 0,
       status: 'idle', // 'idle' | 'waiting' | 'in_progress' | 'round_over' | 'match_over'
       topDiscard: null,
+      activeColor: null,
+      activeSide: 'light',
       drawPileCount: 0,
       direction: 1, // 1 (clockwise) or -1 (counter-clockwise)
       turnSeat: 0,
@@ -94,7 +96,14 @@ export class StateStore {
     this._state.seq = seq;
     if (payload.match_id !== undefined) this._state.matchId = payload.match_id;
     if (payload.status !== undefined) this._state.status = payload.status;
-    if (payload.top_discard !== undefined) this._state.topDiscard = payload.top_discard;
+    if (payload.top_discard !== undefined) {
+      this._state.topDiscard = payload.top_discard;
+      if (payload.active_color === undefined) {
+        this._state.activeColor = null;
+      }
+    }
+    if (payload.active_color !== undefined) this._state.activeColor = payload.active_color || null;
+    if (payload.active_side !== undefined) this._state.activeSide = payload.active_side;
     if (payload.draw_pile_count !== undefined) this._state.drawPileCount = payload.draw_pile_count;
     if (payload.direction !== undefined) this._state.direction = payload.direction;
     if (payload.turn_seat !== undefined) this._state.turnSeat = payload.turn_seat;
@@ -146,7 +155,8 @@ export class StateStore {
   _isCardPlayable(card) {
     if (!this._state.topDiscard) return true;
     if (card.color === 'wild') return true;
-    if (card.color === this._state.topDiscard.color) return true;
+    const effectiveColor = this._state.activeColor || this._state.topDiscard.color;
+    if (card.color === effectiveColor) return true;
     if (card.value !== undefined && card.value === this._state.topDiscard.value) return true;
     return false;
   }

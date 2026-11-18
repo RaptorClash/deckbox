@@ -15,6 +15,17 @@ var bot_ai: RefCounted = null
 var active_side: String = "light"
 var last_penalty_step: int = 0
 var mercy_hand_limit: int = 0
+var last_plus_four_challenge: Dictionary = {}
+var _last_sort_mode: String = ""
+var _last_immediate_draw: Dictionary = {}
+
+const COLOR_SORT_ORDER: Dictionary = {
+	"red": 0, "pink": 0,
+	"blue": 1, "teal": 1,
+	"green": 2, "purple": 2,
+	"yellow": 3, "orange": 3,
+	"wild": 4
+}
 
 func _init() -> void:
 	uno_rules = UnoRulesScript.new()
@@ -55,6 +66,8 @@ func init_match(p_match_id: String, p_players: Array[Dictionary], p_rules: Dicti
 	active_side = "light"
 	last_penalty_step = 0
 	mercy_hand_limit = house_rules.mercy_hand_limit
+	last_plus_four_challenge = {}
+	_last_sort_mode = ""
 
 func _add_to_discard(card: Dictionary) -> void:
 	discard_pile.append(card)
@@ -130,6 +143,8 @@ func start_round() -> void:
 	active_side = "light"
 	last_penalty_step = 0
 	mercy_hand_limit = house_rules.mercy_hand_limit
+	last_plus_four_challenge = {}
+	_last_sort_mode = ""
 	for p in players:
 		p["eliminated"] = false
 		p["called_uno"] = false
@@ -191,6 +206,21 @@ func handle_action(player_id: String, action: Dictionary) -> Dictionary:
 	if action_type == "ACTION_CALL_UNO":
 		player["called_uno"] = true
 		return { "success": true, "events": [{ "type": "CALLED_UNO", "player_id": player_id }] }
+
+	if action_type == "ACTION_SORT_HAND":
+		var mode = str(action.get("mode", "auto"))
+		var ok_s = sort_player_hand(player_id, mode)
+		return { "success": ok_s, "events": [{ "type": "HAND_SORTED", "player_id": player_id, "mode": _last_sort_mode }] }
+
+	if action_type == "ACTION_SHUFFLE_HAND":
+		var ok_sh = shuffle_player_hand(player_id)
+		return { "success": ok_sh, "events": [{ "type": "HAND_SHUFFLED", "player_id": player_id }] }
+
+	if action_type == "ACTION_CATCH_UNO":
+		return _handle_catch_uno(player_id, action)
+
+	if action_type == "ACTION_CHALLENGE_PLUS_FOUR":
+		return _handle_challenge_plus_four(player_id, action)
 
 	if player_seat != current_turn_seat:
 		return { "success": false, "error": "Not your turn. Active seat: %d, player seat: %d" % [current_turn_seat, player_seat] }
@@ -271,6 +301,10 @@ func _handle_play_card(player_id: String, action: Dictionary) -> Dictionary:
 
 	var player = player_map[player_id]
 	var player_seat = int(player.get("seat", 0))
+	var prev_top: Dictionary = get_top_discard().duplicate(true)
+	var prev_active_color: String = active_color
+	last_plus_four_challenge = {}
+	_last_immediate_draw = {}
 
 	# Legal play: remove from hand
 	hand.remove_at(card_idx)
@@ -302,14 +336,20 @@ func _handle_play_card(player_id: String, action: Dictionary) -> Dictionary:
 		return { "success": true, "events": extra_events }
 
 	if current_hand.size() == 1:
-		player_map[player_id]["called_uno"] = bool(action.get("called_uno", false))
-	elif current_hand.size() == 0:
+		player_map[player_id]["called_uno"] = bool(player_map[player_id].get("called_uno", false)) or bool(action.get("called_uno", false))
+	elif current_hand.size() > 1:
+		player_map[player_id]["called_uno"] = false
+	if current_hand.size() == 0:
 		round_over = true
 		var res = _calculate_round_results(player_seat)
 		var earned_points = res.get("score_earned", 50)
 		var win_evs: Array[Dictionary] = [{ "type": "ROUND_WON", "winner": player_id, "score": earned_points, "card": target_card.duplicate(true) }]
 		win_evs.append_array(extra_events)
 		return { "success": true, "events": win_evs }
+
+	var played_val = str(target_card.get("value", ""))
+	if played_val in ["wild_draw_four", "wild_reverse_draw_four", "wild_draw_six", "wild_draw_ten"] and not round_over:
+		_record_wild_draw_challenge(player_id, player_seat, target_card, prev_top, prev_active_color)
 
 	var all_evs: Array[Dictionary] = [{
 		"type": "CARD_PLAYED",
@@ -378,10 +418,20 @@ func _apply_card_action_effects(player_id: String, card: Dictionary, action: Dic
 				var next_s = _get_next_alive_seat()
 				var next_p = get_player_by_seat(next_s)
 				var next_pid = str(next_p.get("player_id", ""))
+				var drawn_ids: Array[String] = []
 				for _i in range(pen):
 					var drawn = _draw_card()
 					if drawn != null:
 						player_hands[next_pid].append(drawn)
+						drawn_ids.append(str(drawn.get("id", drawn.get("uid", ""))))
+				if player_hands.get(next_pid, []).size() > 1 and player_map.has(next_pid):
+					player_map[next_pid]["called_uno"] = false
+				_last_immediate_draw = {
+					"victim_id": next_pid,
+					"victim_seat": next_s,
+					"penalty": pen,
+					"card_ids": drawn_ids
+				}
 				_advance_turn(2)
 
 		"wild_color_roulette", "wild_draw_color":
@@ -564,6 +614,7 @@ func _check_mercy_elimination() -> Array[Dictionary]:
 	return events
 
 func _handle_draw_card(player_id: String, _action: Dictionary) -> Dictionary:
+	last_plus_four_challenge = {}
 	if pending_penalty_draws > 0:
 		var events: Array[Dictionary] = []
 		var drawn_total = pending_penalty_draws
@@ -571,6 +622,8 @@ func _handle_draw_card(player_id: String, _action: Dictionary) -> Dictionary:
 			var drawn = _draw_card()
 			if drawn != null:
 				player_hands[player_id].append(drawn)
+		if player_hands.get(player_id, []).size() > 1:
+			player_map[player_id]["called_uno"] = false
 		events.append({ "type": "PENALTY_DRAWN", "count": drawn_total, "player_id": player_id })
 		pending_penalty_draws = 0
 		last_penalty_step = 0
@@ -592,6 +645,8 @@ func _handle_draw_card(player_id: String, _action: Dictionary) -> Dictionary:
 			if uno_rules.is_card_matching(drawn, get_top_discard(), active_color):
 				found_playable = true
 				break
+		if player_hands.get(player_id, []).size() > 1:
+			player_map[player_id]["called_uno"] = false
 		var elim_evs = _check_mercy_elimination()
 		events.append_array(elim_evs)
 		if not round_over and not bool(player_map[player_id].get("eliminated", false)):
@@ -604,6 +659,8 @@ func _handle_draw_card(player_id: String, _action: Dictionary) -> Dictionary:
 	if drawn != null:
 		player_hands[player_id].append(drawn)
 		events.append({ "type": "CARD_DRAWN", "player_id": player_id })
+	if player_hands.get(player_id, []).size() > 1:
+		player_map[player_id]["called_uno"] = false
 
 	var elim_evs = _check_mercy_elimination()
 	events.append_array(elim_evs)
@@ -700,6 +757,8 @@ func debug_set_state(state: Dictionary) -> void:
 	elif state.has("top_discard"):
 		discard_pile = [state["top_discard"].duplicate(true)]
 		uno_rules.discard_pile = discard_pile
+	last_plus_four_challenge = {}
+	_last_immediate_draw = {}
 	active_color = str(state.get("active_color", ""))
 	pending_penalty_draws = int(state.get("pending_penalty_draws", 0))
 	if state.has("active_side"):
@@ -709,3 +768,238 @@ func debug_set_state(state: Dictionary) -> void:
 	if state.has("mercy_hand_limit"):
 		mercy_hand_limit = int(state["mercy_hand_limit"])
 		house_rules.mercy_hand_limit = mercy_hand_limit
+
+func sort_player_hand(player_id: String, mode: String = "auto") -> bool:
+	if not player_hands.has(player_id):
+		return false
+	var hand: Array = player_hands[player_id]
+	var use_mode = mode.to_lower().strip_edges()
+	if use_mode == "auto" or use_mode.is_empty():
+		use_mode = "value" if _last_sort_mode == "color" else "color"
+	_last_sort_mode = use_mode
+
+	hand.sort_custom(func(a: Variant, b: Variant) -> bool:
+		if not (a is Dictionary and b is Dictionary):
+			return false
+		var ca = str(a.get("color", "wild")).to_lower()
+		var cb = str(b.get("color", "wild")).to_lower()
+		var ra = int(COLOR_SORT_ORDER.get(ca, 9))
+		var rb = int(COLOR_SORT_ORDER.get(cb, 9))
+		var va = _card_value_sort_key(str(a.get("value", "")))
+		var vb = _card_value_sort_key(str(b.get("value", "")))
+		if use_mode == "value":
+			if va != vb:
+				return va < vb
+			return ra < rb
+		if ra != rb:
+			return ra < rb
+		return va < vb
+	)
+	return true
+
+static func _card_value_sort_key(val: String) -> String:
+	var v = val.to_lower().strip_edges()
+	if v.is_valid_int():
+		return "%02d" % int(v)
+	return "99_" + v
+
+func shuffle_player_hand(player_id: String) -> bool:
+	if not player_hands.has(player_id):
+		return false
+	var hand: Array = player_hands[player_id]
+	var n = hand.size()
+	if n <= 1:
+		return true
+	var first_before = str(hand[0].get("id", hand[0].get("uid", ""))) if hand[0] is Dictionary else ""
+	for i in range(n - 1, 0, -1):
+		var j = rng.randi_range(0, i)
+		var tmp = hand[i]
+		hand[i] = hand[j]
+		hand[j] = tmp
+	var first_after = str(hand[0].get("id", hand[0].get("uid", ""))) if hand[0] is Dictionary else ""
+	if n >= 2 and first_before == first_after:
+		var tmp2 = hand[0]
+		hand[0] = hand[1]
+		hand[1] = tmp2
+	return true
+
+func get_catchable_uno_players(exclude_player_id: String = "") -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for p in players:
+		if not (p is Dictionary):
+			continue
+		if bool(p.get("eliminated", false)):
+			continue
+		var pid = str(p.get("player_id", ""))
+		if pid.is_empty() or pid == exclude_player_id:
+			continue
+		if get_player_card_count(pid) == 1 and not bool(p.get("called_uno", false)):
+			result.append(p.duplicate(true))
+	return result
+
+func can_challenge_plus_four(player_id: String = "") -> bool:
+	if not bool(last_plus_four_challenge.get("active", false)) or round_over:
+		return false
+	if player_id.is_empty():
+		return true
+	var victim = str(last_plus_four_challenge.get("victim_id", ""))
+	return player_id == victim
+
+func get_plus_four_challenge_info() -> Dictionary:
+	return last_plus_four_challenge.duplicate(true)
+
+func _record_wild_draw_challenge(offender_id: String, offender_seat: int, played_card: Dictionary, prev_top: Dictionary, prev_active_color: String) -> void:
+	var offender_p = player_map.get(offender_id, {})
+	var offender_name = str(offender_p.get("name", offender_id))
+	var hand_after: Array = player_hands.get(offender_id, [])
+	var snapshot: Array[Dictionary] = []
+	var is_bluff = false
+	for hc in hand_after:
+		if hc is Dictionary:
+			var c_copy = hc.duplicate(true)
+			var hc_col = str(c_copy.get("color", ""))
+			var playable_alt = (not (hc_col in ["wild", "special", "colorless"])) and uno_rules.is_card_matching(c_copy, prev_top, prev_active_color)
+			c_copy["could_have_played"] = playable_alt
+			if playable_alt:
+				is_bluff = true
+			snapshot.append(c_copy)
+
+	var was_drawn = not _last_immediate_draw.is_empty()
+	var pen = int(_last_immediate_draw.get("penalty", UnoHouseRulesScript.get_card_draw_penalty(played_card)))
+	var victim_id = str(_last_immediate_draw.get("victim_id", ""))
+	var victim_seat = int(_last_immediate_draw.get("victim_seat", current_turn_seat))
+	if not was_drawn:
+		var vp = get_player_by_seat(current_turn_seat)
+		victim_id = str(vp.get("player_id", ""))
+		victim_seat = current_turn_seat
+
+	last_plus_four_challenge = {
+		"active": not victim_id.is_empty(),
+		"offender_id": offender_id,
+		"offender_seat": offender_seat,
+		"offender_name": offender_name,
+		"victim_id": victim_id,
+		"victim_seat": victim_seat,
+		"penalty": pen,
+		"was_already_drawn": was_drawn,
+		"drawn_card_ids": _last_immediate_draw.get("card_ids", []).duplicate(),
+		"offender_hand_snapshot": snapshot,
+		"is_bluff": is_bluff,
+		"card_value": str(played_card.get("value", "wild_draw_four"))
+	}
+
+func _handle_catch_uno(challenger_id: String, action: Dictionary) -> Dictionary:
+	var target_id = str(action.get("target_player_id", ""))
+	if target_id.is_empty():
+		var candidates = get_catchable_uno_players(challenger_id)
+		if candidates.is_empty():
+			return { "success": false, "error": "No player forgot LETZTE!" }
+		target_id = str(candidates[0].get("player_id", ""))
+
+	if not player_map.has(target_id):
+		return { "success": false, "error": "Unknown target player" }
+	var target_p = player_map[target_id]
+	if bool(target_p.get("eliminated", false)):
+		return { "success": false, "error": "Target eliminated" }
+	if get_player_card_count(target_id) != 1 or bool(target_p.get("called_uno", false)):
+		return { "success": false, "error": "Target already called LETZTE! or does not have 1 card" }
+
+	for _i in range(2):
+		var c = _draw_card()
+		if c != null:
+			player_hands[target_id].append(c)
+	target_p["called_uno"] = false
+	var elim_evs = _check_mercy_elimination()
+	var evs: Array[Dictionary] = [{
+		"type": "UNO_CAUGHT",
+		"challenger_id": challenger_id,
+		"target_player_id": target_id,
+		"target_name": str(target_p.get("name", target_id)),
+		"count": 2
+	}]
+	evs.append_array(elim_evs)
+	return { "success": true, "target_player_id": target_id, "events": evs }
+
+func _handle_challenge_plus_four(challenger_id: String, _action: Dictionary) -> Dictionary:
+	if not can_challenge_plus_four(challenger_id):
+		return { "success": false, "error": "No active +4 challenge available for this player" }
+
+	var ch: Dictionary = last_plus_four_challenge.duplicate(true)
+	last_plus_four_challenge["active"] = false
+
+	var offender_id = str(ch.get("offender_id", ""))
+	var victim_id = str(ch.get("victim_id", ""))
+	var victim_seat = int(ch.get("victim_seat", current_turn_seat))
+	var pen = int(ch.get("penalty", 4))
+	var was_drawn = bool(ch.get("was_already_drawn", true))
+	var drawn_ids: Array = ch.get("drawn_card_ids", [])
+	var snapshot: Array = ch.get("offender_hand_snapshot", [])
+	var is_bluff = bool(ch.get("is_bluff", false))
+
+	if is_bluff:
+		if was_drawn and player_hands.has(victim_id):
+			var v_hand: Array = player_hands[victim_id]
+			var moved = 0
+			for cid in drawn_ids:
+				for idx in range(v_hand.size() - 1, -1, -1):
+					var c = v_hand[idx]
+					if c is Dictionary and (str(c.get("id", "")) == str(cid) or str(c.get("uid", "")) == str(cid)):
+						v_hand.remove_at(idx)
+						player_hands[offender_id].append(c)
+						moved += 1
+						break
+			while moved < pen and not v_hand.is_empty():
+				player_hands[offender_id].append(v_hand.pop_back())
+				moved += 1
+		else:
+			pending_penalty_draws = 0
+			last_penalty_step = 0
+			for _i in range(pen):
+				var c = _draw_card()
+				if c != null:
+					player_hands[offender_id].append(c)
+
+		if player_hands.get(offender_id, []).size() > 1 and player_map.has(offender_id):
+			player_map[offender_id]["called_uno"] = false
+		if not bool(player_map.get(victim_id, {}).get("eliminated", false)):
+			current_turn_seat = victim_seat
+		_check_mercy_elimination()
+	else:
+		var extra = 2
+		if was_drawn:
+			for _i in range(extra):
+				var c = _draw_card()
+				if c != null:
+					player_hands[challenger_id].append(c)
+		else:
+			var total_take = maxi(pen, pending_penalty_draws) + extra
+			for _i in range(total_take):
+				var c = _draw_card()
+				if c != null:
+					player_hands[challenger_id].append(c)
+			pending_penalty_draws = 0
+			last_penalty_step = 0
+			_advance_turn(1)
+
+		if player_hands.get(challenger_id, []).size() > 1 and player_map.has(challenger_id):
+			player_map[challenger_id]["called_uno"] = false
+		_check_mercy_elimination()
+
+	var applied = pen if is_bluff else (2 if was_drawn else pen + 2)
+	return {
+		"success": true,
+		"challenge_won": is_bluff,
+		"offender_id": offender_id,
+		"offender_name": str(ch.get("offender_name", offender_id)),
+		"challenger_id": challenger_id,
+		"penalty_applied": applied,
+		"offender_hand": snapshot,
+		"events": [{
+			"type": "PLUS_FOUR_CHALLENGED",
+			"challenge_won": is_bluff,
+			"offender_id": offender_id,
+			"challenger_id": challenger_id,
+			"penalty": applied,
+			"offender_hand": snapshot
+		}]
+	}

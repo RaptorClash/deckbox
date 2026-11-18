@@ -186,18 +186,27 @@ func _append_single_108_deck() -> void:
 					"actions": cc_actions.duplicate(true)
 				})
 
-	# Attach Dark-Side metadata onto newly appended cards when UNO Flip is active
+	# Attach Dark-Side metadata onto newly appended cards when UNO Flip is active, shuffling dark pairing so backs never leak fronts
 	if flip_enabled:
+		var dark_pairs: Array[Dictionary] = []
 		for idx in range(start_idx, draw_pile.size()):
 			var c = draw_pile[idx]
 			if not c.has("light_color"):
 				c["light_color"] = str(c.get("color", "wild"))
 			if not c.has("light_value"):
 				c["light_value"] = str(c.get("value", "0"))
-			if not c.has("dark_color"):
-				c["dark_color"] = SIDE_COLOR_MAP.get(c["light_color"], "wild")
-			if not c.has("dark_value"):
-				c["dark_value"] = DARK_VALUE_MAP.get(c["light_value"], c["light_value"])
+			var dc = str(c.get("dark_color", SIDE_COLOR_MAP.get(c["light_color"], "wild")))
+			var dv = str(c.get("dark_value", DARK_VALUE_MAP.get(c["light_value"], c["light_value"])))
+			dark_pairs.append({ "dark_color": dc, "dark_value": dv })
+		for i in range(dark_pairs.size() - 1, 0, -1):
+			var j = rng.randi_range(0, i)
+			var tmp = dark_pairs[i]
+			dark_pairs[i] = dark_pairs[j]
+			dark_pairs[j] = tmp
+		for offset in range(dark_pairs.size()):
+			var c = draw_pile[start_idx + offset]
+			c["dark_color"] = dark_pairs[offset]["dark_color"]
+			c["dark_value"] = dark_pairs[offset]["dark_value"]
 
 static func _derive_custom_value(cname: String, actions: Array) -> String:
 	for act in actions:

@@ -6,7 +6,6 @@
   "nav.stats": "📊 Statistik",
   "nav.settings": "⚙ Einstellungen",
   "nav.updater": "⬇ Updater",
-
   "gallery.title": "Kartenspielsammlung — Wähle dein Spiel",
   "gallery.subtitle": "Wähle zuerst ein Spiel für deine Runde oder tritt direkt einem laufenden LAN-/PC-Spiel bei. Grafik & Tisch findest du unter ⚙ Einstellungen.",
   "gallery.ready_badge": "● SPIELBEREIT • 2–32+ SPIELER",
@@ -34,7 +33,6 @@
   "gallery.mod_placeholder": "Pfad zur .pck oder .zip Modul-Datei",
   "gallery.mod_load_btn": "Modul laden",
   "gallery.mod_ready": "Bereit: Alle Ablegen! • Modul-Schnittstelle aktiv",
-
   "setup.back_btn": "← Spielauswahl",
   "setup.header": "🃏 Alle Ablegen! — Match-Setup",
   "setup.settings_shortcut": "⚙ Grafik, Tisch & TURN-Einstellungen",
@@ -56,7 +54,6 @@
   "setup.seven_zero": "7-Tausch & 0-Rotation",
   "setup.draw_match": "Ziehen bis es passt",
   "setup.launch_btn": "▶ Alle Ablegen! starten",
-
   "lobby.header": "Multiplayer-Lobby & QR-Beitritt",
   "lobby.host_start": "LAN / QR Host starten",
   "lobby.host_stop": "LAN / QR Host stoppen",
@@ -72,7 +69,6 @@
   "lobby.table_url_fmt": "Smart-TV Tisch-URL: {url}",
   "lobby.stun_default": "Online P2P: STUN aktiv ({stun}) • TURN optional in ⚙ Einstellungen",
   "lobby.stun_turn": "Online P2P: STUN + TURN aktiv ({turn})",
-
   "settings.visual_title": "🎨 Sprache, Darstellung & 3D-Tisch",
   "settings.language_label": "Sprache / Language:",
   "settings.view_mode": "Standard-Ansichtsmodus:",
@@ -90,7 +86,6 @@
   "settings.save_net_btn": "💾 Netzwerk & TURN speichern",
   "settings.saved_ok": "✅ Einstellungen, Sprache & Netzwerk gespeichert!",
   "settings.turn_help": "📘 So funktionieren LAN-QR, STUN und TURN einfach erklärt:\n\n1. Im selben WLAN (QR-Code / Kurz-URL):\nDu brauchst KEINEN TURN-Server! Starte im Match-Setup den LAN-Host — DeckBox wählt automatisch deine echte WLAN-IP (z. B. 192.168.178.x) und zeigt die kurze Adresse http://<IP>:8080 an. Falls die Seite auf dem Handy nicht lädt: (a) VPN auf dem PC pausieren oder im Lobby-Dropdown die richtige WLAN-IP wählen, (b) in der Windows-Firewall eingehende Verbindungen für DeckBox auf Port 8080 & 8081 erlauben.\n\n2. Online über das Internet (STUN — standardmäßig aktiv):\nSTUN (Google & Cloudflare) hilft zwei PCs dabei, ihre öffentliche Adresse zu finden und sich direkt miteinander zu verbinden.\n\n3. Wann brauche ich einen TURN-Server?\nManche Router oder Mobilfunk-Netze (Symmetric NAT) blockieren direkte Verbindungen. Ein TURN-Server springt dann als verschlüsselte Brücke ein. Du kannst hier z. B. kostenlose Zugangsdaten von Metered OpenRelay, Cloudflare Calls oder einen eigenen coturn-Server eintragen.",
-
   "hud.hub_btn": "← Hub",
   "hud.turn_label": "Am Zug: {player} ({dir})",
   "hud.deck_status": "{color} {sym} • Stapel: {count}{side}",
@@ -113,7 +108,6 @@
   "hud.wait_turn_toast": "Bitte warten — ein anderer Spieler ist am Zug!",
   "hud.card_mismatch_toast": "Karte passt nicht auf den Ablagestapel!",
   "hud.draw_blocked_toast": "Karte ziehen gerade nicht möglich.",
-
   "stats.title": "📊 Spieler-Statistiken & Match-Historie",
   "stats.refresh": "🔄 Aktualisieren",
   "stats.back": "← Zurück",
@@ -133,7 +127,6 @@
   "stats.donut_empty_1": "Noch keine",
   "stats.donut_empty_2": "Spiele",
   "stats.bar_empty": "Noch keine Runden gespielt",
-
   "friends.title": "Dezentrale Freundesliste (QR / UUID)",
   "friends.add_btn": "Hinzufügen",
   "friends.empty": "Noch keine Freunde hinzugefügt. Teile deinen QR-Code oder füge einen Freundes-Code ein.",
@@ -141,5 +134,31 @@
   "updater.check_btn": "GitHub Releases abfragen (Update / Downgrade)",
   "profile.title": "Spieler-Profil & Identität",
   "profile.back": "← Zurück",
-  "profile.save": "💾 Profil speichern"
+  "profile.save": "💾 Profil speichern",
+  "gallery.search_placeholder": "🔍 Spiele durchsuchen...",
+  "gallery.mod_help_btn": "ℹ Anleitung: Module & Online-Spiel",
+  "gallery.mod_help_text": "📦 So funktionieren externe Spielmodule & Online-Spiel:\n\n1. Modul laden:\nWähle eine .pck- oder .zip-Moduldatei aus und klicke auf 'Modul laden'. DeckBox trägt das Spiel automatisch als neue Karte in die Spiele-Galerie ein.\n\n2. Smartphone-Beitritt im LAN (ohne Download):\nDie Spiellogik läuft zentral auf dem Host. Mitspieler am Handy öffnen einfach QR-Code oder http://<IP>:8080 im Browser — sie müssen kein Modul installieren!\n\n3. Online-Mehrspieler (P2P):\nBei Internet-Partien zwischen Desktops laden alle Spieler dasselbe Modul; DeckBox prüft automatisch Version & Regel-Hash. Bei strengen Routern hilft ein TURN-Server unter ⚙ Einstellungen.",
+  "setup.bot_difficulty": "KI-Schwierigkeit:",
+  "setup.diff_easy": "Einfach (Entspannt)",
+  "setup.diff_normal": "Normal (Ausgeglichen)",
+  "setup.diff_hard": "Schwer (Taktisch)",
+  "setup.humans_label": "Menschliche Spieler (Pass & Play / Host):",
+  "setup.bots_label": "Zusätzliche KI-Bots:",
+  "setup.player_name_placeholder": "Spieler {num}",
+  "lobby.roster_title": "Verbundene Lobby & Rollenvergabe:",
+  "lobby.role_host_player": "Host spielt selbst mit",
+  "lobby.role_host_table": "Host nur als Tisch-Anzeige",
+  "lobby.role_player": "Mitspieler",
+  "lobby.role_table": "Tisch-Anzeige",
+  "lobby.role_spectator": "Zuschauer",
+  "lobby.no_clients_yet": "Noch keine Handys/Browser verbunden. Starte den LAN-Host für Einladungen.",
+  "hud.sort_btn": "🔤 Sortieren",
+  "hud.shuffle_btn": "🔀 Mischen",
+  "hud.catch_uno_btn": "⚠ LETZTE! vergessen?",
+  "hud.challenge_p4_btn": "⚖ +4 anfechten!",
+  "hud.uno_caught_toast": "⚠ {target} hat LETZTE! vergessen! +{count} Karten!",
+  "hud.challenge_won_title": "✅ Bluff enttarnt! {offender} zieht +{count} Karten!",
+  "hud.challenge_lost_title": "❌ +4 war erlaubt! {challenger} zieht +{count} Karten!",
+  "hud.challenge_hand_subtitle": "Aufgedeckte Hand von {offender} (spielbare Alternativen markiert):",
+  "hud.challenge_close_btn": "Weiter spielen"
 }

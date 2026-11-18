@@ -48,7 +48,8 @@ export class ActionDispatcher {
     // Check playability
     const isWild = (card.color === 'wild');
     if (!isWild && state.topDiscard) {
-      const colorMatch = (card.color === state.topDiscard.color);
+      const effectiveColor = state.activeColor || state.topDiscard.color;
+      const colorMatch = (card.color === effectiveColor);
       const valueMatch = (card.value !== undefined && card.value === state.topDiscard.value);
       if (!colorMatch && !valueMatch) {
         return { valid: false, error: 'CARD_NOT_PLAYABLE' };
@@ -57,7 +58,9 @@ export class ActionDispatcher {
 
     // If wild, must select valid color
     if (isWild) {
-      const validColors = ['red', 'blue', 'green', 'yellow'];
+      const validColors = (state.activeSide === 'dark')
+        ? ['pink', 'teal', 'purple', 'orange']
+        : ['red', 'blue', 'green', 'yellow'];
       if (!chosenColor || typeof chosenColor !== 'string') {
         return { valid: false, error: 'MISSING_CHOSEN_COLOR' };
       }

@@ -48,7 +48,8 @@ func is_card_playable(card: Dictionary, top_discard: Dictionary, active_color: S
 func choose_action(hand: Array, top_discard: Dictionary, difficulty: String = "tactical") -> Dictionary:
 	return choose_action_with_context(hand, top_discard, {}, difficulty)
 
-func choose_action_with_context(hand: Array, top_discard: Dictionary, match_context: Dictionary, _difficulty: String = "tactical") -> Dictionary:
+func choose_action_with_context(hand: Array, top_discard: Dictionary, match_context: Dictionary, difficulty: String = "tactical") -> Dictionary:
+	var diff = difficulty.to_lower().strip_edges()
 	var pending_penalty = int(match_context.get("pending_penalty_draws", 0))
 	var last_step = int(match_context.get("last_penalty_step", 0))
 	var active_color = str(match_context.get("active_color", ""))
@@ -63,7 +64,7 @@ func choose_action_with_context(hand: Array, top_discard: Dictionary, match_cont
 		# First check shield custom cards
 		for c in hand:
 			if c is Dictionary and UnoHouseRulesScript.card_has_action(c, "negate_penalty"):
-				return _build_play(c, hand, active_side)
+				return _build_play(c, hand, active_side, diff)
 
 		if prog:
 			var best_stack: Dictionary = {}
@@ -75,15 +76,15 @@ func choose_action_with_context(hand: Array, top_discard: Dictionary, match_cont
 						min_pen = pen
 						best_stack = c
 			if not best_stack.is_empty():
-				return _build_play(best_stack, hand, active_side)
+				return _build_play(best_stack, hand, active_side, diff)
 			return { "type": "ACTION_DRAW_CARD" }
 
 		for c in hand:
 			if c is Dictionary and str(c.get("value", "")) == "draw_two" and can_stack_two:
-				return _build_play(c, hand, active_side)
+				return _build_play(c, hand, active_side, diff)
 		for c in hand:
 			if c is Dictionary and str(c.get("value", "")) == "wild_draw_four" and can_stack_four:
-				return _build_play(c, hand, active_side)
+				return _build_play(c, hand, active_side, diff)
 		return { "type": "ACTION_DRAW_CARD" }
 
 	var playable_cards: Array[Dictionary] = []
@@ -94,40 +95,72 @@ func choose_action_with_context(hand: Array, top_discard: Dictionary, match_cont
 	if playable_cards.is_empty():
 		return { "type": "ACTION_DRAW_CARD" }
 
-	# 1. Attack leader if close to winning
+	# Easy Bot: relaxed random/first-card choice and forgets LETZTE! when dropping to 1 card
+	if diff == "easy":
+		return _build_play(playable_cards[0], hand, active_side, diff)
+
+	# 1. Attack leader if close to winning (Hard attacks earlier at <= 3 cards)
 	var next_card_count = int(match_context.get("next_player_card_count", 99))
 	var next_called_uno = bool(match_context.get("next_player_called_uno", false))
-	if next_called_uno or next_card_count <= 2:
+	var attack_thresh = 3 if (diff == "hard" or diff == "tactical") else 2
+	if next_called_uno or next_card_count <= attack_thresh:
 		for c in playable_cards:
 			var val = str(c.get("value", ""))
 			if val in ["skip", "skip_everyone", "draw_two", "draw_four", "draw_five", "reverse", "discard_all"]:
-				return _build_play(c, hand, active_side)
+				return _build_play(c, hand, active_side, diff)
 		for c in playable_cards:
 			if str(c.get("value", "")) in ["wild_draw_ten", "wild_draw_six", "wild_draw_four", "wild_reverse_draw_four", "wild_draw_color"]:
-				return _build_play(c, hand, active_side)
+				return _build_play(c, hand, active_side, diff)
 
-	# 2. Prioritize regular colored cards / Discard All over Wilds
+	# 2. Hard/Tactical: Prioritize Discard All and highest-point cards in dominant color
 	var regular_playable: Array[Dictionary] = []
 	for c in playable_cards:
 		if not (str(c.get("color", "")) in ["wild", "special", "colorless"]):
 			regular_playable.append(c)
 
 	if not regular_playable.is_empty():
-		return _build_play(regular_playable[0], hand, active_side)
+		if diff == "hard" or diff == "tactical":
+			var dom_col = choose_wild_color(hand, active_side)
+			var best_c: Dictionary = regular_playable[0]
+			var best_score: int = -1
+			for rc in regular_playable:
+				var rv = str(rc.get("value", ""))
+				var sc = 0
+				if rv == "discard_all":
+					sc += 100
+				elif rv in ["draw_two", "draw_four", "draw_five", "skip", "skip_everyone", "reverse", "flip"]:
+					sc += 40
+				elif rv.is_valid_int():
+					sc += int(rv)
+				if str(rc.get("color", "")) == dom_col:
+					sc += 25
+				if sc > best_score:
+					best_score = sc
+					best_c = rc
+			return _build_play(best_c, hand, active_side, diff)
+		return _build_play(regular_playable[0], hand, active_side, diff)
 
 	# 3. Play standard Wild before heavy Wilds
 	for c in playable_cards:
 		if str(c.get("value", "")) == "wild":
-			return _build_play(c, hand, active_side)
+			return _build_play(c, hand, active_side, diff)
 
 	# 4. Play any remaining Wild / Custom card
-	return _build_play(playable_cards[0], hand, active_side)
+	return _build_play(playable_cards[0], hand, active_side, diff)
 
-func _build_play(c: Dictionary, hand: Array, active_side: String) -> Dictionary:
+func _build_play(c: Dictionary, hand: Array, active_side: String, difficulty: String = "tactical") -> Dictionary:
 	var act = {
 		"type": "ACTION_PLAY_CARD",
 		"card_id": str(c.get("id", c.get("uid", "")))
 	}
 	if str(c.get("color", "")) in ["wild", "special", "colorless"]:
 		act["chosen_color"] = choose_wild_color(hand, active_side)
+	if hand.size() == 2:
+		var d = difficulty.to_lower().strip_edges()
+		if d == "easy":
+			act["called_uno"] = false
+		elif d == "normal":
+			act["called_uno"] = ((str(c.get("id", c.get("uid", ""))).hash() & 1) == 0)
+		else:
+			act["called_uno"] = true
 	return act

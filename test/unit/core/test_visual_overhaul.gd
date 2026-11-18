@@ -219,6 +219,50 @@ func test_main_menu_two_step_game_selector_and_settings_tab() -> void:
 	menu.set_language("fr")
 	assert_ne(menu.play_tab_btn.text, de_play_text, "Switching language to French must update UI text live")
 
+func test_dimmed_cards_flip_obsidian_unlimited_seats_and_lobby_roster() -> void:
+	# 1. CardTextureGenerator: unplayable 3D card dimming + Dark Side obsidian fill
+	var tex_gen = load("res://core/visuals/card_texture_generator.gd")
+	var dark_tex: ImageTexture = tex_gen.get_card_front_texture({ "color": "pink", "value": "5" }, "classic_arcade", true)
+	var dark_img: Image = dark_tex.get_image()
+	var body_px: Color = dark_img.get_pixel(24, 136)
+	assert_lt(body_px.get_luminance(), 0.20, "Dark Side card body must be pitch-black obsidian so it is distinct from Light front cards")
+
+	var card_inst = load("res://assets/3d/card_rounded.glb").instantiate()
+	add_child_autofree(card_inst)
+	tex_gen.apply_card_materials_to_mesh(card_inst, { "color": "red", "value": "7" }, "classic_arcade", true, true)
+	tex_gen.set_card_mesh_playable_state(card_inst, false)
+	var mesh_inst = _find_mesh_in_node(card_inst)
+	var dim_mat: StandardMaterial3D = mesh_inst.get_surface_override_material(0)
+	assert_lt(dim_mat.albedo_color.a, 0.99, "Unplayable 3D cards must be translucent/dimmed")
+	tex_gen.set_card_mesh_playable_state(card_inst, true)
+	var lit_mat: StandardMaterial3D = mesh_inst.get_surface_override_material(0)
+	assert_almost_eq(lit_mat.albedo_color.a, 1.0, 0.01, "Playable 3D cards must restore full opacity")
+
+	# 2. VersionHandshake unlimited max_players = 0 allocates seats >= 0
+	var handshake = load("res://core/network/version_handshake.gd").new()
+	handshake.configure_host({ "app_version": "0.1.0", "protocol_version": 1, "max_players": 0, "room_code": "1234" })
+	var join_r1 = handshake.evaluate_join_request({
+		"v": 1, "type": "JOIN_REQUEST", "seq": 1, "sender": "phone_a",
+		"payload": { "app_version": "0.1.0", "protocol_version": 1, "role": "player" }
+	})
+	assert_eq(join_r1["payload"]["status"], "ACCEPTED", "Unlimited LAN room (max_players=0) must accept player joins")
+	assert_gte(int(join_r1["payload"]["seat_index"]), 0, "Unlimited LAN must assign valid seat_index >= 0")
+
+	# 3. MainMenu: scalable GridContainer, external mod help, named humans + bots + diff, lobby roster role management
+	var menu = load(MAIN_MENU_PATH).instantiate()
+	add_child_autofree(menu)
+	assert_true(menu.games_grid is GridContainer, "GamesGrid must be a scalable GridContainer")
+	assert_not_null(menu.human_count_spin, "MainMenu must expose human_count_spin")
+	assert_not_null(menu.bot_count_spin, "MainMenu must expose bot_count_spin")
+	assert_not_null(menu.bot_difficulty_option, "MainMenu must expose bot_difficulty_option")
+	assert_gte(menu.bot_difficulty_option.item_count, 3, "Bot difficulty must offer easy, normal, hard")
+	menu.set_human_player_names(["Alice", "Bob"])
+	assert_eq(int(menu.human_count_spin.value), 2, "Setting 2 human names must sync human_count_spin")
+	assert_false(menu.get_external_module_help_text().is_empty(), "External module & online play help text must exist")
+	menu.register_lobby_client(42, "Handy Max", "player", 0)
+	assert_true(menu.set_lobby_client_role(42, "table"), "Host must be able to reassign a connected client to table role")
+	assert_eq(menu._connected_lobby_clients[42]["role"], "table")
+
 func _find_mesh_in_node(n: Node) -> MeshInstance3D:
 	if n is MeshInstance3D:
 		return n

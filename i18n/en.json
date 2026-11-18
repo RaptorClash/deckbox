@@ -6,7 +6,6 @@
   "nav.stats": "📊 Stats",
   "nav.settings": "⚙ Settings",
   "nav.updater": "⬇ Updater",
-
   "gallery.title": "Card Game Collection — Choose Your Game",
   "gallery.subtitle": "Pick a game to start or join a match on your local network. Display & table settings are in ⚙ Settings.",
   "gallery.ready_badge": "● READY TO PLAY • 2–32+ PLAYERS",
@@ -34,7 +33,6 @@
   "gallery.mod_placeholder": "Path to .pck or .zip module file",
   "gallery.mod_load_btn": "Load Module",
   "gallery.mod_ready": "Ready: Discard All! • Module interface active",
-
   "setup.back_btn": "← Game Selection",
   "setup.header": "🃏 Discard All! — Match Setup",
   "setup.settings_shortcut": "⚙ Graphics, Table & TURN Settings",
@@ -56,7 +54,6 @@
   "setup.seven_zero": "7-Swap & 0-Rotate",
   "setup.draw_match": "Draw Until Match",
   "setup.launch_btn": "▶ Start Discard All!",
-
   "lobby.header": "Multiplayer Lobby & QR Join",
   "lobby.host_start": "Start LAN / QR Host",
   "lobby.host_stop": "Stop LAN / QR Host",
@@ -72,7 +69,6 @@
   "lobby.table_url_fmt": "Smart-TV Table URL: {url}",
   "lobby.stun_default": "Online P2P: STUN active ({stun}) • TURN optional in ⚙ Settings",
   "lobby.stun_turn": "Online P2P: STUN + TURN active ({turn})",
-
   "settings.visual_title": "🎨 Language, Display & 3D Table",
   "settings.language_label": "Language (13 built-in):",
   "settings.view_mode": "Default View Mode:",
@@ -90,7 +86,6 @@
   "settings.save_net_btn": "💾 Save Network & TURN",
   "settings.saved_ok": "✅ Settings, language & network saved!",
   "settings.turn_help": "📘 How LAN QR, STUN, and TURN work:\n\n1. Same Wi-Fi (QR Code / Short URL):\nNo TURN server needed! Start the LAN host in Match Setup — DeckBox automatically picks your real Wi-Fi IP (e.g. 192.168.x.x) and shows the short URL http://<IP>:8080. If the page doesn't open on your phone: (a) pause any VPN or pick the right Wi-Fi IP from the dropdown, (b) allow ports 8080 & 8081 in Windows Firewall.\n\n2. Online over the Internet (STUN — active by default):\nSTUN (Google & Cloudflare) helps two PCs discover their public address for direct P2P connections.\n\n3. When do I need a TURN server?\nStrict routers or cellular networks (Symmetric NAT) may block direct P2P. A TURN server relays encrypted packets as a bridge. Enter free credentials (e.g. Metered OpenRelay, Cloudflare Calls) or your own coturn server here.",
-
   "hud.hub_btn": "← Hub",
   "hud.turn_label": "Turn: {player} ({dir})",
   "hud.deck_status": "{color} {sym} • Deck: {count}{side}",
@@ -113,7 +108,6 @@
   "hud.wait_turn_toast": "Please wait — another player's turn!",
   "hud.card_mismatch_toast": "Card does not match the discard pile!",
   "hud.draw_blocked_toast": "Cannot draw cards right now.",
-
   "stats.title": "📊 Player Statistics & Match History",
   "stats.refresh": "🔄 Refresh",
   "stats.back": "← Back",
@@ -133,7 +127,6 @@
   "stats.donut_empty_1": "No",
   "stats.donut_empty_2": "Games",
   "stats.bar_empty": "No rounds played yet",
-
   "friends.title": "Decentralized Friends List (QR / UUID)",
   "friends.add_btn": "Add",
   "friends.empty": "No friends added yet. Share your QR code or paste a friend code.",
@@ -141,5 +134,31 @@
   "updater.check_btn": "Check GitHub Releases (Update / Downgrade)",
   "profile.title": "Player Profile & Identity",
   "profile.back": "← Back",
-  "profile.save": "💾 Save Profile"
+  "profile.save": "💾 Save Profile",
+  "gallery.search_placeholder": "🔍 Search games...",
+  "gallery.mod_help_btn": "ℹ How Modules & Online Play Work",
+  "gallery.mod_help_text": "📦 How External Game Modules & Online Play Work:\n\n1. Install & Load Modules:\nPlace a community or custom .pck or .zip cartridge module anywhere on disk and click 'Load Module'. DeckBox automatically registers it in the scalable Game Gallery above so you can launch it anytime.\n\n2. Web-Lite Smartphone Join (Zero Install):\nExternal & built-in cartridges run host-authoritatively in DeckBox. Friends on smartphones/browsers only scan the QR code or open http://<IP>:8080 without installing the module.\n\n3. Online P2P Play:\nFor online matches over the internet, every Desktop peer loads the matching module (.pck) and passes the automatic Version & Rules Hash Handshake. Configure a TURN server under ⚙ Settings if routers block direct P2P.",
+  "setup.bot_difficulty": "AI Bot Difficulty:",
+  "setup.diff_easy": "Easy (Relaxed)",
+  "setup.diff_normal": "Normal (Balanced)",
+  "setup.diff_hard": "Hard (Tactical)",
+  "setup.humans_label": "Human Players (Pass & Play / Host):",
+  "setup.bots_label": "Additional AI Bots:",
+  "setup.player_name_placeholder": "Player {num}",
+  "lobby.roster_title": "Connected Lobby & Role Assignment:",
+  "lobby.role_host_player": "Host Plays as Player",
+  "lobby.role_host_table": "Host as Smart-TV Table Only",
+  "lobby.role_player": "Player",
+  "lobby.role_table": "Table Display",
+  "lobby.role_spectator": "Spectator",
+  "lobby.no_clients_yet": "No phones/browsers connected yet. Start LAN host to invite players.",
+  "hud.sort_btn": "🔤 Sort",
+  "hud.shuffle_btn": "🔀 Shuffle",
+  "hud.catch_uno_btn": "⚠ Challenge LAST!",
+  "hud.challenge_p4_btn": "⚖ Challenge +4!",
+  "hud.uno_caught_toast": "⚠ {target} forgot LAST! +{count} cards!",
+  "hud.challenge_won_title": "✅ Bluff Caught! {offender} takes +{count} cards!",
+  "hud.challenge_lost_title": "❌ +4 Was Legal! {challenger} takes +{count} cards!",
+  "hud.challenge_hand_subtitle": "Revealed cards held by {offender} (playable cards highlighted):",
+  "hud.challenge_close_btn": "Continue Match"
 }

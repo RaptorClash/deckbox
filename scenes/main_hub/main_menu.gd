@@ -48,6 +48,9 @@ var _active_uno_view: Control = null
 var _active_tab_id: String = "play"
 var _last_host_info: Dictionary = {}
 var _discovered_rooms_cache: Array[Dictionary] = []
+var _connected_lobby_clients: Dictionary = {}
+var _syncing_counts: bool = false
+var _custom_human_names: Array[String] = []
 var active_preview_table_3d: Node3D = null
 var _preview_showcase_root: Node3D = null
 var _lounge_orbit_angle: float = 0.0
@@ -74,19 +77,28 @@ var _lounge_orbit_angle: float = 0.0
 
 # Step 1: Game Selector Gallery
 @onready var game_selector_view: VBoxContainer = $HubShell/ContentStack/PlayTab/GameSelectorView
-@onready var alle_ablegen_card: PanelContainer = $HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/AlleAblegenCard
-@onready var select_uno_btn: Button = $HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/AlleAblegenCard/CardBox/SelectUnoBtn
+@onready var game_search_edit: LineEdit = $HubShell/ContentStack/PlayTab/GameSelectorView/GalleryHeaderPanel/HeaderBox/GameSearchEdit
+@onready var games_grid: GridContainer = $HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid
+@onready var alle_ablegen_card: PanelContainer = $HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/AlleAblegenCard
+@onready var select_uno_btn: Button = $HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/AlleAblegenCard/CardBox/SelectUnoBtn
 @onready var join_address_edit: LineEdit = $HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/JoinAddressRow/JoinAddressEdit
 @onready var lan_rooms_list: ItemList = $HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/LanRoomsRow/LanRoomsList
 @onready var join_status_label: Label = $HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/JoinStatusLabel
 @onready var pck_path_edit: LineEdit = $HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox/ExternalRow/PckPathEdit
 @onready var ext_status_label: Label = $HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox/ExternalStatusLabel
+@onready var mod_help_btn: Button = $HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox/ModHelpBtn
+@onready var mod_help_overlay: PanelContainer = $ModHelpOverlay
+@onready var mod_help_label: Label = $ModHelpOverlay/HelpBox/HelpScroll/ModHelpLabel
 
 # Step 2: Match Setup (Rules & Lobby ONLY)
 @onready var match_setup_view: VBoxContainer = $HubShell/ContentStack/PlayTab/MatchSetupView
 @onready var mode_option: OptionButton = $HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/ModeOption
 @onready var player_count_spin: SpinBox = $HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/PlayerCountRow/PlayerCountSpin
 @onready var unlimited_lan_check: CheckBox = $HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/PlayerCountRow/UnlimitedLanCheck
+@onready var human_count_spin: SpinBox = $HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RosterConfigBox/HumansRow/HumanCountSpin
+@onready var bot_count_spin: SpinBox = $HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RosterConfigBox/BotsRow/BotCountSpin
+@onready var bot_difficulty_option: OptionButton = $HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RosterConfigBox/BotDifficultyRow/BotDifficultyOption
+@onready var human_names_grid: GridContainer = $HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RosterConfigBox/HumanNamesGrid
 @onready var no_mercy_check: CheckBox = $HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/ExpansionsGrid/NoMercyCheck
 @onready var flip_mode_check: CheckBox = $HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/ExpansionsGrid/FlipModeCheck
 @onready var include_custom_check: CheckBox = $HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/ExpansionsGrid/IncludeCustomCheck
@@ -108,6 +120,9 @@ var _lounge_orbit_angle: float = 0.0
 @onready var stun_label: Label = $HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/StunLabel
 @onready var qr_backplate: PanelContainer = $HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/QrCenter/QrBackplate
 @onready var qr_texture_rect: TextureRect = $HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/QrCenter/QrBackplate/QRTextureRect
+@onready var lobby_roster_panel: PanelContainer = $HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/LobbyRosterPanel
+@onready var host_role_option: OptionButton = $HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/LobbyRosterPanel/LobbyRosterBox/HostRoleOption
+@onready var lobby_clients_list: VBoxContainer = $HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/LobbyRosterPanel/LobbyRosterBox/LobbyClientsScroll/LobbyClientsList
 
 # Settings Tab (Visuals, 3D Table & Network/TURN)
 @onready var language_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/LanguageRow/LanguageOption
@@ -152,6 +167,10 @@ func _ready() -> void:
 	if qr_backplate != null:
 		qr_backplate.add_theme_stylebox_override("panel", UIThemeScript.make_glass_panel(Color(0.96, 0.97, 0.99, 1.0), UIThemeScript.COL_BORDER_GOLD, 16, 10))
 		qr_backplate.visible = false
+	if lobby_roster_panel != null:
+		lobby_roster_panel.add_theme_stylebox_override("panel", UIThemeScript.make_glass_panel(Color(0.05, 0.08, 0.14, 0.88), Color(0.32, 0.72, 1.0, 0.35), 10, 10))
+	if mod_help_overlay != null:
+		mod_help_overlay.add_theme_stylebox_override("panel", UIThemeScript.make_glass_panel(Color(0.04, 0.06, 0.12, 0.97), UIThemeScript.COL_BORDER_GOLD, 16, 16))
 	if copy_join_url_btn != null:
 		copy_join_url_btn.disabled = true
 
@@ -168,6 +187,8 @@ func _ready() -> void:
 	_registry.auto_register_builtin_cartridges()
 
 	_ws_host.packet_received.connect(_on_ws_packet_received)
+	if _ws_host.has_signal("client_disconnected"):
+		_ws_host.client_disconnected.connect(_on_ws_client_disconnected)
 	_lan_discovery.room_found.connect(_on_lan_rooms_changed)
 	_lan_discovery.room_updated.connect(_on_lan_rooms_changed)
 	_lan_discovery.room_expired.connect(_on_lan_room_expired)
@@ -309,6 +330,24 @@ func _init_play_options() -> void:
 		bot_speed_option.add_item("Sofort (0s)", 2)
 		bot_speed_option.set_item_metadata(2, "instant")
 
+	if bot_difficulty_option != null:
+		bot_difficulty_option.clear()
+		bot_difficulty_option.add_item("Easy", 0)
+		bot_difficulty_option.set_item_metadata(0, "easy")
+		bot_difficulty_option.add_item("Normal", 1)
+		bot_difficulty_option.set_item_metadata(1, "normal")
+		bot_difficulty_option.add_item("Hard", 2)
+		bot_difficulty_option.set_item_metadata(2, "hard")
+		bot_difficulty_option.select(1)
+
+	if host_role_option != null:
+		host_role_option.clear()
+		host_role_option.add_item("Host Player", 0)
+		host_role_option.set_item_metadata(0, "player")
+		host_role_option.add_item("Host Table Only", 1)
+		host_role_option.set_item_metadata(1, "table")
+		host_role_option.select(0)
+
 	var prof = _profile_svc.load_profile()
 	var active_lang = I18nServiceScript.ensure_initialized(str(prof.get("language", "")))
 	_select_option_by_meta(language_option, active_lang)
@@ -325,6 +364,10 @@ func _init_play_options() -> void:
 		turn_user_edit.text = str(prof.get("turn_username", ""))
 	if turn_pass_edit != null:
 		turn_pass_edit.text = str(prof.get("turn_credential", ""))
+	_custom_human_names = [str(prof.get("display_name", "Player 1"))]
+	_rebuild_human_name_inputs()
+	_refresh_lobby_roster_ui()
+	_rebuild_dynamic_game_cards()
 	_apply_turn_config_from_inputs()
 	apply_language()
 
@@ -389,19 +432,21 @@ func apply_language() -> void:
 	var gs = "HubShell/ContentStack/PlayTab/GameSelectorView/"
 	_set_rel_text(gs + "GalleryHeaderPanel/HeaderBox/GalleryTitle", "gallery.title")
 	_set_rel_text(gs + "GalleryHeaderPanel/HeaderBox/GallerySubtitle", "gallery.subtitle")
-	_set_rel_text(gs + "GamesGrid/AlleAblegenCard/CardBox/Badge", "gallery.ready_badge")
-	_set_rel_text(gs + "GamesGrid/AlleAblegenCard/CardBox/Title", "gallery.alle_ablegen_title")
-	_set_rel_text(gs + "GamesGrid/AlleAblegenCard/CardBox/Desc", "gallery.alle_ablegen_desc")
+	_set_rel_placeholder(gs + "GalleryHeaderPanel/HeaderBox/GameSearchEdit", "gallery.search_placeholder")
+	var gg = gs + "GamesScroll/GamesGrid/"
+	_set_rel_text(gg + "AlleAblegenCard/CardBox/Badge", "gallery.ready_badge")
+	_set_rel_text(gg + "AlleAblegenCard/CardBox/Title", "gallery.alle_ablegen_title")
+	_set_rel_text(gg + "AlleAblegenCard/CardBox/Desc", "gallery.alle_ablegen_desc")
 	if select_uno_btn != null:
 		select_uno_btn.text = I18nServiceScript.t("gallery.select_btn")
-	_set_rel_text(gs + "GamesGrid/WizardCard/CardBox/Badge", "gallery.wizard_badge")
-	_set_rel_text(gs + "GamesGrid/WizardCard/CardBox/Title", "gallery.wizard_title")
-	_set_rel_text(gs + "GamesGrid/WizardCard/CardBox/Desc", "gallery.wizard_desc")
-	_set_rel_text(gs + "GamesGrid/WizardCard/CardBox/SoonBtn", "gallery.soon_btn")
-	_set_rel_text(gs + "GamesGrid/DoppelkopfCard/CardBox/Badge", "gallery.doko_badge")
-	_set_rel_text(gs + "GamesGrid/DoppelkopfCard/CardBox/Title", "gallery.doko_title")
-	_set_rel_text(gs + "GamesGrid/DoppelkopfCard/CardBox/Desc", "gallery.doko_desc")
-	_set_rel_text(gs + "GamesGrid/DoppelkopfCard/CardBox/SoonBtn", "gallery.soon_btn")
+	_set_rel_text(gg + "WizardCard/CardBox/Badge", "gallery.wizard_badge")
+	_set_rel_text(gg + "WizardCard/CardBox/Title", "gallery.wizard_title")
+	_set_rel_text(gg + "WizardCard/CardBox/Desc", "gallery.wizard_desc")
+	_set_rel_text(gg + "WizardCard/CardBox/SoonBtn", "gallery.soon_btn")
+	_set_rel_text(gg + "DoppelkopfCard/CardBox/Badge", "gallery.doko_badge")
+	_set_rel_text(gg + "DoppelkopfCard/CardBox/Title", "gallery.doko_title")
+	_set_rel_text(gg + "DoppelkopfCard/CardBox/Desc", "gallery.doko_desc")
+	_set_rel_text(gg + "DoppelkopfCard/CardBox/SoonBtn", "gallery.soon_btn")
 
 	_set_rel_text(gs + "BottomJoinRow/QuickJoinPanel/JoinBox/JoinTitle", "gallery.join_title")
 	_set_rel_placeholder(gs + "BottomJoinRow/QuickJoinPanel/JoinBox/JoinAddressRow/JoinAddressEdit", "gallery.join_placeholder")
@@ -414,6 +459,10 @@ func apply_language() -> void:
 	_set_rel_text(gs + "BottomJoinRow/ExternalModulePanel/ModBox/ModHint", "gallery.mod_hint")
 	_set_rel_placeholder(gs + "BottomJoinRow/ExternalModulePanel/ModBox/ExternalRow/PckPathEdit", "gallery.mod_placeholder")
 	_set_rel_text(gs + "BottomJoinRow/ExternalModulePanel/ModBox/ExternalRow/LoadPckBtn", "gallery.mod_load_btn")
+	if mod_help_btn != null:
+		mod_help_btn.text = I18nServiceScript.t("gallery.mod_help_btn")
+	if mod_help_label != null:
+		mod_help_label.text = get_external_module_help_text()
 	if ext_status_label != null:
 		ext_status_label.text = I18nServiceScript.t("gallery.mod_ready")
 
@@ -431,6 +480,13 @@ func apply_language() -> void:
 	_set_rel_text(sb + "PlayerCountRow/PlayerCountLabel", "setup.players_label")
 	if unlimited_lan_check != null:
 		unlimited_lan_check.text = I18nServiceScript.t("setup.unlimited_lan")
+	_set_rel_text(sb + "RosterConfigBox/HumansRow/HumansLabel", "setup.humans_label")
+	_set_rel_text(sb + "RosterConfigBox/BotsRow/BotsLabel", "setup.bots_label")
+	_set_rel_text(sb + "RosterConfigBox/BotDifficultyRow/BotDifficultyLabel", "setup.bot_difficulty")
+	if bot_difficulty_option != null and bot_difficulty_option.item_count >= 3:
+		bot_difficulty_option.set_item_text(0, I18nServiceScript.t("setup.diff_easy"))
+		bot_difficulty_option.set_item_text(1, I18nServiceScript.t("setup.diff_normal"))
+		bot_difficulty_option.set_item_text(2, I18nServiceScript.t("setup.diff_hard"))
 	_set_rel_text(sb + "ExpansionsHeader", "setup.expansions_label")
 	if no_mercy_check != null:
 		no_mercy_check.text = I18nServiceScript.t("setup.no_mercy")
@@ -454,6 +510,10 @@ func apply_language() -> void:
 		launch_uno_btn.text = I18nServiceScript.t("setup.launch_btn")
 
 	_set_rel_text(ms + "Columns/LobbyPanel/LobbyBox/LobbyHeader", "lobby.header")
+	_set_rel_text(ms + "Columns/LobbyPanel/LobbyBox/LobbyRosterPanel/LobbyRosterBox/LobbyRosterTitle", "lobby.roster_title")
+	if host_role_option != null and host_role_option.item_count >= 2:
+		host_role_option.set_item_text(0, I18nServiceScript.t("lobby.role_host_player"))
+		host_role_option.set_item_text(1, I18nServiceScript.t("lobby.role_host_table"))
 	if copy_join_url_btn != null:
 		copy_join_url_btn.text = I18nServiceScript.t("lobby.copy_btn")
 	if _is_hosting:
@@ -499,12 +559,197 @@ func apply_language() -> void:
 	_apply_turn_config_from_inputs()
 	_refresh_lan_rooms_list()
 	_refresh_friends_ui()
+	_refresh_lobby_roster_ui()
+	_rebuild_human_name_inputs()
 	if stats_tab != null and stats_tab.has_method("apply_language"):
 		stats_tab.apply_language()
 	if profile_tab != null and profile_tab.has_method("apply_language"):
 		profile_tab.apply_language()
 	if _active_uno_view != null and _active_uno_view.has_method("apply_language"):
 		_active_uno_view.apply_language()
+
+func get_external_module_help_text() -> String:
+	return I18nServiceScript.t("gallery.mod_help_text")
+
+func _on_toggle_mod_help_pressed() -> void:
+	if mod_help_overlay != null:
+		if mod_help_label != null:
+			mod_help_label.text = get_external_module_help_text()
+		mod_help_overlay.visible = not mod_help_overlay.visible
+
+func _on_game_search_changed(query: String) -> void:
+	if games_grid == null:
+		return
+	var q = query.to_lower().strip_edges()
+	for card in games_grid.get_children():
+		if not (card is Control):
+			continue
+		if q.is_empty():
+			card.visible = true
+			continue
+		var txt = ""
+		var box = card.get_node_or_null("CardBox")
+		if box != null:
+			for sub in box.get_children():
+				if "text" in sub:
+					txt += " " + str(sub.text)
+		card.visible = q in txt.to_lower()
+
+func _rebuild_dynamic_game_cards() -> void:
+	if games_grid == null or _registry == null:
+		return
+	for c in games_grid.get_children():
+		if c.has_meta("dynamic_cartridge"):
+			games_grid.remove_child(c)
+			c.queue_free()
+
+	var builtin_ids = ["uno", "wizard", "doppelkopf"]
+	if _registry.has_method("get_available_cartridges"):
+		for info in _registry.get_available_cartridges():
+			if not (info is Dictionary):
+				continue
+			var gid = str(info.get("game_id", "")).to_lower()
+			if gid.is_empty() or gid in builtin_ids:
+				continue
+			var card_p = PanelContainer.new()
+			card_p.set_meta("dynamic_cartridge", gid)
+			card_p.custom_minimum_size = Vector2(280, 240)
+			card_p.size_flags_horizontal = SIZE_EXPAND_FILL
+			card_p.add_theme_stylebox_override("panel", UIThemeScript.make_glass_panel(UIThemeScript.COL_GLASS_SURFACE, Color(0.28, 0.72, 1.0, 0.55), 16, 16))
+			var vbox = VBoxContainer.new()
+			vbox.name = "CardBox"
+			vbox.add_theme_constant_override("separation", 10)
+			var badge = Label.new()
+			badge.text = "📦 MODUL • %d–%d" % [int(info.get("min_players", 2)), int(info.get("max_players", 8))]
+			badge.add_theme_color_override("font_color", Color(0.42, 0.92, 0.72))
+			vbox.add_child(badge)
+			var title_lbl = Label.new()
+			title_lbl.text = str(info.get("display_name", gid.capitalize()))
+			title_lbl.add_theme_font_size_override("font_size", 22)
+			vbox.add_child(title_lbl)
+			var desc_lbl = Label.new()
+			desc_lbl.text = "External Cartridge (%s)" % gid
+			desc_lbl.size_flags_vertical = SIZE_EXPAND_FILL
+			desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			vbox.add_child(desc_lbl)
+			var play_btn = Button.new()
+			play_btn.custom_minimum_size = Vector2(0, 44)
+			play_btn.text = "▶ %s" % str(info.get("display_name", gid))
+			play_btn.pressed.connect(func(): select_game(gid))
+			vbox.add_child(play_btn)
+			card_p.add_child(vbox)
+			games_grid.add_child(card_p)
+
+func set_human_player_names(names: Array) -> void:
+	_custom_human_names.clear()
+	for n in names:
+		_custom_human_names.append(str(n).strip_edges())
+	_syncing_counts = true
+	if human_count_spin != null:
+		human_count_spin.value = float(maxi(1, _custom_human_names.size()))
+	if player_count_spin != null and bot_count_spin != null:
+		player_count_spin.value = float(maxi(2, _custom_human_names.size() + int(bot_count_spin.value)))
+	_syncing_counts = false
+	_rebuild_human_name_inputs()
+
+func get_human_player_names() -> Array[String]:
+	var result: Array[String] = []
+	if human_names_grid != null and human_names_grid.get_child_count() > 0:
+		var idx = 1
+		for child in human_names_grid.get_children():
+			if child is LineEdit:
+				var txt = child.text.strip_edges()
+				if txt.is_empty():
+					txt = I18nServiceScript.t("setup.player_name_placeholder", {"num": idx})
+				result.append(txt)
+				idx += 1
+	elif not _custom_human_names.is_empty():
+		return _custom_human_names.duplicate()
+	if result.is_empty():
+		var fallback_name = str(_profile_svc.get_profile().get("display_name", "Player 1")) if _profile_svc != null else "Player 1"
+		result.append(fallback_name)
+	return result
+
+func _rebuild_human_name_inputs() -> void:
+	if human_names_grid == null:
+		return
+	var current_vals: Array[String] = []
+	if human_names_grid.get_child_count() > 0:
+		for child in human_names_grid.get_children():
+			if child is LineEdit:
+				current_vals.append(child.text.strip_edges())
+	elif not _custom_human_names.is_empty():
+		current_vals = _custom_human_names.duplicate()
+
+	for child in human_names_grid.get_children():
+		human_names_grid.remove_child(child)
+		child.queue_free()
+
+	var h_cnt = maxi(1, int(human_count_spin.value)) if human_count_spin != null else 1
+	var mode = _get_selected_meta(mode_option, "solo")
+	if human_names_grid != null:
+		human_names_grid.visible = (mode == "pass_and_play" or h_cnt > 1)
+	for i in range(h_cnt):
+		var le = LineEdit.new()
+		le.size_flags_horizontal = SIZE_EXPAND_FILL
+		le.placeholder_text = I18nServiceScript.t("setup.player_name_placeholder", {"num": i + 1})
+		if i < current_vals.size() and not current_vals[i].is_empty():
+			le.text = current_vals[i]
+		elif i < _custom_human_names.size() and not _custom_human_names[i].is_empty():
+			le.text = _custom_human_names[i]
+		elif i == 0 and _profile_svc != null:
+			le.text = str(_profile_svc.get_profile().get("display_name", ""))
+		human_names_grid.add_child(le)
+
+func _on_mode_option_selected(_index: int) -> void:
+	var mode = _get_selected_meta(mode_option, "solo")
+	_syncing_counts = true
+	if mode == "pass_and_play":
+		if human_count_spin != null and int(human_count_spin.value) < 2:
+			human_count_spin.value = 2.0
+		if bot_count_spin != null and player_count_spin != null and int(bot_count_spin.value) == 3:
+			bot_count_spin.value = 0.0
+	elif mode == "solo":
+		if human_count_spin != null:
+			human_count_spin.value = 1.0
+		if bot_count_spin != null and player_count_spin != null:
+			bot_count_spin.value = float(maxi(1, int(player_count_spin.value) - 1))
+	elif mode == "lan_host":
+		if human_count_spin != null:
+			human_count_spin.value = 1.0
+		if not _is_hosting:
+			start_lan_host()
+	if player_count_spin != null and human_count_spin != null and bot_count_spin != null:
+		player_count_spin.value = float(clampi(int(human_count_spin.value) + int(bot_count_spin.value), 2, 32))
+	_syncing_counts = false
+	_rebuild_human_name_inputs()
+
+func _on_player_count_spin_changed(val: float) -> void:
+	if _syncing_counts:
+		return
+	_syncing_counts = true
+	var h_cnt = maxi(1, int(human_count_spin.value)) if human_count_spin != null else 1
+	var total = maxi(2, int(val))
+	if total <= h_cnt:
+		if human_count_spin != null:
+			human_count_spin.value = float(total)
+		if bot_count_spin != null:
+			bot_count_spin.value = 0.0
+	elif bot_count_spin != null:
+		bot_count_spin.value = float(total - h_cnt)
+	_syncing_counts = false
+	_rebuild_human_name_inputs()
+
+func _on_roster_counts_changed(_val: float) -> void:
+	if _syncing_counts:
+		return
+	_syncing_counts = true
+	var h_cnt = maxi(1, int(human_count_spin.value)) if human_count_spin != null else 1
+	var b_cnt = maxi(0, int(bot_count_spin.value)) if bot_count_spin != null else 0
+	if player_count_spin != null:
+		player_count_spin.value = float(clampi(h_cnt + b_cnt, 2, 32))
+	_syncing_counts = false
+	_rebuild_human_name_inputs()
 
 func _init_lan_ip_options() -> void:
 	if lan_ip_option == null or _http_host == null:
@@ -823,6 +1068,8 @@ func stop_lan_host() -> void:
 		_lan_discovery.stop_broadcasting()
 	_is_hosting = false
 	_last_host_info = {}
+	_connected_lobby_clients.clear()
+	_refresh_lobby_roster_ui()
 	if qr_backplate != null:
 		qr_backplate.visible = false
 	if qr_texture_rect != null:
@@ -921,16 +1168,152 @@ func _open_join_url(url: String) -> void:
 	if join_status_label != null:
 		join_status_label.text = I18nServiceScript.t("gallery.join_opened", {"url": url})
 
+func register_lobby_client(peer_id: int, player_name: String, role: String = "player", seat_index: int = -1, player_id: String = "", token: String = "") -> void:
+	var pid = player_id if not player_id.is_empty() else ("ws_%d" % peer_id)
+	_connected_lobby_clients[peer_id] = {
+		"peer_id": peer_id,
+		"name": player_name if not player_name.is_empty() else ("Spieler %d" % peer_id),
+		"role": role,
+		"seat_index": seat_index,
+		"player_id": pid,
+		"token": token
+	}
+	_refresh_lobby_roster_ui()
+
+func set_lobby_client_role(peer_id: int, new_role: String) -> bool:
+	if not _connected_lobby_clients.has(peer_id):
+		return false
+	var r = new_role.to_lower().strip_edges()
+	if not (r in ["player", "table", "spectator"]):
+		return false
+	var client: Dictionary = _connected_lobby_clients[peer_id]
+	client["role"] = r
+	var pid = str(client.get("player_id", "ws_%d" % peer_id))
+	var tok = str(client.get("token", ""))
+	if _ws_host != null:
+		_ws_host.register_client_session(peer_id, pid, r, tok)
+		var room_code = str(_last_host_info.get("room_code", ""))
+		var upd_resp = {
+			"v": 1,
+			"type": "JOIN_RESPONSE",
+			"seq": 1,
+			"sender": "host",
+			"recipient": pid,
+			"timestamp": int(Time.get_unix_time_from_system()),
+			"payload": {
+				"status": "ACCEPTED",
+				"role": r,
+				"seat_index": int(client.get("seat_index", 0)) if r == "player" else -1,
+				"reconnect_token": tok,
+				"room_code": room_code
+			}
+		}
+		_ws_host.send_to(peer_id, upd_resp)
+		if _active_uno_view != null and _active_uno_view.cartridge != null:
+			_broadcast_match_state_to_ws_clients()
+	_refresh_lobby_roster_ui()
+	return true
+
+func _on_ws_client_disconnected(peer_id: int, _player_id: String, _code: int, _reason: String) -> void:
+	if _connected_lobby_clients.has(peer_id):
+		_connected_lobby_clients.erase(peer_id)
+		_refresh_lobby_roster_ui()
+
+func _refresh_lobby_roster_ui() -> void:
+	if lobby_clients_list == null:
+		return
+	for child in lobby_clients_list.get_children():
+		lobby_clients_list.remove_child(child)
+		child.queue_free()
+	if _connected_lobby_clients.is_empty():
+		var empty_lbl = Label.new()
+		empty_lbl.text = I18nServiceScript.t("lobby.no_clients_yet")
+		empty_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		empty_lbl.add_theme_color_override("font_color", Color(0.68, 0.76, 0.88))
+		lobby_clients_list.add_child(empty_lbl)
+		return
+
+	var roles = ["player", "table", "spectator"]
+	var role_labels = [
+		I18nServiceScript.t("lobby.role_player"),
+		I18nServiceScript.t("lobby.role_table"),
+		I18nServiceScript.t("lobby.role_spectator")
+	]
+	for peer_id in _connected_lobby_clients.keys():
+		var client: Dictionary = _connected_lobby_clients[peer_id]
+		var row = HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		var name_lbl = Label.new()
+		name_lbl.size_flags_horizontal = SIZE_EXPAND_FILL
+		name_lbl.text = "📱 %s" % str(client.get("name", "Player"))
+		row.add_child(name_lbl)
+
+		var opt = OptionButton.new()
+		opt.custom_minimum_size = Vector2(145, 30)
+		var cur_role = str(client.get("role", "player"))
+		var sel_idx = 0
+		for ri in range(roles.size()):
+			opt.add_item(role_labels[ri], ri)
+			opt.set_item_metadata(ri, roles[ri])
+			if roles[ri] == cur_role:
+				sel_idx = ri
+		opt.select(sel_idx)
+		opt.item_selected.connect(func(idx: int):
+			var chosen = str(opt.get_item_metadata(idx))
+			set_lobby_client_role(int(peer_id), chosen)
+		)
+		row.add_child(opt)
+		lobby_clients_list.add_child(row)
+
+func _on_active_match_state_changed(_pub_state: Dictionary) -> void:
+	_broadcast_match_state_to_ws_clients()
+
+func _broadcast_match_state_to_ws_clients() -> void:
+	if _ws_host == null or _active_uno_view == null or _active_uno_view.cartridge == null:
+		return
+	var cart = _active_uno_view.cartridge
+	var pub = cart.get_public_state()
+	pub["status"] = "round_over" if cart.is_round_over() else "in_progress"
+	for peer_id in _connected_lobby_clients.keys():
+		var client: Dictionary = _connected_lobby_clients[peer_id]
+		var role = str(client.get("role", "spectator"))
+		var pid = str(client.get("player_id", ""))
+		if role == "player" and not pid.is_empty() and cart.player_map.has(pid):
+			var p_view = cart.get_player_view(pid)
+			p_view["status"] = pub["status"]
+			_ws_host.send_to(peer_id, _ws_host.build_envelope("PLAYER_VIEW_UPDATE", p_view))
+		else:
+			_ws_host.send_to(peer_id, _ws_host.build_envelope("PUBLIC_STATE_UPDATE", pub))
+
 func _on_ws_packet_received(peer_id: int, envelope: Dictionary) -> void:
 	var msg_type = str(envelope.get("type", ""))
 	if msg_type == "JOIN_REQUEST":
+		var req_payload: Dictionary = envelope.get("payload", {})
+		var sender_id = str(envelope.get("sender", ""))
+		var req_name = str(req_payload.get("player_name", "Spieler %d" % peer_id))
 		var resp = _handshake.evaluate_join_request(envelope)
+		var resp_payload: Dictionary = resp.get("payload", {})
+		if resp_payload.get("status") == "ACCEPTED":
+			var assigned_role = str(resp_payload.get("role", req_payload.get("role", "player")))
+			var seat_idx = int(resp_payload.get("seat_index", -1))
+			var tok = str(resp_payload.get("reconnect_token", ""))
+			var use_pid = sender_id if not sender_id.is_empty() else ("ws_%d" % peer_id)
+			if _ws_host != null:
+				_ws_host.register_client_session(peer_id, use_pid, assigned_role, tok)
+			register_lobby_client(peer_id, req_name, assigned_role, seat_idx, use_pid, tok)
 		if _ws_host != null:
 			_ws_host.send_to(peer_id, resp)
-			var payload = resp.get("payload", {})
-			if payload.get("status") == "ACCEPTED" and _active_uno_view != null and _active_uno_view.cartridge != null:
-				var pub = _active_uno_view.cartridge.get_public_state()
-				_ws_host.send_to(peer_id, _ws_host.build_envelope("STATE_PUBLIC", pub))
+			if resp_payload.get("status") == "ACCEPTED":
+				if _active_uno_view != null and _active_uno_view.cartridge != null:
+					_broadcast_match_state_to_ws_clients()
+				else:
+					_ws_host.send_to(peer_id, _ws_host.build_envelope("STATUS_UPDATE", { "status": "waiting" }))
+	elif msg_type in ["ACTION_PLAY_CARD", "ACTION_DRAW_CARD", "ACTION_CALL_UNO", "ACTION_CATCH_UNO", "ACTION_CHALLENGE_PLUS_FOUR", "ACTION_SORT_HAND", "ACTION_SHUFFLE_HAND", "ACTION_SEND_EMOTE"]:
+		if _active_uno_view != null and _active_uno_view.has_method("execute_remote_player_action"):
+			var client: Dictionary = _connected_lobby_clients.get(peer_id, {})
+			var pid = str(client.get("player_id", str(envelope.get("sender", ""))))
+			var payload = envelope.get("payload", {})
+			_active_uno_view.execute_remote_player_action(pid, msg_type, payload if payload is Dictionary else {})
 
 func _on_no_mercy_toggled(toggled_on: bool) -> void:
 	if mercy_limit_spin != null:
@@ -951,6 +1334,8 @@ func _gather_match_options() -> Dictionary:
 	var theme_m = _get_selected_meta(theme_option, "arcade_ps5")
 	var quality = _get_selected_meta(quality_option, "high")
 	var speed_m = _get_selected_meta(bot_speed_option, "normal")
+	var diff_m = _get_selected_meta(bot_difficulty_option, "normal")
+	var host_role = _get_selected_meta(host_role_option, "player")
 
 	var no_mercy_on = no_mercy_check.button_pressed if no_mercy_check != null else false
 	var flip_on = flip_mode_check.button_pressed if flip_mode_check != null else false
@@ -962,10 +1347,64 @@ func _gather_match_options() -> Dictionary:
 
 	var prof = _profile_svc.get_profile()
 	var cb_mode = colorblind_check.button_pressed if colorblind_check != null else bool(prof.get("colorblind_mode", true))
+	var human_names = get_human_player_names()
+	var bot_c = maxi(0, int(bot_count_spin.value)) if bot_count_spin != null else 0
+
+	var roster: Array[Dictionary] = []
+	var next_seat = 0
+	if host_role != "table":
+		for hn in human_names:
+			roster.append({
+				"player_id": "p%d" % next_seat,
+				"seat": next_seat,
+				"name": hn,
+				"is_bot": false,
+				"is_remote": false
+			})
+			next_seat += 1
+	else:
+		view_m = "table_role"
+
+	for peer_id in _connected_lobby_clients.keys():
+		var client: Dictionary = _connected_lobby_clients[peer_id]
+		if str(client.get("role", "")) == "player":
+			roster.append({
+				"player_id": str(client.get("player_id", "ws_%d" % peer_id)),
+				"seat": next_seat,
+				"name": str(client.get("name", "Player")),
+				"is_bot": false,
+				"is_remote": true
+			})
+			next_seat += 1
+
+	for bi in range(bot_c):
+		roster.append({
+			"player_id": "p%d" % next_seat,
+			"seat": next_seat,
+			"name": "Bot %d" % (bi + 1),
+			"is_bot": true,
+			"is_remote": false
+		})
+		next_seat += 1
+
+	while roster.size() < 2:
+		roster.append({
+			"player_id": "p%d" % next_seat,
+			"seat": next_seat,
+			"name": "Bot %d" % next_seat,
+			"is_bot": true,
+			"is_remote": false
+		})
+		next_seat += 1
+
 	var opts = {
-		"mode": "pass_and_play" if mode == "pass_and_play" else "solo",
-		"player_count": maxi(2, int(player_count_spin.value)) if player_count_spin != null else 4,
-		"player_name": str(prof.get("display_name", "Du")),
+		"mode": "pass_and_play" if (mode == "pass_and_play" or human_names.size() > 1) else "solo",
+		"player_count": roster.size(),
+		"player_name": human_names[0] if not human_names.is_empty() else str(prof.get("display_name", "Du")),
+		"human_names": human_names,
+		"bot_count": bot_c,
+		"bot_difficulty": diff_m,
+		"players_roster": roster,
 		"view_mode": view_m,
 		"card_skin": skin_m,
 		"theme": theme_m,
@@ -1009,18 +1448,25 @@ func start_uno_match(custom_options: Dictionary = {}) -> bool:
 	active_match_host.add_child(_active_uno_view)
 	if _active_uno_view.has_signal("back_requested"):
 		_active_uno_view.back_requested.connect(_on_match_back_requested)
+	if _active_uno_view.has_signal("match_state_changed"):
+		_active_uno_view.match_state_changed.connect(_on_active_match_state_changed)
 	if _active_uno_view.has_method("configure_match"):
 		_active_uno_view.configure_match(opts)
 
 	if hub_shell != null:
 		hub_shell.visible = false
 	active_match_host.visible = true
+	if _is_hosting:
+		_broadcast_match_state_to_ws_clients()
 	return true
 
 func _on_match_back_requested() -> void:
 	if _active_uno_view != null:
 		_active_uno_view.queue_free()
 		_active_uno_view = null
+	if _is_hosting and _ws_host != null:
+		for peer_id in _connected_lobby_clients.keys():
+			_ws_host.send_to(peer_id, _ws_host.build_envelope("STATUS_UPDATE", { "status": "waiting" }))
 	select_tab("play")
 
 func _on_load_external_pck_pressed() -> void:
@@ -1028,6 +1474,8 @@ func _on_load_external_pck_pressed() -> void:
 		return
 	var path = pck_path_edit.text.strip_edges()
 	var res = _ext_loader.load_cartridge_package(path, _registry)
+	if res.get("success", false):
+		_rebuild_dynamic_game_cards()
 	if ext_status_label != null:
 		if res.get("success", false):
 			ext_status_label.text = "Externes Modul geladen: %s" % str(res.get("game_id", ""))

@@ -256,8 +256,8 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -184.0
-offset_top = -184.0
+offset_left = -220.0
+offset_top = -310.0
 offset_right = -18.0
 offset_bottom = -18.0
 grow_horizontal = 0
@@ -266,16 +266,42 @@ mouse_filter = 2
 theme_override_constants/separation = 8
 alignment = 2
 
+[node name="CatchUnoBtn" type="Button" parent="HudLayer/BottomRightActions"]
+visible = false
+custom_minimum_size = Vector2(180, 40)
+layout_mode = 2
+text = "⚠ LETZTE! vergessen?"
+
+[node name="ChallengePlusFourBtn" type="Button" parent="HudLayer/BottomRightActions"]
+visible = false
+custom_minimum_size = Vector2(180, 42)
+layout_mode = 2
+text = "⚖ +4 anfechten!"
+
 [node name="CallUnoButton" type="Button" parent="HudLayer/BottomRightActions"]
-custom_minimum_size = Vector2(156, 54)
+custom_minimum_size = Vector2(180, 54)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "LETZTE!"
 
 [node name="DrawPileBtn" type="Button" parent="HudLayer/BottomRightActions"]
-custom_minimum_size = Vector2(156, 42)
+custom_minimum_size = Vector2(180, 42)
 layout_mode = 2
 text = "Karte ziehen"
+
+[node name="HandToolsRow" type="HBoxContainer" parent="HudLayer/BottomRightActions"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="SortHandBtn" type="Button" parent="HudLayer/BottomRightActions/HandToolsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🔤 Sortieren"
+
+[node name="ShuffleHandBtn" type="Button" parent="HudLayer/BottomRightActions/HandToolsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🔀 Mischen"
 
 [node name="EmoteRow" type="HBoxContainer" parent="HudLayer/BottomRightActions"]
 layout_mode = 2
@@ -401,6 +427,45 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 17
 text = "Zurück zum Hub"
 
+[node name="ChallengeRevealOverlay" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="RevealBox" type="VBoxContainer" parent="ChallengeRevealOverlay"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="ChallengeResultTitle" type="Label" parent="ChallengeRevealOverlay/RevealBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+horizontal_alignment = 1
+text = "+4 Anfechtung"
+
+[node name="ChallengeResultSubtitle" type="Label" parent="ChallengeRevealOverlay/RevealBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
+text = "Aufgedeckte Karten des Gegners:"
+
+[node name="RevealedCardsRow" type="HBoxContainer" parent="ChallengeRevealOverlay/RevealBox"]
+custom_minimum_size = Vector2(0, 175)
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="CloseChallengeBtn" type="Button" parent="ChallengeRevealOverlay/RevealBox"]
+custom_minimum_size = Vector2(220, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 17
+text = "Weiter spielen"
+
 [connection signal="pressed" from="HudLayer/TopLeftBar/BackButton" to="." method="_on_back_button_pressed"]
 [connection signal="pressed" from="HudLayer/TopRightControls/ViewModeQuickBtn" to="." method="_on_cycle_view_mode_pressed"]
 [connection signal="pressed" from="HudLayer/TopRightControls/SettingsToggleBtn" to="." method="_on_settings_toggle_pressed"]
@@ -410,8 +475,12 @@ text = "Zurück zum Hub"
 [connection signal="item_selected" from="HudLayer/QuickSettingsDrawer/DrawerBox/SpeedRow/SpeedOption" to="." method="_on_speed_option_selected"]
 [connection signal="item_selected" from="HudLayer/QuickSettingsDrawer/DrawerBox/QualityRow/QualityOption" to="." method="_on_quality_option_selected"]
 [connection signal="toggled" from="HudLayer/QuickSettingsDrawer/DrawerBox/ColorblindBtn" to="." method="_on_colorblind_toggled"]
+[connection signal="pressed" from="HudLayer/BottomRightActions/CatchUnoBtn" to="." method="_on_catch_uno_btn_pressed"]
+[connection signal="pressed" from="HudLayer/BottomRightActions/ChallengePlusFourBtn" to="." method="_on_challenge_plus_four_btn_pressed"]
 [connection signal="pressed" from="HudLayer/BottomRightActions/CallUnoButton" to="." method="_on_call_uno_button_pressed"]
 [connection signal="pressed" from="HudLayer/BottomRightActions/DrawPileBtn" to="." method="_on_draw_pile_btn_pressed"]
+[connection signal="pressed" from="HudLayer/BottomRightActions/HandToolsRow/SortHandBtn" to="." method="_on_sort_hand_btn_pressed"]
+[connection signal="pressed" from="HudLayer/BottomRightActions/HandToolsRow/ShuffleHandBtn" to="." method="_on_shuffle_hand_btn_pressed"]
 [connection signal="pressed" from="HudLayer/BottomRightActions/EmoteRow/EmoteTapBtn" to="." method="_on_emote_pressed" binds= ["*Klopf Klopf!*"]]
 [connection signal="pressed" from="HudLayer/BottomRightActions/EmoteRow/EmoteNiceBtn" to="." method="_on_emote_pressed" binds= ["Starker Zug!"]]
 [connection signal="color_selected" from="RadialColorWheel" to="." method="select_wild_color"]
@@ -419,3 +488,4 @@ text = "Zurück zum Hub"
 [connection signal="pressed" from="CurtainOverlay/CurtainBox/RevealButton" to="." method="reveal_pass_and_play"]
 [connection signal="pressed" from="RoundOverOverlay/RoundBox/Actions/PlayAgainBtn" to="." method="_on_play_again_pressed"]
 [connection signal="pressed" from="RoundOverOverlay/RoundBox/Actions/BackHubBtn" to="." method="_on_back_button_pressed"]
+[connection signal="pressed" from="ChallengeRevealOverlay/RevealBox/CloseChallengeBtn" to="." method="_on_close_challenge_overlay_pressed"]
