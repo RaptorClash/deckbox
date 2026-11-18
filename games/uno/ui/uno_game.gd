@@ -17,7 +17,11 @@ const CardFlightAnimatorScript = preload("res://core/visuals/card_flight_animato
 const SoundEffectsPlayerScript = preload("res://core/audio/sound_effects_player.gd")
 const QRCodeScript = preload("res://core/network/qr_code.gd")
 const I18nServiceScript = preload("res://core/i18n/i18n_service.gd")
+const KeybindServiceScript = preload("res://core/input/keybind_service.gd")
+const ProfileServiceScript = preload("res://core/profile/profile_service.gd")
 const CardMeshScene = preload("res://assets/3d/card_rounded.glb")
+
+const REACTION_WINDOW_SEC: float = 4.0
 
 const TABLE_SCENES: Dictionary = {
 	"arcade_ps5": "res://scenes/tables/arcade_ps5.tscn",
@@ -59,10 +63,20 @@ var active_view_mode: String = "full_3d"
 var active_card_skin: String = "classic_arcade"
 var active_bot_speed: String = "normal"
 var active_bot_difficulty: String = "normal"
+var active_location_id: String = "cozy_house"
+var active_jukebox_mode: String = "auto"
 var colorblind_mode: bool = true
 var pending_wild_card_id: String = ""
 var _local_human_ids: Array[String] = []
 var _last_revealed_human_id: String = ""
+var _keybind_svc: RefCounted = null
+var _keyboard_selected_idx: int = -1
+var _reaction_time_left: float = 0.0
+var _reaction_signature: String = ""
+var _expired_reaction_signatures: Dictionary = {}
+var _pending_jump_in_card: Dictionary = {}
+var _last_skipped_seat: int = -1
+var _skip_banner_time_left: float = 0.0
 
 var active_table_3d: Node3D = null
 var direction_ring_3d: Node3D = null
@@ -116,6 +130,14 @@ var _rng_visual: RandomNumberGenerator = RandomNumberGenerator.new()
 @onready var table_qr_badge: PanelContainer = $HudLayer/TableQrBadge
 @onready var table_qr_rect: TextureRect = $HudLayer/TableQrBadge/QrBox/QrRect
 @onready var table_qr_pin: Label = $HudLayer/TableQrBadge/QrBox/QrPinLabel
+@onready var skip_banner_panel: PanelContainer = $HudLayer/SkipBannerPanel
+@onready var skip_banner_label: Label = $HudLayer/SkipBannerPanel/SkipBannerLabel
+@onready var center_reaction_panel: PanelContainer = $HudLayer/CenterReactionPanel
+@onready var reaction_title_label: Label = $HudLayer/CenterReactionPanel/ReactionBox/ReactionTitleLabel
+@onready var reaction_timer_bar: ProgressBar = $HudLayer/CenterReactionPanel/ReactionBox/ReactionTimerBar
+@onready var catch_uno_popup_btn: Button = $HudLayer/CenterReactionPanel/ReactionBox/CatchUnoPopupBtn
+@onready var jump_in_popup_btn: Button = $HudLayer/CenterReactionPanel/ReactionBox/JumpInPopupBtn
+@onready var challenge_p4_popup_btn: Button = $HudLayer/CenterReactionPanel/ReactionBox/ChallengeP4PopupBtn
 @onready var emote_toast: PanelContainer = $HudLayer/EmoteToast
 @onready var emote_banner: Label = $HudLayer/EmoteToast/EmoteBanner
 @onready var color_wheel: Control = $RadialColorWheel
@@ -141,9 +163,18 @@ func _ready() -> void:
 	animator = CardFlightAnimatorScript.new()
 	add_child(animator)
 
+	_keybind_svc = KeybindServiceScript.new()
+	var prof_svc = ProfileServiceScript.new()
+	var prof = prof_svc.load_profile()
+	if prof is Dictionary:
+		active_location_id = str(prof.get("location_id", active_location_id))
+		active_jukebox_mode = str(prof.get("jukebox_mode", active_jukebox_mode))
+		if prof.get("keybinds", null) is Dictionary:
+			_keybind_svc.load_from_dict(prof["keybinds"])
+
 	sfx_player = SoundEffectsPlayerScript.new()
 	add_child(sfx_player)
-	sfx_player.start_ambient_lounge()
+	sfx_player.play_jukebox(active_jukebox_mode, active_location_id)
 
 	_bot_turn_timer = Timer.new()
 	_bot_turn_timer.one_shot = true
@@ -151,7 +182,7 @@ func _ready() -> void:
 	add_child(_bot_turn_timer)
 
 	_init_drawer_controls()
-	configure_match({ "mode": "solo", "theme": active_theme_id, "quality": active_quality_preset })
+	configure_match({ "mode": "solo", "theme": active_theme_id, "quality": active_quality_preset, "location_id": active_location_id, "jukebox_mode": active_jukebox_mode })
 	apply_language()
 
 func _set_rel_text(rel_path: String, key: String, params: Dictionary = {}) -> void:
@@ -199,6 +230,16 @@ func _apply_hud_accent_styles() -> void:
 		catch_uno_btn.add_theme_stylebox_override("normal", UIThemeScript.make_accent_button(Color(0.86, 0.56, 0.10, 0.96), Color(1.0, 0.90, 0.35, 0.95), 14))
 	if challenge_p4_btn != null:
 		challenge_p4_btn.add_theme_stylebox_override("normal", UIThemeScript.make_accent_button(Color(0.68, 0.20, 0.86, 0.96), Color(1.0, 0.55, 0.95, 0.95), 14))
+	if center_reaction_panel != null:
+		center_reaction_panel.add_theme_stylebox_override("panel", UIThemeScript.make_glass_panel(Color(0.05, 0.07, 0.14, 0.92), Color(1.0, 0.78, 0.20, 0.95), 14, 14))
+	if catch_uno_popup_btn != null:
+		catch_uno_popup_btn.add_theme_stylebox_override("normal", UIThemeScript.make_accent_button(Color(0.88, 0.56, 0.10, 0.96), Color(1.0, 0.90, 0.35, 0.95), 12))
+	if jump_in_popup_btn != null:
+		jump_in_popup_btn.add_theme_stylebox_override("normal", UIThemeScript.make_accent_button(Color(0.14, 0.62, 0.92, 0.96), Color(0.55, 0.92, 1.0, 0.95), 12))
+	if challenge_p4_popup_btn != null:
+		challenge_p4_popup_btn.add_theme_stylebox_override("normal", UIThemeScript.make_accent_button(Color(0.68, 0.20, 0.86, 0.96), Color(1.0, 0.55, 0.95, 0.95), 12))
+	if skip_banner_panel != null:
+		skip_banner_panel.add_theme_stylebox_override("panel", UIThemeScript.make_glass_panel(Color(0.45, 0.10, 0.12, 0.92), Color(1.0, 0.45, 0.35, 0.95), 10, 12))
 	if curtain_overlay != null:
 		curtain_overlay.add_theme_stylebox_override("panel", UIThemeScript.make_glass_panel(Color(0.03, 0.04, 0.09, 0.96), UIThemeScript.COL_BORDER_GOLD, 0, 24))
 	if round_over_overlay != null:
@@ -210,6 +251,12 @@ func _process(delta: float) -> void:
 	if direction_ring_3d != null and is_instance_valid(direction_ring_3d):
 		direction_ring_3d.rotate_y(-float(_turn_direction) * delta * 0.95)
 	_animate_3d_player_hand_hover(delta)
+	_tick_reaction_timer(delta)
+	if _skip_banner_time_left > 0.0:
+		_skip_banner_time_left = maxf(0.0, _skip_banner_time_left - delta)
+		if _skip_banner_time_left <= 0.0 and skip_banner_panel != null:
+			skip_banner_panel.visible = false
+			_last_skipped_seat = -1
 
 func _animate_3d_player_hand_hover(delta: float) -> void:
 	if _player_3d_cards.is_empty():
@@ -298,6 +345,10 @@ func configure_match(options: Dictionary = {}) -> void:
 	var view_m = str(options.get("view_mode", active_view_mode))
 	var skin_m = str(options.get("card_skin", active_card_skin))
 	var speed_m = str(options.get("bot_speed", active_bot_speed))
+	active_location_id = str(options.get("location_id", active_location_id))
+	active_jukebox_mode = str(options.get("jukebox_mode", active_jukebox_mode))
+	if _keybind_svc != null and options.has("keybinds") and options["keybinds"] is Dictionary:
+		_keybind_svc.load_from_dict(options["keybinds"])
 	active_bot_difficulty = str(options.get("bot_difficulty", active_bot_difficulty)).to_lower().strip_edges()
 	if not (active_bot_difficulty in ["easy", "normal", "hard", "tactical"]):
 		active_bot_difficulty = "normal"
@@ -398,6 +449,17 @@ func configure_match(options: Dictionary = {}) -> void:
 	_last_revealed_human_id = current_player_id
 	pending_wild_card_id = ""
 	_hovered_3d_index = -1
+	_keyboard_selected_idx = -1
+	_reaction_time_left = 0.0
+	_reaction_signature = ""
+	_expired_reaction_signatures.clear()
+	_pending_jump_in_card = {}
+	_last_skipped_seat = -1
+	_skip_banner_time_left = 0.0
+	if skip_banner_panel != null:
+		skip_banner_panel.visible = false
+	if center_reaction_panel != null:
+		center_reaction_panel.visible = false
 	_round_recorded = false
 	_match_start_unix = int(Time.get_unix_time_from_system())
 
@@ -423,6 +485,8 @@ func configure_match(options: Dictionary = {}) -> void:
 	set_table_theme(theme_id)
 	set_quality_preset(quality)
 	set_view_mode(active_view_mode)
+	if sfx_player != null:
+		sfx_player.play_jukebox(active_jukebox_mode, active_location_id)
 	if cartridge != null and not cartridge.is_round_over():
 		var start_p = cartridge.get_player_by_seat(cartridge.current_turn_seat)
 		if bool(start_p.get("is_bot", false)):
@@ -514,6 +578,8 @@ func set_table_theme(theme_id: String) -> void:
 			if inst is Node3D:
 				active_table_3d = inst
 				table_viewport.add_child(active_table_3d)
+				if active_table_3d.has_method("apply_location_environment"):
+					active_table_3d.apply_location_environment(active_location_id)
 				if active_table_3d.has_method("apply_quality_preset"):
 					active_table_3d.apply_quality_preset(active_quality_preset)
 				if active_table_3d.has_method("configure_for_player_count"):
@@ -871,9 +937,104 @@ func _gui_input(event: InputEvent) -> void:
 		accept_event()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if _handle_keyboard_shortcut(event as InputEventKey):
+			if get_viewport() != null:
+				get_viewport().set_input_as_handled()
+			return
 	if _handle_3d_pointer_event(event):
 		if get_viewport() != null:
 			get_viewport().set_input_as_handled()
+
+func _handle_keyboard_shortcut(event: InputEventKey) -> bool:
+	if cartridge == null or _keybind_svc == null:
+		return false
+	var focus_owner = get_viewport().gui_get_focus_owner() if get_viewport() != null else null
+	if focus_owner is LineEdit or focus_owner is TextEdit:
+		return false
+	if event.keycode == KEY_ESCAPE:
+		if color_wheel != null and color_wheel.visible and color_wheel.has_method("close_wheel"):
+			color_wheel.close_wheel()
+			_on_color_choice_canceled()
+			return true
+		if quick_drawer != null and quick_drawer.visible:
+			quick_drawer.visible = false
+			return true
+		return false
+	if (curtain_overlay != null and curtain_overlay.visible) or (round_over_overlay != null and round_over_overlay.visible) or (challenge_reveal_overlay != null and challenge_reveal_overlay.visible):
+		return false
+
+	if _keybind_svc.matches_event("jukebox_next", event):
+		if sfx_player != null:
+			var next_t: String = sfx_player.next_jukebox_track()
+			_show_status_toast("🎵 Jukebox: %s" % next_t)
+		return true
+	if _keybind_svc.matches_event("cycle_view", event):
+		_on_cycle_view_mode_pressed()
+		return true
+	if _keybind_svc.matches_event("reaction_action", event):
+		if jump_in_popup_btn != null and jump_in_popup_btn.visible:
+			_on_jump_in_popup_btn_pressed()
+			return true
+		if catch_uno_popup_btn != null and catch_uno_popup_btn.visible:
+			_on_catch_uno_btn_pressed()
+			return true
+		if challenge_p4_popup_btn != null and challenge_p4_popup_btn.visible:
+			_on_challenge_plus_four_btn_pressed()
+			return true
+		return false
+	if _keybind_svc.matches_event("call_uno", event):
+		_on_call_uno_button_pressed()
+		return true
+	if _keybind_svc.matches_event("draw_card", event):
+		_on_draw_pile_btn_pressed()
+		return true
+	if _keybind_svc.matches_event("sort_hand", event):
+		_on_sort_hand_btn_pressed()
+		return true
+	if _keybind_svc.matches_event("shuffle_hand", event):
+		_on_shuffle_hand_btn_pressed()
+		return true
+
+	var my_view: Dictionary = cartridge.get_player_view(current_player_id)
+	var hand: Array = my_view.get("hand", [])
+	if hand.is_empty():
+		return false
+
+	if _keybind_svc.matches_event("nav_left", event):
+		_keyboard_selected_idx = (hand.size() - 1) if _keyboard_selected_idx < 0 else clampi(_keyboard_selected_idx - 1, 0, hand.size() - 1)
+		_hovered_3d_index = _keyboard_selected_idx
+		_rebuild_25d_hand_fan(my_view)
+		return true
+	if _keybind_svc.matches_event("nav_right", event):
+		_keyboard_selected_idx = 0 if _keyboard_selected_idx < 0 else clampi(_keyboard_selected_idx + 1, 0, hand.size() - 1)
+		_hovered_3d_index = _keyboard_selected_idx
+		_rebuild_25d_hand_fan(my_view)
+		return true
+
+	# Number keys 1..9 quick select card
+	var kcode: int = int(event.keycode)
+	if kcode >= KEY_1 and kcode <= KEY_9:
+		var num_idx := clampi(kcode - KEY_1, 0, hand.size() - 1)
+		_keyboard_selected_idx = num_idx
+		_hovered_3d_index = num_idx
+		_rebuild_25d_hand_fan(my_view)
+		return true
+
+	if _keybind_svc.matches_event("play_card", event):
+		if _keyboard_selected_idx < 0 or _keyboard_selected_idx >= hand.size():
+			for hi in range(hand.size()):
+				if hand[hi] is Dictionary and bool(hand[hi].get("playable", false)):
+					_keyboard_selected_idx = hi
+					break
+		if _keyboard_selected_idx >= 0 and _keyboard_selected_idx < hand.size():
+			var sel_card: Dictionary = hand[_keyboard_selected_idx]
+			if bool(sel_card.get("playable", false)):
+				_on_card_pressed(str(sel_card.get("id", "")), sel_card)
+			else:
+				_show_status_toast(I18nServiceScript.t("hud.card_mismatch_toast"))
+			return true
+	return false
 
 func _handle_3d_pointer_event(event: InputEvent) -> bool:
 	if event == null or event == _last_handled_event:
@@ -1086,8 +1247,99 @@ func refresh_display() -> void:
 		var can_chal = (not curtain_shown) and (active_view_mode != "table_role") and (not cartridge.is_round_over()) and cartridge.can_challenge_plus_four(current_player_id)
 		challenge_p4_btn.visible = can_chal
 
+	_update_reaction_window(curtain_shown)
 	_check_round_over()
 	match_state_changed.emit(pub_state)
+
+func _update_reaction_window(curtain_shown: bool) -> void:
+	if center_reaction_panel == null or cartridge == null:
+		return
+	var blocked: bool = curtain_shown or (active_view_mode == "table_role") or bool(cartridge.is_round_over())
+	if blocked:
+		center_reaction_panel.visible = false
+		return
+
+	var catch_list: Array = cartridge.get_catchable_uno_players(current_player_id)
+	var jump_list: Array = cartridge.get_jump_in_cards(current_player_id)
+	var can_chal: bool = cartridge.can_challenge_plus_four(current_player_id)
+
+	var has_catch := not catch_list.is_empty()
+	var has_jump := not jump_list.is_empty()
+	if not has_catch and not has_jump and not can_chal:
+		center_reaction_panel.visible = false
+		_reaction_time_left = 0.0
+		_reaction_signature = ""
+		_pending_jump_in_card = {}
+		if catch_uno_btn != null:
+			catch_uno_btn.visible = false
+		return
+
+	var catch_id := str(catch_list[0].get("player_id", "")) if has_catch else ""
+	var jump_id := str(jump_list[0].get("id", "")) if has_jump else ""
+	_pending_jump_in_card = jump_list[0] if has_jump else {}
+	var sig := "C:%s|J:%s|P4:%s|D:%d" % [catch_id, jump_id, str(can_chal), cartridge.discard_pile.size()]
+
+	if _expired_reaction_signatures.has(sig):
+		center_reaction_panel.visible = false
+		if catch_uno_btn != null:
+			catch_uno_btn.visible = false
+		return
+
+	if sig != _reaction_signature:
+		_reaction_signature = sig
+		_reaction_time_left = REACTION_WINDOW_SEC
+
+	center_reaction_panel.visible = (_reaction_time_left > 0.0)
+	if catch_uno_popup_btn != null:
+		catch_uno_popup_btn.visible = has_catch
+		catch_uno_popup_btn.text = I18nServiceScript.t("hud.catch_uno_btn")
+	if jump_in_popup_btn != null:
+		jump_in_popup_btn.visible = has_jump
+		if has_jump:
+			jump_in_popup_btn.text = I18nServiceScript.t("ui.game.jump_in_btn", { "card": "%s %s" % [str(_pending_jump_in_card.get("color", "")).to_upper(), str(_pending_jump_in_card.get("value", "")).to_upper()] })
+	if challenge_p4_popup_btn != null:
+		challenge_p4_popup_btn.visible = can_chal
+		challenge_p4_popup_btn.text = I18nServiceScript.t("hud.challenge_p4_btn")
+	_sync_reaction_timer_widgets()
+
+func _tick_reaction_timer(delta: float) -> void:
+	if _reaction_time_left <= 0.0:
+		return
+	_reaction_time_left = maxf(0.0, _reaction_time_left - delta)
+	_sync_reaction_timer_widgets()
+	if _reaction_time_left <= 0.0:
+		if not _reaction_signature.is_empty():
+			_expired_reaction_signatures[_reaction_signature] = true
+		if center_reaction_panel != null:
+			center_reaction_panel.visible = false
+		if catch_uno_btn != null:
+			catch_uno_btn.visible = false
+
+func _sync_reaction_timer_widgets() -> void:
+	if reaction_title_label != null:
+		reaction_title_label.text = I18nServiceScript.t("ui.game.reaction_title", { "sec": "%.1f" % _reaction_time_left })
+	if reaction_timer_bar != null:
+		reaction_timer_bar.value = clampf((_reaction_time_left / REACTION_WINDOW_SEC) * 100.0, 0.0, 100.0)
+
+func _on_jump_in_popup_btn_pressed() -> void:
+	if cartridge == null or _pending_jump_in_card.is_empty():
+		return
+	var cid := str(_pending_jump_in_card.get("id", _pending_jump_in_card.get("uid", "")))
+	if cid.is_empty():
+		return
+	var res: Dictionary = cartridge.handle_action(current_player_id, { "type": "ACTION_JUMP_IN", "card_id": cid })
+	if res.get("success", false):
+		if not _reaction_signature.is_empty():
+			_expired_reaction_signatures[_reaction_signature] = true
+		_reaction_time_left = 0.0
+		if center_reaction_panel != null:
+			center_reaction_panel.visible = false
+		var pub_after = cartridge.get_public_state()
+		_trigger_action_feedback(res.get("events", []), int(pub_after.get("current_turn_seat", 0)), _pending_jump_in_card, true)
+		_post_human_turn()
+	else:
+		_show_status_toast(str(res.get("error", "")))
+	refresh_display()
 
 func _rebuild_25d_hand_fan(my_view: Dictionary) -> void:
 	if hand_cards_layer == null:
@@ -1128,7 +1380,8 @@ func _rebuild_25d_hand_fan(my_view: Dictionary) -> void:
 		card_btn.texture_normal = CardTextureGenScript.get_card_back_texture(active_card_skin) if is_masked else CardTextureGenScript.get_card_front_texture(card, active_card_skin, colorblind_mode)
 
 		var off = float(idx) - float(count - 1) * 0.5
-		var base_y = 24.0 + absf(off) * 2.2 - (14.0 if playable else 0.0)
+		var is_kb_sel := (idx == _keyboard_selected_idx)
+		var base_y = 24.0 + absf(off) * 2.2 - (14.0 if playable else 0.0) - (14.0 if is_kb_sel else 0.0)
 		card_btn.position = Vector2(start_x + float(idx) * step_x, base_y)
 		card_btn.pivot_offset = Vector2(card_w * 0.5, card_h)
 		card_btn.rotation_degrees = clampf(off * 2.1, -18.0, 18.0)
@@ -1186,42 +1439,45 @@ func _rebuild_opponent_badges(pub_state: Dictionary, my_view: Dictionary) -> voi
 
 		var is_active = (p_seat == active_turn_seat)
 		var is_elim = bool(p.get("eliminated", false))
+		var is_fin = bool(p.get("finished", false))
+		var is_skipped = (p_seat == _last_skipped_seat and _skip_banner_time_left > 0.0)
 		var badge = PanelContainer.new()
 		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		badge.add_theme_stylebox_override("panel", UIThemeScript.make_badge_style(Color(0.32, 0.72, 1.0, 0.55), is_active))
-		if is_elim:
-			badge.modulate = Color(0.55, 0.45, 0.48, 0.7)
+		badge.add_theme_stylebox_override("panel", UIThemeScript.make_badge_style(Color(1.0, 0.35, 0.35, 0.85) if is_skipped else Color(0.32, 0.72, 1.0, 0.55), is_active))
+		if is_elim or is_fin:
+			badge.modulate = Color(0.58, 0.58, 0.62, 0.78)
 
 		var hbox = HBoxContainer.new()
 		hbox.add_theme_constant_override("separation", 6)
 		var name_lbl = Label.new()
 		var p_name = str(p.get("name", "P%d" % p_seat))
-		var uno_flag = " 💀KO" if is_elim else (" 🔥%s" % I18nServiceScript.t("hud.call_last") if bool(p.get("called_uno", false)) else (" ⚠!" if int(p.get("card_count", 0)) == 1 else ""))
+		var uno_flag = " 💀KO" if is_elim else (" 🏁 #%d" % int(p.get("placement", 1)) if is_fin else (" 🚫" if is_skipped else (" 🔥%s" % I18nServiceScript.t("hud.call_last") if bool(p.get("called_uno", false)) else (" ⚠!" if int(p.get("card_count", 0)) == 1 else ""))))
 		name_lbl.text = ("%s" % p_name) if compact else ("%s%s" % [p_name, " 🤖" if p.get("is_bot", false) else ""])
 		name_lbl.add_theme_font_size_override("font_size", 12 if compact else 14)
 		hbox.add_child(name_lbl)
 
 		var count_lbl = Label.new()
-		count_lbl.text = "💀 KO" if is_elim else ("🃏 %d%s" % [int(p.get("card_count", 0)), uno_flag])
+		count_lbl.text = "💀 KO" if is_elim else ("🏁 #%d" % int(p.get("placement", 1)) if is_fin else ("🃏 %d%s" % [int(p.get("card_count", 0)), uno_flag]))
 		count_lbl.add_theme_font_size_override("font_size", 12 if compact else 14)
-		count_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.35) if is_active else Color(0.75, 0.90, 1.0))
+		count_lbl.add_theme_color_override("font_color", Color(1.0, 0.45, 0.35) if is_skipped else (Color(1.0, 0.85, 0.35) if is_active else Color(0.75, 0.90, 1.0)))
 		hbox.add_child(count_lbl)
 
 		badge.add_child(hbox)
 		opponent_badges_root.add_child(badge)
 
-		# Position badge directly above each opponent's 3D seat/card fan via Camera3D projection
+		# Position badge outside the stadium table rim via Camera3D projection
 		var rel_idx = ((p_seat - my_seat) % total_players + total_players) % total_players
 		var ang = PI * 0.5 + float(rel_idx) * TAU / float(total_players)
-		var rx = vp_size.x * 0.41
-		var ry = vp_size.y * 0.34
+		var rx = vp_size.x * 0.42
+		var ry = vp_size.y * 0.36
 		var cx = vp_size.x * 0.5 + cos(ang) * rx
-		var cy = vp_size.y * 0.45 + sin(ang) * ry
+		var cy = vp_size.y * 0.43 + sin(ang) * ry
 		if active_table_3d != null and active_table_3d.has_method("get_camera"):
 			var cam: Camera3D = active_table_3d.get_camera()
-			var seat_3d = _get_seat_3d_anchor(p_seat, total_players, my_seat) + Vector3(0.0, 0.24, 0.0)
-			if cam != null and table_viewport != null and table_viewport.size.x > 0 and table_viewport.size.y > 0 and not cam.is_position_behind(seat_3d):
-				var vp_proj = cam.unproject_position(seat_3d)
+			var seat_raw = _get_seat_3d_anchor(p_seat, total_players, my_seat)
+			var radial_out = Vector3(seat_raw.x * 1.18, seat_raw.y + 0.08, seat_raw.z * 1.28)
+			if cam != null and table_viewport != null and table_viewport.size.x > 0 and table_viewport.size.y > 0 and not cam.is_position_behind(radial_out):
+				var vp_proj = cam.unproject_position(radial_out)
 				cx = (vp_proj.x / float(table_viewport.size.x)) * vp_size.x
 				cy = (vp_proj.y / float(table_viewport.size.y)) * vp_size.y
 		cy = clampf(cy, 68.0, vp_size.y - 185.0)
@@ -1356,6 +1612,20 @@ func _trigger_action_feedback(events: Array, seat_idx: int, fallback_card: Dicti
 				is_special = true
 				if animator != null:
 					animator.animate_special_callout(hud_layer, "🛡 STRAFE ABGEWEHRT!", Color(0.25, 0.95, 0.70))
+			elif ev_type == "PLAYER_SKIPPED":
+				is_special = true
+				_last_skipped_seat = int(ev.get("skipped_seat", -1))
+				_skip_banner_time_left = 2.4
+				var sk_name := str(ev.get("skipped_name", "Player"))
+				if skip_banner_panel != null and skip_banner_label != null:
+					skip_banner_label.text = I18nServiceScript.t("ui.game.skip_banner", { "player": sk_name })
+					skip_banner_panel.visible = true
+			elif ev_type == "PLAYER_FINISHED":
+				is_special = true
+				_show_status_toast(I18nServiceScript.t("ui.game.player_finished_toast", {
+					"player": str(ev.get("name", ev.get("player_id", ""))),
+					"place": int(ev.get("placement", 1))
+				}))
 
 	var val_str = str(played_card.get("value", "")).to_lower()
 	if val_str in ["skip", "skip_everyone", "reverse", "draw_two", "draw_four", "draw_five", "wild", "wild_draw_four", "wild_reverse_draw_four", "wild_draw_six", "wild_draw_ten", "flip", "discard_all"]:
@@ -1471,7 +1741,8 @@ func _on_bot_turn_timer_timeout() -> void:
 	var bot_delay = animator.get_bot_delay() if animator != null else 0.0
 	if bool(next_p.get("is_bot", false)):
 		if bot_delay > 0.0:
-			var need_pause = (not cartridge.get_catchable_uno_players("").is_empty()) or _has_local_challenge_opportunity()
+			var reaction_open := (center_reaction_panel != null and center_reaction_panel.visible) or (_skip_banner_time_left > 0.0)
+			var need_pause = (not cartridge.get_catchable_uno_players("").is_empty()) or _has_local_challenge_opportunity() or reaction_open
 			_bot_turn_timer.start(maxf(bot_delay, 2.2) if need_pause else bot_delay)
 		else:
 			_run_bot_turns_sync()
@@ -1626,7 +1897,17 @@ func _check_round_over() -> void:
 		if winner_label != null:
 			var win_p = cartridge.player_map.get(winner_id, {})
 			var win_name = str(win_p.get("name", winner_id))
-			winner_label.text = I18nServiceScript.t("hud.round_over_win", {"player": win_name, "score": score})
+			var base_win_txt := I18nServiceScript.t("hud.round_over_win", {"player": win_name, "score": score})
+			var placements: Array = res.get("placements", [])
+			if not placements.is_empty():
+				var lines: Array[String] = [base_win_txt, "", I18nServiceScript.t("ui.game.podium_header")]
+				for idx in range(placements.size()):
+					var pid := str(placements[idx])
+					var p_name := str(cartridge.player_map.get(pid, {}).get("name", pid))
+					lines.append("#%d  %s" % [idx + 1, p_name])
+				winner_label.text = "\n".join(lines)
+			else:
+				winner_label.text = base_win_txt
 	if not _round_recorded and stats_svc != null:
 		_round_recorded = true
 		if sfx_player != null:

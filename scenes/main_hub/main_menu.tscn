@@ -154,32 +154,33 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/h_separation = 16
 theme_override_constants/v_separation = 16
-columns = 3
+columns = 4
 
 [node name="AlleAblegenCard" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid"]
-custom_minimum_size = Vector2(280, 240)
+custom_minimum_size = Vector2(240, 185)
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_horizontal = 0
 
 [node name="CardBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/AlleAblegenCard"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 6
 
 [node name="Badge" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/AlleAblegenCard/CardBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.32, 0.95, 0.65, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 11
 text = "● SPIELBEREIT • 2–32+ SPIELER"
 
 [node name="Title" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/AlleAblegenCard/CardBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 19
 text = "🃏 Alle Ablegen!"
 
 [node name="Desc" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/AlleAblegenCard/CardBox"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.8, 0.86, 0.96, 1)
+theme_override_font_sizes/font_size = 12
 text = "Der schnelle Ablege-Klassiker in 3D & Web-Lite. Inklusive kombinierbarer Modi:
 • 🔥 Gnadenlos (+6 / +10 / Alle ablegen / KO-Limit)
 • 🔄 Flip! (Doppelseitige Karten: Hell & Dunkel)
@@ -187,74 +188,78 @@ text = "Der schnelle Ablege-Klassiker in 3D & Web-Lite. Inklusive kombinierbarer
 autowrap_mode = 3
 
 [node name="SelectUnoBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/AlleAblegenCard/CardBox"]
-custom_minimum_size = Vector2(0, 48)
+custom_minimum_size = Vector2(0, 38)
 layout_mode = 2
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 14
 text = "▶ Alle Ablegen! auswählen"
 
 [node name="WizardCard" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid"]
-custom_minimum_size = Vector2(280, 240)
+custom_minimum_size = Vector2(240, 185)
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_horizontal = 0
 
 [node name="CardBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/WizardCard"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 6
 
 [node name="Badge" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/WizardCard/CardBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.98, 0.78, 0.24, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 11
 text = "◌ MODUL-VORSCHAU • 3–6 SPIELER"
 
 [node name="Title" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/WizardCard/CardBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 19
 text = "🧙 Zauber-Stiche"
 
 [node name="Desc" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/WizardCard/CardBox"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.7, 0.76, 0.88, 1)
+theme_override_font_sizes/font_size = 12
 text = "Taktisches Stichspiel mit Vorhersage der genauen Stichzahl vor jeder Runde. Die Cartridge-Schnittstelle ist vorbereitet."
 autowrap_mode = 3
 
 [node name="SoonBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/WizardCard/CardBox"]
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
+theme_override_font_sizes/font_size = 13
 disabled = true
 text = "In Vorbereitung (Modul-Slot)"
 
 [node name="DoppelkopfCard" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid"]
-custom_minimum_size = Vector2(280, 240)
+custom_minimum_size = Vector2(240, 185)
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_horizontal = 0
 
 [node name="CardBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/DoppelkopfCard"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 6
 
 [node name="Badge" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/DoppelkopfCard/CardBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.98, 0.78, 0.24, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 11
 text = "◌ MODUL-VORSCHAU • 4 SPIELER"
 
 [node name="Title" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/DoppelkopfCard/CardBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 19
 text = "👑 Doppelkopf"
 
 [node name="Desc" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/DoppelkopfCard/CardBox"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.7, 0.76, 0.88, 1)
+theme_override_font_sizes/font_size = 12
 text = "Das traditionsreiche deutsche Team-Stichspiel mit Hochzeiten, Soli und Sonderpunkten. Modul-Schnittstelle aktiv."
 autowrap_mode = 3
 
 [node name="SoonBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/DoppelkopfCard/CardBox"]
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
+theme_override_font_sizes/font_size = 13
 disabled = true
 text = "In Vorbereitung (Modul-Slot)"
 
@@ -556,6 +561,10 @@ text = "7-Tausch & 0-Rotation"
 layout_mode = 2
 text = "Ziehen bis es passt"
 
+[node name="PlayToEndCheck" type="CheckBox" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RulesGrid"]
+layout_mode = 2
+text = "🏁 Bis zum Ende spielen (Plätze)"
+
 [node name="LaunchUnoBtn" type="Button" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter"]
 custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
@@ -755,7 +764,7 @@ size_flags_horizontal = 3
 
 [node name="VisualBox" type="VBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="VisualTitle" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
 layout_mode = 2
@@ -771,7 +780,7 @@ size_flags_horizontal = 3
 text = "Sprache / Language:"
 
 [node name="LanguageOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/LanguageRow"]
-custom_minimum_size = Vector2(220, 38)
+custom_minimum_size = Vector2(220, 34)
 layout_mode = 2
 
 [node name="ViewModeRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
@@ -783,7 +792,7 @@ size_flags_horizontal = 3
 text = "Standard-Ansichtsmodus:"
 
 [node name="ViewModeOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/ViewModeRow"]
-custom_minimum_size = Vector2(220, 38)
+custom_minimum_size = Vector2(220, 34)
 layout_mode = 2
 
 [node name="SkinRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
@@ -795,7 +804,7 @@ size_flags_horizontal = 3
 text = "Karten-Design:"
 
 [node name="SkinOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/SkinRow"]
-custom_minimum_size = Vector2(220, 38)
+custom_minimum_size = Vector2(220, 34)
 layout_mode = 2
 
 [node name="ThemeRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
@@ -807,7 +816,31 @@ size_flags_horizontal = 3
 text = "3D-Tisch-Theme:"
 
 [node name="ThemeOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/ThemeRow"]
-custom_minimum_size = Vector2(220, 38)
+custom_minimum_size = Vector2(220, 34)
+layout_mode = 2
+
+[node name="LocationRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+layout_mode = 2
+
+[node name="LocationLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/LocationRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Umgebung / Ort:"
+
+[node name="LocationOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/LocationRow"]
+custom_minimum_size = Vector2(220, 34)
+layout_mode = 2
+
+[node name="JukeboxRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+layout_mode = 2
+
+[node name="JukeboxLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/JukeboxRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🎵 Jukebox (Musik):"
+
+[node name="JukeboxOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/JukeboxRow"]
+custom_minimum_size = Vector2(220, 34)
 layout_mode = 2
 
 [node name="QualityRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
@@ -819,7 +852,7 @@ size_flags_horizontal = 3
 text = "Grafik-Qualität:"
 
 [node name="QualityOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/QualityRow"]
-custom_minimum_size = Vector2(220, 38)
+custom_minimum_size = Vector2(220, 34)
 layout_mode = 2
 
 [node name="SpeedRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
@@ -831,7 +864,7 @@ size_flags_horizontal = 3
 text = "KI-Spieltempo:"
 
 [node name="BotSpeedOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/SpeedRow"]
-custom_minimum_size = Vector2(220, 38)
+custom_minimum_size = Vector2(220, 34)
 layout_mode = 2
 
 [node name="ColorblindCheck" type="CheckButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
@@ -839,12 +872,37 @@ layout_mode = 2
 button_pressed = true
 text = "Farbenblind-Symbole auf Karten & Farbrad aktivieren"
 
-[node name="Spacer" type="Control" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+[node name="KeybindsTitle" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "⌨ Tastaturkürzel & Steuerung (Klicken zum Ändern)"
+
+[node name="KeybindsHint" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.78, 0.9, 1)
+theme_override_font_sizes/font_size = 11
+text = "Klicke auf eine Taste, um sie neu zu belegen (1–9 wählt direkt Handkarten)."
+autowrap_mode = 3
+
+[node name="KeybindsScroll" type="ScrollContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+custom_minimum_size = Vector2(0, 120)
 layout_mode = 2
 size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="KeybindsBox" type="VBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/KeybindsScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="KeybindsResetBtn" type="Button" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "↺ Standard-Tasten wiederherstellen"
 
 [node name="SaveVisualSettingsBtn" type="Button" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 text = "💾 Darstellung & Einstellungen speichern"
 
@@ -1026,7 +1084,10 @@ mouse_filter = 1
 [connection signal="item_selected" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/LanguageRow/LanguageOption" to="." method="_on_language_option_selected"]
 [connection signal="item_selected" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/SkinRow/SkinOption" to="." method="_on_preview_setting_changed"]
 [connection signal="item_selected" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/ThemeRow/ThemeOption" to="." method="_on_preview_setting_changed"]
+[connection signal="item_selected" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/LocationRow/LocationOption" to="." method="_on_preview_setting_changed"]
+[connection signal="item_selected" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/JukeboxRow/JukeboxOption" to="." method="_on_jukebox_option_selected"]
 [connection signal="item_selected" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/QualityRow/QualityOption" to="." method="_on_preview_setting_changed"]
+[connection signal="pressed" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/KeybindsResetBtn" to="." method="_on_reset_keybinds_pressed"]
 [connection signal="pressed" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/SaveVisualSettingsBtn" to="." method="save_settings"]
 [connection signal="pressed" from="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/SaveNetworkSettingsBtn" to="." method="save_settings"]
 [connection signal="pressed" from="HubShell/ContentStack/FriendsTab/FriendsBox/AddFriendRow/AddFriendBtn" to="." method="_on_add_friend_pressed"]

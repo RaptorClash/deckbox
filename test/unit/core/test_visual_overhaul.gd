@@ -263,6 +263,77 @@ func test_dimmed_cards_flip_obsidian_unlimited_seats_and_lobby_roster() -> void:
 	assert_true(menu.set_lobby_client_role(42, "table"), "Host must be able to reassign a connected client to table role")
 	assert_eq(menu._connected_lobby_clients[42]["role"], "table")
 
+func test_locations_jukebox_keybinds_timed_reactions_and_compact_gallery() -> void:
+	# 1. LocationEnvironmentBuilder & TableTheme integration
+	var loc_builder = load("res://core/visuals/location_environment_builder.gd")
+	assert_not_null(loc_builder, "LocationEnvironmentBuilder script must exist")
+	var locs: Array = loc_builder.get_available_locations()
+	for lid in ["cozy_house", "forest_glade", "neon_club", "bowling_alley", "rustic_pub"]:
+		assert_has(locs, lid, "Location '%s' must be supported" % lid)
+
+	var table_inst = load("res://scenes/tables/cozy_wood.tscn").instantiate()
+	add_child_autofree(table_inst)
+	table_inst.apply_location_environment("forest_glade")
+	assert_eq(table_inst.active_location_id, "forest_glade", "TableTheme must track active_location_id")
+	assert_not_null(table_inst.get_node_or_null("LocationBackdrop3D"), "Applying location must spawn 3D environment backdrop around table")
+
+	# 2. JukeboxService relaxed procedural tracks + auto/shuffle modes
+	var jukebox_script = load("res://core/audio/jukebox_service.gd")
+	assert_not_null(jukebox_script, "JukeboxService script must exist")
+	var jukebox = jukebox_script.new()
+	var tracks: Array = jukebox_script.get_available_tracks()
+	for tid in ["cozy_house", "forest_glade", "neon_club", "bowling_alley", "rustic_pub"]:
+		assert_has(tracks, tid, "Jukebox track for '%s' must exist" % tid)
+	assert_eq(jukebox.resolve_track_for_mode("auto", "bowling_alley"), "bowling_alley", "Auto mode must match active location")
+	var stream: AudioStreamWAV = jukebox.get_track_stream("cozy_house")
+	assert_not_null(stream, "Jukebox must synthesize AudioStreamWAV for cozy_house")
+	assert_gt(stream.data.size(), 1000, "Synthesized music stream must contain PCM audio frames")
+
+	# 3. KeybindService defaults, remapping & reset
+	var kb_script = load("res://core/input/keybind_service.gd")
+	assert_not_null(kb_script, "KeybindService script must exist")
+	var kb = kb_script.new()
+	for act_id in ["nav_left", "nav_right", "play_card", "draw_card", "call_uno", "reaction_action", "sort_hand", "shuffle_hand", "cycle_view", "jukebox_next"]:
+		assert_gt(kb.get_keybind(act_id), 0, "Default keybind must be set for %s" % act_id)
+	kb.set_keybind("play_card", KEY_K)
+	assert_eq(kb.get_keybind("play_card"), KEY_K, "Keybind must update when remapped")
+	kb.reset_to_defaults()
+	assert_eq(kb.get_keybind("play_card"), KEY_SPACE, "Resetting keybinds must restore default KEY_SPACE")
+
+	# 4. MainMenuHub compact tiles, base_cartridge filtered out, PlayToEndCheck, Location/Jukebox/Keybinds UI
+	var menu = load(MAIN_MENU_PATH).instantiate()
+	add_child_autofree(menu)
+	assert_null(menu.games_grid.get_node_or_null("DynCard_base_cartridge"), "base_cartridge must be filtered out of game gallery")
+	assert_eq(menu.alle_ablegen_card.size_flags_horizontal, Control.SIZE_SHRINK_BEGIN, "Game tiles must stay compact (SIZE_SHRINK_BEGIN)")
+	assert_not_null(menu.play_to_end_check, "Match setup must expose PlayToEndCheck")
+	assert_not_null(menu.location_option, "Settings tab must expose LocationOption")
+	assert_not_null(menu.jukebox_option, "Settings tab must expose JukeboxOption")
+	assert_not_null(menu.keybinds_box, "Settings tab must expose KeybindsBox")
+
+	# 5. UnoGame timed center reaction window & auto-expiration
+	var game_scene = load("res://games/uno/ui/uno_game.tscn").instantiate()
+	add_child_autofree(game_scene)
+	game_scene.configure_match({
+		"players": [
+			{ "player_id": "p0", "name": "Player", "seat": 0, "is_bot": false },
+			{ "player_id": "p1", "name": "Bot 1", "seat": 1, "is_bot": true }
+		]
+	})
+	game_scene.cartridge.debug_set_state({
+		"top_discard": { "id": "top", "color": "red", "value": "3" },
+		"active_seat": 0,
+		"player_hands": {
+			"p0": [{ "id": "p0_r5", "uid": "p0_r5", "color": "red", "value": "5" }, { "id": "p0_b2", "uid": "p0_b2", "color": "blue", "value": "2" }],
+			"p1": [{ "id": "p1_r8", "uid": "p1_r8", "color": "red", "value": "8" }]
+		}
+	})
+	game_scene.cartridge.player_map["p1"]["called_uno"] = false
+	game_scene.refresh_display()
+	assert_true(game_scene.center_reaction_panel.visible, "Catchable LETZTE! opportunity must pop up CenterReactionPanel")
+	assert_gt(game_scene._reaction_time_left, 0.5, "Reaction countdown timer must start positive")
+	game_scene._tick_reaction_timer(5.0)
+	assert_false(game_scene.center_reaction_panel.visible, "CenterReactionPanel must auto-hide once countdown expires")
+
 func _find_mesh_in_node(n: Node) -> MeshInstance3D:
 	if n is MeshInstance3D:
 		return n

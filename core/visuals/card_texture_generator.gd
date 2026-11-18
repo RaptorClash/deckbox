@@ -175,7 +175,7 @@ static func set_card_mesh_playable_state(card_root: Node, is_playable: bool) -> 
 				f_mat.albedo_color = Color(1.0, 1.0, 1.0, 1.0)
 				f_mat.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
 			else:
-				f_mat.albedo_color = Color(0.42, 0.45, 0.52, 0.68)
+				f_mat.albedo_color = Color(0.42, 0.45, 0.52, 0.90)
 				f_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 				f_mat.roughness = 0.85
 				f_mat.rim_enabled = false
@@ -188,7 +188,7 @@ static func set_card_mesh_playable_state(card_root: Node, is_playable: bool) -> 
 				e_mat.albedo_color = Color(e_mat.albedo_color.r, e_mat.albedo_color.g, e_mat.albedo_color.b, 1.0)
 				e_mat.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
 			else:
-				e_mat.albedo_color = Color(0.42, 0.45, 0.52, 0.68)
+				e_mat.albedo_color = Color(0.42, 0.45, 0.52, 0.90)
 				e_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 			mesh_node.set_surface_override_material(2, e_mat)
 

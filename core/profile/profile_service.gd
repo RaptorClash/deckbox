@@ -49,6 +49,9 @@ func create_default_profile(display_name: String = "Player") -> Dictionary:
 		"turn_username": "",
 		"turn_credential": "",
 		"language": "",
+		"location_id": "cozy_house",
+		"jukebox_mode": "auto",
+		"keybinds": {},
 		"colorblind_mode": false,
 		"created_at": now,
 		"updated_at": now,
@@ -181,6 +184,12 @@ func migrate_schema(data: Dictionary) -> Dictionary:
 			migrated["turn_credential"] = ""
 		if not migrated.has("language"):
 			migrated["language"] = ""
+		if not migrated.has("location_id"):
+			migrated["location_id"] = "cozy_house"
+		if not migrated.has("jukebox_mode"):
+			migrated["jukebox_mode"] = "auto"
+		if not migrated.has("keybinds") or not (migrated.get("keybinds", null) is Dictionary):
+			migrated["keybinds"] = {}
 
 	return migrated
 

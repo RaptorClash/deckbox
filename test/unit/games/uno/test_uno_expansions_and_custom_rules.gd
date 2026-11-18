@@ -449,3 +449,61 @@ func test_bot_difficulty_levels_easy_normal_hard() -> void:
 	var hard_act = ai.choose_action_with_context(hand, top, {}, "hard")
 	assert_eq(hard_act["card_id"], "r2", "Hard bot saves Wild and plays Red 2")
 	assert_true(bool(hard_act.get("called_uno", false)), "Hard bot with 2 cards remembers to call LETZTE!")
+
+func test_play_until_end_multi_finisher_placements_and_skip_events() -> void:
+	var game = _cartridge_script.new()
+	game.init_match("pue_test", _make_players(3), { "play_until_end": true, "jump_in": true }, 42)
+	game.start_round()
+
+	game.debug_set_state({
+		"top_discard": { "id": "top", "color": "red", "value": "3" },
+		"active_seat": 0,
+		"direction": 1,
+		"player_hands": {
+			"p0": [{ "id": "p0_r5", "uid": "p0_r5", "color": "red", "value": "5" }],
+			"p1": [
+				{ "id": "p1_skip", "uid": "p1_skip", "color": "red", "value": "skip" },
+				{ "id": "p1_r9", "uid": "p1_r9", "color": "red", "value": "9" }
+			],
+			"p2": [
+				{ "id": "p2_ji", "uid": "p2_ji", "color": "red", "value": "skip" },
+				{ "id": "p2_b4", "uid": "p2_b4", "color": "blue", "value": "4" }
+			]
+		}
+	})
+
+	# P0 plays final card -> finishes 1st, game continues for P1 & P2!
+	var fin_res = game.handle_action("p0", { "type": "ACTION_PLAY_CARD", "card_id": "p0_r5" })
+	assert_true(fin_res["success"], "P0 final card play must succeed")
+	assert_false(game.round_over, "With play_until_end=true and 2 remaining players, round must continue")
+	assert_eq(game.finish_order, ["p0"], "P0 must be recorded first in finish_order")
+	assert_true(bool(game.player_map["p0"].get("finished", false)), "P0 must be marked finished")
+	assert_eq(int(game.player_map["p0"].get("placement", 0)), 1, "P0 placement must be 1")
+	var has_fin_evt := false
+	for ev in fin_res.get("events", []):
+		if ev is Dictionary and ev.get("type", "") == "PLAYER_FINISHED":
+			has_fin_evt = true
+	assert_true(has_fin_evt, "PLAYER_FINISHED event must be emitted")
+	assert_eq(game.current_turn_seat, 1, "Turn must move to P1 after P0 finishes")
+
+	# P1 plays Skip -> emits PLAYER_SKIPPED for P2, wraps around skipping finished P0 back to P1!
+	var skip_res = game.handle_action("p1", { "type": "ACTION_PLAY_CARD", "card_id": "p1_skip" })
+	assert_true(skip_res["success"])
+	var has_skip_evt := false
+	for ev in skip_res.get("events", []):
+		if ev is Dictionary and ev.get("type", "") == "PLAYER_SKIPPED" and ev.get("skipped_player_id", "") == "p2":
+			has_skip_evt = true
+	assert_true(has_skip_evt, "PLAYER_SKIPPED event must identify skipped P2 for visual skip feedback")
+	assert_eq(game.current_turn_seat, 1, "Turn must skip P2 and finished P0, returning to P1")
+
+	# Verify Jump-In card detection for P2 (red skip matches top discard red skip!)
+	var jump_cards: Array = game.get_jump_in_cards("p2")
+	assert_eq(jump_cards.size(), 1, "P2 holds identical Red Skip for Jump-In")
+	assert_eq(str(jump_cards[0].get("id", "")), "p2_ji")
+
+	# P1 plays final Red 9 -> finishes 2nd, leaving only P2 -> round ends with full placements!
+	var end_res = game.handle_action("p1", { "type": "ACTION_PLAY_CARD", "card_id": "p1_r9" })
+	assert_true(end_res["success"])
+	assert_true(game.round_over, "Round must end when only 1 unfinished player remains")
+	assert_eq(game.finish_order, ["p0", "p1", "p2"], "Full podium order must include P0, P1, P2")
+	assert_eq(game.round_results.get("placements", []), ["p0", "p1", "p2"], "Round results must expose placements")
