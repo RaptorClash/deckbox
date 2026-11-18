@@ -77,7 +77,7 @@ func test_main_menu_scene_instantiation():
 	assert_not_null(instance)
 
 	# Verify hub tabs and embedded screens
-	for tab_id in ["play", "friends", "pack_editor", "profile", "stats", "updater"]:
+	for tab_id in ["play", "friends", "pack_editor", "profile", "stats", "settings", "updater"]:
 		assert_true(instance.select_tab(tab_id), "Should switch to tab: %s" % tab_id)
 
 	# Verify LAN Host & QR Code generation

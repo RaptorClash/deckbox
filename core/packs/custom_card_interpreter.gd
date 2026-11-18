@@ -172,6 +172,21 @@ static func execute_action(action: Dictionary, context: Dictionary) -> Dictionar
 				"text": text
 			})
 
+		"flip_side":
+			var cur_side = str(context.get("active_side", "light"))
+			var next_side = "dark" if cur_side == "light" else "light"
+			context["active_side"] = next_side
+			events.append({
+				"event": "flip_side",
+				"active_side": next_side
+			})
+
+		"skip_everyone":
+			context["skip_everyone"] = true
+			events.append({
+				"event": "skip_everyone"
+			})
+
 		_:
 			return {
 				"success": false,

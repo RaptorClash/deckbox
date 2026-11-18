@@ -8,6 +8,8 @@ signal profile_saved(profile: Dictionary)
 const ProfileServiceScript = preload("res://core/profile/profile_service.gd")
 const AudioControlsScript = preload("res://core/qol/audio_controls.gd")
 const BackupServiceScript = preload("res://core/profile/backup_service.gd")
+const UIThemeScript = preload("res://core/visuals/deckbox_ui_theme.gd")
+const I18nServiceScript = preload("res://core/i18n/i18n_service.gd")
 
 var _profile_svc: RefCounted
 var _audio_controls: RefCounted
@@ -25,12 +27,25 @@ var _backup_svc: RefCounted
 @onready var status_label: Label = $VBoxContainer/Footer/StatusLabel
 
 func _ready() -> void:
+	theme = UIThemeScript.create_theme()
 	_profile_svc = ProfileServiceScript.new()
 	_audio_controls = AudioControlsScript.new()
 	_backup_svc = BackupServiceScript.new()
 
 	_init_pickers()
 	load_current_profile()
+	apply_language()
+
+func apply_language() -> void:
+	var title_lbl = get_node_or_null("VBoxContainer/Header/Title")
+	if title_lbl != null and "text" in title_lbl:
+		title_lbl.text = I18nServiceScript.t("profile.title")
+	var back_btn = get_node_or_null("VBoxContainer/Header/BackButton")
+	if back_btn != null and "text" in back_btn:
+		back_btn.text = I18nServiceScript.t("profile.back")
+	var save_btn = get_node_or_null("VBoxContainer/Header/SaveButton")
+	if save_btn != null and "text" in save_btn:
+		save_btn.text = I18nServiceScript.t("profile.save")
 
 func _init_pickers() -> void:
 	if theme_picker:

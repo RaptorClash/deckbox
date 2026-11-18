@@ -69,11 +69,30 @@ class WebSocketTransport {
 }
 
 // Bootstrap on DOMContentLoaded
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
-  const roomCode = urlParams.get('room') || '';
-  const initialRole = urlParams.get('role') || 'spectator';
-  const playerName = urlParams.get('name') || 'Guest_' + Math.floor(Math.random() * 900 + 100);
+  let roomCode = urlParams.get('room') || '';
+  let initialRole = urlParams.get('role') || '';
+  let wsPortParam = urlParams.get('ws') || '';
+
+  if (!roomCode && typeof fetch === 'function') {
+    try {
+      const resp = await fetch('/api/room', { cache: 'no-store' });
+      if (resp && resp.ok) {
+        const meta = await resp.json();
+        if (meta && meta.room_code) {
+          roomCode = String(meta.room_code);
+          if (!initialRole) initialRole = String(meta.role || 'player');
+          if (!wsPortParam && meta.ws_port) wsPortParam = String(meta.ws_port);
+        }
+      }
+    } catch (_err) {
+      // Ignore auto-discovery errors and fall back to Join Modal
+    }
+  }
+
+  if (!initialRole) initialRole = 'spectator';
+  const playerName = urlParams.get('name') || 'Spieler_' + Math.floor(Math.random() * 900 + 100);
   const reconnectToken = urlParams.get('token') || '';
 
   const displayRoomEl = document.getElementById('display-room-code');
@@ -94,7 +113,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // Determine WebSocket URL
   const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   const wsHost = window.location.hostname || 'localhost';
-  const wsPort = urlParams.get('ws') || 8081;
+  const wsPort = wsPortParam || 8081;
   const wsUrl = `${wsProtocol}//${wsHost}:${wsPort}/ws`;
 
   function setStatus(text, className) {
@@ -188,9 +207,9 @@ window.addEventListener('DOMContentLoaded', () => {
       } else if (state.isMyTurn) {
         turnBannerEl.textContent = '★ It is YOUR turn! ★';
       } else if (state.activePlayer) {
-        turnBannerEl.textContent = `${state.activePlayer.name}'s turn`;
+        turnBannerEl.textContent = `${state.activePlayer.name} ist am Zug`;
       } else {
-        turnBannerEl.textContent = 'DeckBox UNO';
+        turnBannerEl.textContent = 'DeckBox — Alle Ablegen!';
       }
     }
 

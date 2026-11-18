@@ -39,6 +39,8 @@ static func filter_public_state(game: Object) -> Dictionary:
 	if raw_top is Dictionary and not raw_top.is_empty():
 		sanitized_top["color"] = str(raw_top.get("color", ""))
 		sanitized_top["value"] = str(raw_top.get("value", ""))
+		if raw_top.has("name"):
+			sanitized_top["name"] = str(raw_top["name"])
 		if raw_top.has("action"):
 			sanitized_top["action"] = raw_top["action"]
 		if raw_top.has("chosen_color"):
@@ -64,7 +66,8 @@ static func filter_public_state(game: Object) -> Dictionary:
 					"name": str(p.get("name", "")),
 					"card_count": int(card_count),
 					"called_uno": bool(p.get("called_uno", false)),
-					"is_bot": bool(p.get("is_bot", false))
+					"is_bot": bool(p.get("is_bot", false)),
+					"eliminated": bool(p.get("eliminated", false))
 				}
 				player_summaries.append(summary)
 
@@ -83,6 +86,10 @@ static func filter_public_state(game: Object) -> Dictionary:
 		pub_state["active_color"] = str(game.active_color)
 	if "pending_penalty_draws" in game:
 		pub_state["pending_penalty_draws"] = int(game.pending_penalty_draws)
+	if "active_side" in game:
+		pub_state["active_side"] = str(game.active_side)
+	if "mercy_hand_limit" in game:
+		pub_state["mercy_hand_limit"] = int(game.mercy_hand_limit)
 
 	return pub_state
 
@@ -125,6 +132,12 @@ static func filter_player_view(game: Object, player_id: String) -> Dictionary:
 				"value": str(card.get("value", "")),
 				"playable": bool(is_playable)
 			}
+			if card.has("name"):
+				clean_card["name"] = str(card["name"])
+			if card.has("is_custom"):
+				clean_card["is_custom"] = bool(card["is_custom"])
+			if card.has("custom_id"):
+				clean_card["custom_id"] = str(card["custom_id"])
 			if card.has("action"):
 				clean_card["action"] = card["action"]
 			if card.has("actions"):

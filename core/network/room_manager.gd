@@ -46,10 +46,16 @@ func get_deep_link_url(role: String = "player") -> String:
 
 func allocate_player_seat(player_id: String, player_name: String, avatar_id: String = "default") -> Dictionary:
 	var free_seat: int = -1
-	for s in range(max_players):
-		if not seats.has(s):
-			free_seat = s
-			break
+	if max_players <= 0:
+		var s: int = 0
+		while seats.has(s):
+			s += 1
+		free_seat = s
+	else:
+		for s in range(max_players):
+			if not seats.has(s):
+				free_seat = s
+				break
 
 	if free_seat < 0:
 		return { "success": false, "error": "ROOM_FULL" }
@@ -112,6 +118,8 @@ func get_occupied_seat_count() -> int:
 	return seats.size()
 
 func is_full() -> bool:
+	if max_players <= 0:
+		return false
 	return seats.size() >= max_players
 
 func get_room_info() -> Dictionary:

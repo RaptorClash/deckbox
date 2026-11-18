@@ -12,73 +12,98 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 1
 script = ExtResource("1_script")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="LoungeViewportContainer" type="SubViewportContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.06, 0.08, 0.13, 1)
+mouse_filter = 2
+stretch = true
+
+[node name="PreviewViewport" type="SubViewport" parent="LoungeViewportContainer"]
+own_world_3d = true
+handle_input_locally = false
+msaa_3d = 2
+size = Vector2i(1280, 720)
+render_target_update_mode = 4
+
+[node name="BackdropScrim" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.02, 0.03, 0.07, 0.42)
 
 [node name="HubShell" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 18.0
-offset_top = 14.0
-offset_right = -18.0
-offset_bottom = -14.0
+offset_left = 22.0
+offset_top = 16.0
+offset_right = -22.0
+offset_bottom = -16.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 14
 
-[node name="TopBar" type="HBoxContainer" parent="HubShell"]
+[node name="TopBarPanel" type="PanelContainer" parent="HubShell"]
 layout_mode = 2
-theme_override_constants/separation = 10
 
-[node name="BrandTitle" type="Label" parent="HubShell/TopBar"]
+[node name="TopBar" type="HBoxContainer" parent="HubShell/TopBarPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BrandTitle" type="Label" parent="HubShell/TopBarPanel/TopBar"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "DeckBox 3D Collection"
+text = "🃏 DECKBOX"
 
-[node name="VersionBadge" type="Label" parent="HubShell/TopBar"]
+[node name="VersionBadge" type="Label" parent="HubShell/TopBarPanel/TopBar"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.8, 0.28, 1)
+theme_override_font_sizes/font_size = 13
 text = "v0.1.0"
 
-[node name="Spacer" type="Control" parent="HubShell/TopBar"]
+[node name="Spacer" type="Control" parent="HubShell/TopBarPanel/TopBar"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="PlayTabBtn" type="Button" parent="HubShell/TopBar"]
+[node name="PlayTabBtn" type="Button" parent="HubShell/TopBarPanel/TopBar"]
 layout_mode = 2
-text = "Play & 3D Table"
+text = "🎮 Spiele"
 
-[node name="FriendsTabBtn" type="Button" parent="HubShell/TopBar"]
+[node name="FriendsTabBtn" type="Button" parent="HubShell/TopBarPanel/TopBar"]
 layout_mode = 2
-text = "Friends QR"
+text = "👥 Freunde"
 
-[node name="PacksTabBtn" type="Button" parent="HubShell/TopBar"]
+[node name="PacksTabBtn" type="Button" parent="HubShell/TopBarPanel/TopBar"]
 layout_mode = 2
-text = "Card Pack Editor"
+text = "🎨 Karten-Editor"
 
-[node name="ProfileTabBtn" type="Button" parent="HubShell/TopBar"]
+[node name="ProfileTabBtn" type="Button" parent="HubShell/TopBarPanel/TopBar"]
 layout_mode = 2
-text = "Profile & Backup"
+text = "👤 Profil"
 
-[node name="StatsTabBtn" type="Button" parent="HubShell/TopBar"]
+[node name="StatsTabBtn" type="Button" parent="HubShell/TopBarPanel/TopBar"]
 layout_mode = 2
-text = "Statistics"
+text = "📊 Statistik"
 
-[node name="UpdaterTabBtn" type="Button" parent="HubShell/TopBar"]
+[node name="SettingsTabBtn" type="Button" parent="HubShell/TopBarPanel/TopBar"]
 layout_mode = 2
-text = "Updater"
+text = "⚙ Einstellungen"
 
-[node name="HSeparator" type="HSeparator" parent="HubShell"]
+[node name="UpdaterTabBtn" type="Button" parent="HubShell/TopBarPanel/TopBar"]
 layout_mode = 2
+text = "⬇ Updater"
 
 [node name="ContentStack" type="Control" parent="HubShell"]
 layout_mode = 2
@@ -92,166 +117,452 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Columns" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab"]
+[node name="GameSelectorView" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab"]
 layout_mode = 2
-theme_override_constants/separation = 18
+theme_override_constants/separation = 16
 
-[node name="SetupPanel" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/Columns"]
+[node name="GalleryHeaderPanel" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView"]
+layout_mode = 2
+
+[node name="HeaderBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GalleryHeaderPanel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="GalleryTitle" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GalleryHeaderPanel/HeaderBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Kartenspielsammlung — Wähle dein Spiel"
+
+[node name="GallerySubtitle" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GalleryHeaderPanel/HeaderBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.74, 0.82, 0.94, 1)
+theme_override_font_sizes/font_size = 14
+text = "Wähle zuerst ein Spiel für deine Runde oder tritt direkt einem laufenden LAN-/PC-Spiel bei. Grafik & Tisch findest du unter ⚙ Einstellungen."
+
+[node name="GamesGrid" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="AlleAblegenCard" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="SetupBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel"]
+[node name="CardBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/AlleAblegenCard"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="GameHeader" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
+[node name="Badge" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/AlleAblegenCard/CardBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "DeckBox UNO — 3D Edition"
+theme_override_colors/font_color = Color(0.32, 0.95, 0.65, 1)
+theme_override_font_sizes/font_size = 13
+text = "● SPIELBEREIT • 2–32+ SPIELER"
 
-[node name="ModeLabel" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
+[node name="Title" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/AlleAblegenCard/CardBox"]
 layout_mode = 2
-text = "Match Mode:"
+theme_override_font_sizes/font_size = 24
+text = "🃏 Alle Ablegen!"
 
-[node name="ModeOption" type="OptionButton" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
+[node name="Desc" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/AlleAblegenCard/CardBox"]
 layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.8, 0.86, 0.96, 1)
+text = "Der schnelle Ablege-Klassiker in 3D & Web-Lite. Inklusive kombinierbarer Modi:
+• 🔥 Gnadenlos (+6 / +10 / Alle ablegen / KO-Limit)
+• 🔄 Flip! (Doppelseitige Karten: Hell & Dunkel)
+• 🃏 Eigene Karten aus dem Editor"
+autowrap_mode = 3
 
-[node name="PlayerCountRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
-layout_mode = 2
-
-[node name="PlayerCountLabel" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/PlayerCountRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Pass & Play Human Seats:"
-
-[node name="PlayerCountSpin" type="SpinBox" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/PlayerCountRow"]
-layout_mode = 2
-min_value = 2.0
-max_value = 4.0
-value = 2.0
-
-[node name="ThemeLabel" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
-layout_mode = 2
-text = "3D Table Environment:"
-
-[node name="ThemeOption" type="OptionButton" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
-layout_mode = 2
-
-[node name="QualityLabel" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
-layout_mode = 2
-text = "3D Graphics Quality:"
-
-[node name="QualityOption" type="OptionButton" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
-layout_mode = 2
-
-[node name="RulesHeader" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
-layout_mode = 2
-text = "House Rules:"
-
-[node name="RulesGrid" type="GridContainer" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
-layout_mode = 2
-columns = 2
-
-[node name="StackD2Check" type="CheckBox" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/RulesGrid"]
-layout_mode = 2
-text = "Stack +2 Cards"
-
-[node name="StackD4Check" type="CheckBox" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/RulesGrid"]
-layout_mode = 2
-text = "Stack +4 Cards"
-
-[node name="JumpInCheck" type="CheckBox" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/RulesGrid"]
-layout_mode = 2
-text = "Jump-In (Identical Card)"
-
-[node name="SevenZeroCheck" type="CheckBox" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/RulesGrid"]
-layout_mode = 2
-text = "7-Swap & 0-Rotate"
-
-[node name="DrawMatchCheck" type="CheckBox" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/RulesGrid"]
-layout_mode = 2
-text = "Draw Until Playable"
-
-[node name="LaunchUnoBtn" type="Button" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
+[node name="SelectUnoBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/AlleAblegenCard/CardBox"]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "▶ Launch 3D UNO Match"
+theme_override_font_sizes/font_size = 17
+text = "▶ Alle Ablegen! auswählen"
 
-[node name="HSep" type="HSeparator" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
-layout_mode = 2
-
-[node name="ExternalRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
-layout_mode = 2
-
-[node name="PckPathEdit" type="LineEdit" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/ExternalRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "External cartridge (.pck / .zip path)"
-
-[node name="LoadPckBtn" type="Button" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/ExternalRow"]
-layout_mode = 2
-text = "Mount Cartridge"
-
-[node name="ExternalStatusLabel" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox"]
-layout_mode = 2
-text = "Built-in cartridges ready: UNO (Phase 2 ready for Wizard & Doppelkopf)"
-
-[node name="LobbyPanel" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/Columns"]
+[node name="WizardCard" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="LobbyBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/Columns/LobbyPanel"]
+[node name="CardBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/WizardCard"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Badge" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/WizardCard/CardBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.78, 0.24, 1)
+theme_override_font_sizes/font_size = 13
+text = "◌ MODUL-VORSCHAU • 3–6 SPIELER"
+
+[node name="Title" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/WizardCard/CardBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "🧙 Zauber-Stiche"
+
+[node name="Desc" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/WizardCard/CardBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.7, 0.76, 0.88, 1)
+text = "Taktisches Stichspiel mit Vorhersage der genauen Stichzahl vor jeder Runde. Die Cartridge-Schnittstelle ist vorbereitet."
+autowrap_mode = 3
+
+[node name="SoonBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/WizardCard/CardBox"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+disabled = true
+text = "In Vorbereitung (Modul-Slot)"
+
+[node name="DoppelkopfCard" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CardBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/DoppelkopfCard"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Badge" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/DoppelkopfCard/CardBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.78, 0.24, 1)
+theme_override_font_sizes/font_size = 13
+text = "◌ MODUL-VORSCHAU • 4 SPIELER"
+
+[node name="Title" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/DoppelkopfCard/CardBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "👑 Doppelkopf"
+
+[node name="Desc" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/DoppelkopfCard/CardBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.7, 0.76, 0.88, 1)
+text = "Das traditionsreiche deutsche Team-Stichspiel mit Hochzeiten, Soli und Sonderpunkten. Modul-Schnittstelle aktiv."
+autowrap_mode = 3
+
+[node name="SoonBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/DoppelkopfCard/CardBox"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+disabled = true
+text = "In Vorbereitung (Modul-Slot)"
+
+[node name="BottomJoinRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="QuickJoinPanel" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="JoinBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="LobbyHeader" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/LobbyPanel/LobbyBox"]
+[node name="JoinTitle" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Live 3D Table Preview & QR / LAN Host"
+theme_override_font_sizes/font_size = 17
+text = "🌐 Spiel beitreten (PC, Tablet & LAN-Browser)"
 
-[node name="PreviewViewportContainer" type="SubViewportContainer" parent="HubShell/ContentStack/PlayTab/Columns/LobbyPanel/LobbyBox"]
-custom_minimum_size = Vector2(0, 210)
+[node name="JoinAddressRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="JoinAddressEdit" type="LineEdit" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/JoinAddressRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Host-IP oder Kurz-URL eingeben (z. B. 192.168.178.25)"
+
+[node name="JoinDirectBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/JoinAddressRow"]
+layout_mode = 2
+text = "Im Browser beitreten"
+
+[node name="LanRoomsRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LanRoomsList" type="ItemList" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/LanRoomsRow"]
+custom_minimum_size = Vector2(0, 62)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="LanJoinBtns" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/LanRoomsRow"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="JoinLanRoomBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/LanRoomsRow/LanJoinBtns"]
+layout_mode = 2
+text = "Raum öffnen"
+
+[node name="RefreshLanBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/LanRoomsRow/LanJoinBtns"]
+layout_mode = 2
+text = "🔄 LAN suchen"
+
+[node name="JoinStatusLabel" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.68, 0.78, 0.92, 1)
+theme_override_font_sizes/font_size = 12
+text = "Tipp: Gib die Kurz-URL (z. B. http://192.168.178.25:8080) auf Handy oder PC ein."
+
+[node name="ExternalModulePanel" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ModBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ModTitle" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "📦 Externes Spielmodul laden (.pck / .zip)"
+
+[node name="ModHint" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.8, 0.92, 1)
+theme_override_font_sizes/font_size = 13
+text = "Lade zusätzliche Community- oder eigene Kartenspiele direkt in deine Sammlung."
+autowrap_mode = 3
+
+[node name="ExternalRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PckPathEdit" type="LineEdit" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox/ExternalRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Pfad zur .pck oder .zip Modul-Datei"
+
+[node name="LoadPckBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox/ExternalRow"]
+layout_mode = 2
+text = "Modul laden"
+
+[node name="ExternalStatusLabel" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.74, 0.84, 0.96, 1)
+text = "Bereit: Alle Ablegen! • Modul-Schnittstelle aktiv"
+
+[node name="MatchSetupView" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SetupTopBar" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView"]
+layout_mode = 2
+
+[node name="BarRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/SetupTopBar"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="BackToGamesBtn" type="Button" parent="HubShell/ContentStack/PlayTab/MatchSetupView/SetupTopBar/BarRow"]
+layout_mode = 2
+text = "← Spielauswahl"
+
+[node name="GameHeader" type="Label" parent="HubShell/ContentStack/PlayTab/MatchSetupView/SetupTopBar/BarRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 21
+text = "🃏 Alle Ablegen! — Match-Setup"
+
+[node name="OpenSettingsShortcutBtn" type="Button" parent="HubShell/ContentStack/PlayTab/MatchSetupView/SetupTopBar/BarRow"]
+layout_mode = 2
+text = "⚙ Grafik, Tisch & TURN-Einstellungen"
+
+[node name="Columns" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView"]
 layout_mode = 2
 size_flags_vertical = 3
-stretch = true
+theme_override_constants/separation = 20
 
-[node name="PreviewViewport" type="SubViewport" parent="HubShell/ContentStack/PlayTab/Columns/LobbyPanel/LobbyBox/PreviewViewportContainer"]
-own_world_3d = true
-handle_input_locally = false
-size = Vector2i(560, 220)
-render_target_update_mode = 4
-
-[node name="HostLanBtn" type="Button" parent="HubShell/ContentStack/PlayTab/Columns/LobbyPanel/LobbyBox"]
-custom_minimum_size = Vector2(0, 40)
+[node name="SetupPanel" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns"]
 layout_mode = 2
-text = "Start LAN / QR Host"
+size_flags_horizontal = 3
 
-[node name="RoomPinLabel" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/LobbyPanel/LobbyBox"]
+[node name="SetupOuter" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel"]
 layout_mode = 2
-text = "Room PIN: ---- (Offline)"
+theme_override_constants/separation = 12
 
-[node name="JoinUrlLabel" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/LobbyPanel/LobbyBox"]
+[node name="SetupScroll" type="ScrollContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter"]
 layout_mode = 2
-autowrap_mode = 3
-text = "Player URL: (Start host to generate QR & link)"
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
 
-[node name="TableUrlLabel" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/LobbyPanel/LobbyBox"]
+[node name="SetupBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll"]
 layout_mode = 2
-autowrap_mode = 3
-text = "Table Display URL: ----"
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
 
-[node name="StunLabel" type="Label" parent="HubShell/ContentStack/PlayTab/Columns/LobbyPanel/LobbyBox"]
+[node name="ModeLabel" type="Label" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox"]
 layout_mode = 2
-text = "Online P2P STUN: stun:stun.l.google.com:19302"
+theme_override_font_sizes/font_size = 15
+text = "Spielmodus:"
 
-[node name="QrCenter" type="CenterContainer" parent="HubShell/ContentStack/PlayTab/Columns/LobbyPanel/LobbyBox"]
+[node name="ModeOption" type="OptionButton" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox"]
 layout_mode = 2
 
-[node name="QRTextureRect" type="TextureRect" parent="HubShell/ContentStack/PlayTab/Columns/LobbyPanel/LobbyBox/QrCenter"]
-custom_minimum_size = Vector2(140, 140)
+[node name="PlayerCountRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PlayerCountLabel" type="Label" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/PlayerCountRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Spieler / Plätze (2–32+):"
+
+[node name="PlayerCountSpin" type="SpinBox" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/PlayerCountRow"]
+layout_mode = 2
+min_value = 2.0
+max_value = 32.0
+value = 4.0
+
+[node name="UnlimitedLanCheck" type="CheckBox" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/PlayerCountRow"]
+layout_mode = 2
+button_pressed = true
+text = "Unbegrenzt (LAN)"
+
+[node name="ExpansionsHeader" type="Label" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Modi & Erweiterungen (Kombinierbar):"
+
+[node name="ExpansionsGrid" type="GridContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 8
+columns = 2
+
+[node name="NoMercyCheck" type="CheckBox" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/ExpansionsGrid"]
+layout_mode = 2
+text = "🔥 Gnadenlos (+6/+10/Alle)"
+
+[node name="FlipModeCheck" type="CheckBox" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/ExpansionsGrid"]
+layout_mode = 2
+text = "🔄 Flip! (Hell/Dunkel)"
+
+[node name="IncludeCustomCheck" type="CheckBox" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/ExpansionsGrid"]
+layout_mode = 2
+button_pressed = true
+text = "🃏 Eigene Editor-Karten"
+
+[node name="MercyLimitRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/ExpansionsGrid"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="MercyLbl" type="Label" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/ExpansionsGrid/MercyLimitRow"]
+layout_mode = 2
+text = "💀 KO-Limit:"
+
+[node name="MercyLimitSpin" type="SpinBox" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/ExpansionsGrid/MercyLimitRow"]
+layout_mode = 2
+min_value = 0.0
+max_value = 50.0
+value = 0.0
+
+[node name="RulesHeader" type="Label" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Hausregeln:"
+
+[node name="RulesGrid" type="GridContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 8
+columns = 2
+
+[node name="StackD2Check" type="CheckBox" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RulesGrid"]
+layout_mode = 2
+text = "+2 Stapeln"
+
+[node name="StackD4Check" type="CheckBox" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RulesGrid"]
+layout_mode = 2
+text = "+4 Stapeln"
+
+[node name="JumpInCheck" type="CheckBox" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RulesGrid"]
+layout_mode = 2
+text = "Zwischenwerfen (Jump-In)"
+
+[node name="SevenZeroCheck" type="CheckBox" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RulesGrid"]
+layout_mode = 2
+text = "7-Tausch & 0-Rotation"
+
+[node name="DrawMatchCheck" type="CheckBox" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RulesGrid"]
+layout_mode = 2
+text = "Ziehen bis es passt"
+
+[node name="LaunchUnoBtn" type="Button" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+theme_override_font_sizes/font_size = 19
+text = "▶ Alle Ablegen! starten"
+
+[node name="LobbyPanel" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="LobbyBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="LobbyHeader" type="Label" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Multiplayer-Lobby & QR-Beitritt"
+
+[node name="HostControlsRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HostLanBtn" type="Button" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/HostControlsRow"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "LAN / QR Host starten"
+
+[node name="LanIpOption" type="OptionButton" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/HostControlsRow"]
+custom_minimum_size = Vector2(180, 44)
+layout_mode = 2
+tooltip_text = "WLAN/LAN-Adapter auswählen (falls VPN/WSL aktiv ist)"
+
+[node name="QrCenter" type="CenterContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="QrBackplate" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/QrCenter"]
+layout_mode = 2
+
+[node name="QRTextureRect" type="TextureRect" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/QrCenter/QrBackplate"]
+custom_minimum_size = Vector2(188, 188)
 layout_mode = 2
 stretch_mode = 5
+
+[node name="RoomPinLabel" type="Label" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+text = "Raum-PIN: ---- (Offline)"
+
+[node name="JoinUrlRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="JoinUrlLabel" type="Label" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/JoinUrlRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
+text = "Kurz-URL: (Host starten für QR & Kurz-Link)"
+
+[node name="CopyJoinUrlBtn" type="Button" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/JoinUrlRow"]
+layout_mode = 2
+text = "📋 Link kopieren"
+
+[node name="TableUrlLabel" type="Label" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.78, 0.9, 1)
+theme_override_font_sizes/font_size = 13
+autowrap_mode = 3
+text = "Smart-TV Tisch-URL: ----"
+
+[node name="StunLabel" type="Label" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.68, 0.78, 0.92, 1)
+theme_override_font_sizes/font_size = 13
+text = "Online P2P: STUN aktiv • TURN-Server konfigurierbar unter ⚙ Einstellungen"
+autowrap_mode = 3
 
 [node name="FriendsTab" type="PanelContainer" parent="HubShell/ContentStack"]
 visible = false
@@ -269,11 +580,11 @@ theme_override_constants/separation = 12
 [node name="FriendsTitle" type="Label" parent="HubShell/ContentStack/FriendsTab/FriendsBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
-text = "Decentralized Friends List (QR / UUID)"
+text = "Dezentrale Freundesliste (QR / UUID)"
 
 [node name="MyUuidLabel" type="Label" parent="HubShell/ContentStack/FriendsTab/FriendsBox"]
 layout_mode = 2
-text = "Your UUID: ----"
+text = "Deine UUID: ----"
 
 [node name="FriendQrRow" type="HBoxContainer" parent="HubShell/ContentStack/FriendsTab/FriendsBox"]
 layout_mode = 2
@@ -288,7 +599,7 @@ stretch_mode = 5
 layout_mode = 2
 size_flags_horizontal = 3
 editable = false
-placeholder_text = "Your friend QR payload URI"
+placeholder_text = "Dein Freundes-QR-Payload"
 
 [node name="AddFriendRow" type="HBoxContainer" parent="HubShell/ContentStack/FriendsTab/FriendsBox"]
 layout_mode = 2
@@ -296,11 +607,11 @@ layout_mode = 2
 [node name="AddFriendPayloadEdit" type="LineEdit" parent="HubShell/ContentStack/FriendsTab/FriendsBox/AddFriendRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-placeholder_text = "Paste friend's deckbox://friend?... payload here"
+placeholder_text = "Freundes-Code (deckbox://friend?...) einfügen"
 
 [node name="AddFriendBtn" type="Button" parent="HubShell/ContentStack/FriendsTab/FriendsBox/AddFriendRow"]
 layout_mode = 2
-text = "Add Friend"
+text = "Hinzufügen"
 
 [node name="FriendsStatusLabel" type="Label" parent="HubShell/ContentStack/FriendsTab/FriendsBox"]
 layout_mode = 2
@@ -326,6 +637,189 @@ layout_mode = 1
 visible = false
 layout_mode = 1
 
+[node name="SettingsTab" type="MarginContainer" parent="HubShell/ContentStack"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SettingsColumns" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="VisualSettingsPanel" type="PanelContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VisualBox" type="VBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="VisualTitle" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "🎨 Darstellung, 3D-Tisch & Spielgefühl"
+
+[node name="LanguageRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+layout_mode = 2
+
+[node name="LanguageLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/LanguageRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Sprache / Language:"
+
+[node name="LanguageOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/LanguageRow"]
+custom_minimum_size = Vector2(220, 38)
+layout_mode = 2
+
+[node name="ViewModeRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+layout_mode = 2
+
+[node name="ViewLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/ViewModeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Standard-Ansichtsmodus:"
+
+[node name="ViewModeOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/ViewModeRow"]
+custom_minimum_size = Vector2(220, 38)
+layout_mode = 2
+
+[node name="SkinRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+layout_mode = 2
+
+[node name="SkinLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/SkinRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Karten-Design:"
+
+[node name="SkinOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/SkinRow"]
+custom_minimum_size = Vector2(220, 38)
+layout_mode = 2
+
+[node name="ThemeRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+layout_mode = 2
+
+[node name="ThemeLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/ThemeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "3D-Tisch-Theme:"
+
+[node name="ThemeOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/ThemeRow"]
+custom_minimum_size = Vector2(220, 38)
+layout_mode = 2
+
+[node name="QualityRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+layout_mode = 2
+
+[node name="QualityLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/QualityRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Grafik-Qualität:"
+
+[node name="QualityOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/QualityRow"]
+custom_minimum_size = Vector2(220, 38)
+layout_mode = 2
+
+[node name="SpeedRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+layout_mode = 2
+
+[node name="SpeedLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/SpeedRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "KI-Spieltempo:"
+
+[node name="BotSpeedOption" type="OptionButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/SpeedRow"]
+custom_minimum_size = Vector2(220, 38)
+layout_mode = 2
+
+[node name="ColorblindCheck" type="CheckButton" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+layout_mode = 2
+button_pressed = true
+text = "Farbenblind-Symbole auf Karten & Farbrad aktivieren"
+
+[node name="Spacer" type="Control" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SaveVisualSettingsBtn" type="Button" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "💾 Darstellung & Einstellungen speichern"
+
+[node name="NetworkSettingsPanel" type="PanelContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="NetBox" type="VBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="NetTitle" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "🌐 Online-Netzwerk, LAN-Hilfe & TURN-Server"
+
+[node name="TurnUrlLbl" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox"]
+layout_mode = 2
+text = "Eigener TURN-Server (optional, für strikte Router/Mobilfunk):"
+
+[node name="TurnUrlEdit" type="LineEdit" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox"]
+layout_mode = 2
+placeholder_text = "z. B. turn:openrelay.metered.ca:80 oder turn:dein-server.de:3478"
+
+[node name="TurnCredsRow" type="HBoxContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TurnUserEdit" type="LineEdit" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/TurnCredsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "TURN-Benutzername (optional)"
+
+[node name="TurnPassEdit" type="LineEdit" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/TurnCredsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+secret = true
+placeholder_text = "TURN-Passwort / Token"
+
+[node name="SaveNetworkSettingsBtn" type="Button" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "💾 Netzwerk & TURN speichern"
+
+[node name="SettingsStatusLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.92, 0.68, 1)
+text = ""
+
+[node name="TurnHelpPanel" type="PanelContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TurnHelpScroll" type="ScrollContainer" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/TurnHelpPanel"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="TurnHelpLabel" type="Label" parent="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/TurnHelpPanel/TurnHelpScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.8, 0.87, 0.96, 1)
+theme_override_font_sizes/font_size = 13
+text = "📘 So funktionieren LAN-QR, STUN und TURN einfach erklärt:
+
+1. Im selben WLAN (QR-Code / Kurz-URL):
+Du brauchst KEINEN TURN-Server! Starte im Match-Setup den LAN-Host — DeckBox wählt automatisch deine echte WLAN-IP (z. B. 192.168.178.x) und zeigt die kurze Adresse http://<IP>:8080 an. Falls die Seite auf dem Handy nicht lädt: (a) VPN auf dem PC pausieren oder im Lobby-Dropdown die richtige WLAN-IP wählen, (b) in der Windows-Firewall eingehende Verbindungen für DeckBox auf Port 8080 & 8081 erlauben.
+
+2. Online über das Internet (STUN — standardmäßig aktiv):
+STUN (Google & Cloudflare) hilft zwei PCs dabei, ihre öffentliche Adresse zu finden und sich direkt miteinander zu verbinden.
+
+3. Wann brauche ich einen TURN-Server?
+Manche Router oder Mobilfunk-Netze (Symmetric NAT) blockieren direkte Verbindungen. Ein TURN-Server springt dann als verschlüsselte Brücke ein. Du kannst hier z. B. kostenlose Zugangsdaten von Metered OpenRelay, Cloudflare Calls oder einen eigenen coturn-Server eintragen."
+autowrap_mode = 3
+
 [node name="UpdaterTab" type="PanelContainer" parent="HubShell/ContentStack"]
 visible = false
 layout_mode = 1
@@ -342,15 +836,15 @@ theme_override_constants/separation = 12
 [node name="UpdaterHeader" type="Label" parent="HubShell/ContentStack/UpdaterTab/UpdaterBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
-text = "Release Updater & Multiplayer Version Guard"
+text = "Auto-Updater & Multiplayer-Versionsschutz"
 
 [node name="CheckUpdatesBtn" type="Button" parent="HubShell/ContentStack/UpdaterTab/UpdaterBox"]
 layout_mode = 2
-text = "Query GitHub Releases (Update / Downgrade)"
+text = "GitHub Releases abfragen (Update / Downgrade)"
 
 [node name="UpdaterStatusLabel" type="Label" parent="HubShell/ContentStack/UpdaterTab/UpdaterBox"]
 layout_mode = 2
-text = "Ready to check releases for RaptorClash/deckbox."
+text = "Bereit für Release-Prüfung (RaptorClash/deckbox)."
 
 [node name="ReleasesList" type="ItemList" parent="HubShell/ContentStack/UpdaterTab/UpdaterBox"]
 layout_mode = 2
@@ -364,20 +858,35 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 1
 
 [node name="GitHubReleasesRequest" type="HTTPRequest" parent="."]
 
-[connection signal="pressed" from="HubShell/TopBar/PlayTabBtn" to="." method="select_tab" binds= ["play"]]
-[connection signal="pressed" from="HubShell/TopBar/FriendsTabBtn" to="." method="select_tab" binds= ["friends"]]
-[connection signal="pressed" from="HubShell/TopBar/PacksTabBtn" to="." method="select_tab" binds= ["pack_editor"]]
-[connection signal="pressed" from="HubShell/TopBar/ProfileTabBtn" to="." method="select_tab" binds= ["profile"]]
-[connection signal="pressed" from="HubShell/TopBar/StatsTabBtn" to="." method="select_tab" binds= ["stats"]]
-[connection signal="pressed" from="HubShell/TopBar/UpdaterTabBtn" to="." method="select_tab" binds= ["updater"]]
-[connection signal="item_selected" from="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/ThemeOption" to="." method="_on_preview_setting_changed"]
-[connection signal="item_selected" from="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/QualityOption" to="." method="_on_preview_setting_changed"]
-[connection signal="pressed" from="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/LaunchUnoBtn" to="." method="start_uno_match"]
-[connection signal="pressed" from="HubShell/ContentStack/PlayTab/Columns/SetupPanel/SetupBox/ExternalRow/LoadPckBtn" to="." method="_on_load_external_pck_pressed"]
-[connection signal="pressed" from="HubShell/ContentStack/PlayTab/Columns/LobbyPanel/LobbyBox/HostLanBtn" to="." method="_on_host_lan_btn_pressed"]
+[connection signal="pressed" from="HubShell/TopBarPanel/TopBar/PlayTabBtn" to="." method="select_tab" binds= ["play"]]
+[connection signal="pressed" from="HubShell/TopBarPanel/TopBar/FriendsTabBtn" to="." method="select_tab" binds= ["friends"]]
+[connection signal="pressed" from="HubShell/TopBarPanel/TopBar/PacksTabBtn" to="." method="select_tab" binds= ["pack_editor"]]
+[connection signal="pressed" from="HubShell/TopBarPanel/TopBar/ProfileTabBtn" to="." method="select_tab" binds= ["profile"]]
+[connection signal="pressed" from="HubShell/TopBarPanel/TopBar/StatsTabBtn" to="." method="select_tab" binds= ["stats"]]
+[connection signal="pressed" from="HubShell/TopBarPanel/TopBar/SettingsTabBtn" to="." method="select_tab" binds= ["settings"]]
+[connection signal="pressed" from="HubShell/TopBarPanel/TopBar/UpdaterTabBtn" to="." method="select_tab" binds= ["updater"]]
+[connection signal="pressed" from="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/AlleAblegenCard/CardBox/SelectUnoBtn" to="." method="select_game" binds= ["uno"]]
+[connection signal="pressed" from="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/JoinAddressRow/JoinDirectBtn" to="." method="_on_join_direct_pressed"]
+[connection signal="pressed" from="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/LanRoomsRow/LanJoinBtns/JoinLanRoomBtn" to="." method="_on_join_selected_lan_room_pressed"]
+[connection signal="pressed" from="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/LanRoomsRow/LanJoinBtns/RefreshLanBtn" to="." method="_on_refresh_lan_rooms_pressed"]
+[connection signal="pressed" from="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox/ExternalRow/LoadPckBtn" to="." method="_on_load_external_pck_pressed"]
+[connection signal="pressed" from="HubShell/ContentStack/PlayTab/MatchSetupView/SetupTopBar/BarRow/BackToGamesBtn" to="." method="show_game_selector"]
+[connection signal="pressed" from="HubShell/ContentStack/PlayTab/MatchSetupView/SetupTopBar/BarRow/OpenSettingsShortcutBtn" to="." method="select_tab" binds= ["settings"]]
+[connection signal="toggled" from="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/ExpansionsGrid/NoMercyCheck" to="." method="_on_no_mercy_toggled"]
+[connection signal="pressed" from="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/LaunchUnoBtn" to="." method="start_uno_match"]
+[connection signal="pressed" from="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/HostControlsRow/HostLanBtn" to="." method="_on_host_lan_btn_pressed"]
+[connection signal="item_selected" from="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/HostControlsRow/LanIpOption" to="." method="_on_lan_ip_selected"]
+[connection signal="pressed" from="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/JoinUrlRow/CopyJoinUrlBtn" to="." method="_on_copy_join_url_pressed"]
+[connection signal="item_selected" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/LanguageRow/LanguageOption" to="." method="_on_language_option_selected"]
+[connection signal="item_selected" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/SkinRow/SkinOption" to="." method="_on_preview_setting_changed"]
+[connection signal="item_selected" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/ThemeRow/ThemeOption" to="." method="_on_preview_setting_changed"]
+[connection signal="item_selected" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/QualityRow/QualityOption" to="." method="_on_preview_setting_changed"]
+[connection signal="pressed" from="HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/SaveVisualSettingsBtn" to="." method="save_settings"]
+[connection signal="pressed" from="HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/SaveNetworkSettingsBtn" to="." method="save_settings"]
 [connection signal="pressed" from="HubShell/ContentStack/FriendsTab/FriendsBox/AddFriendRow/AddFriendBtn" to="." method="_on_add_friend_pressed"]
 [connection signal="pressed" from="HubShell/ContentStack/UpdaterTab/UpdaterBox/CheckUpdatesBtn" to="." method="_on_check_updates_pressed"]
 [connection signal="request_completed" from="GitHubReleasesRequest" to="." method="_on_github_releases_completed"]

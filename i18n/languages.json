@@ -1,0 +1,15 @@
+[
+  { "code": "en", "flag": "🇬🇧", "nameNative": "English", "nameEn": "English" },
+  { "code": "de", "flag": "🇩🇪", "nameNative": "Deutsch", "nameEn": "German" },
+  { "code": "fr", "flag": "🇫🇷", "nameNative": "Français", "nameEn": "French" },
+  { "code": "es", "flag": "🇪🇸", "nameNative": "Español", "nameEn": "Spanish" },
+  { "code": "it", "flag": "🇮🇹", "nameNative": "Italiano", "nameEn": "Italian" },
+  { "code": "ja", "flag": "🇯🇵", "nameNative": "日本語", "nameEn": "Japanese" },
+  { "code": "ko", "flag": "🇰🇷", "nameNative": "한국어", "nameEn": "Korean" },
+  { "code": "zh-Hans", "flag": "🇨🇳", "nameNative": "简体中文", "nameEn": "Simplified Chinese" },
+  { "code": "zh-Hant", "flag": "🇹🇼", "nameNative": "繁體中文", "nameEn": "Traditional Chinese" },
+  { "code": "pt", "flag": "🇵🇹", "nameNative": "Português", "nameEn": "Portuguese" },
+  { "code": "nl", "flag": "🇳🇱", "nameNative": "Nederlands", "nameEn": "Dutch" },
+  { "code": "pl", "flag": "🇵🇱", "nameNative": "Polski", "nameEn": "Polish" },
+  { "code": "ru", "flag": "🇷🇺", "nameNative": "Русский", "nameEn": "Russian" }
+]

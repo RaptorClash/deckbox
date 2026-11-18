@@ -71,7 +71,7 @@ func auto_register_builtin_cartridges() -> void:
 		if uno_script != null:
 			register_cartridge("uno", uno_script, {
 				"game_id": "uno",
-				"display_name": "UNO Reference Game",
+				"display_name": "Alle Ablegen!",
 				"min_players": 2,
-				"max_players": 4
+				"max_players": 999
 			})

@@ -239,3 +239,103 @@ func test_webrtc_manager_encrypted_relay_fallback():
 	assert_not_null(decrypted_payload, "Decryption must succeed with matching session keys")
 	assert_eq(decrypted_payload["action"], "PLAY_CARD", "Decrypted action must match original")
 	assert_eq(decrypted_payload["card"]["id"], "r5", "Decrypted card id must match")
+
+## Tier 4: LAN IP Ranking, Short Join URL, /api/room Endpoint & Custom TURN Configuration
+func test_http_host_lan_ip_ranking_and_preferred_ip():
+	if _http_script == null:
+		pass_test("Pending http_host implementation")
+		return
+
+	var ranked = _http_script.rank_ipv4_addresses([
+		"127.0.0.1",
+		"169.254.12.5",
+		"172.24.80.1",
+		"192.168.56.1",
+		"10.0.0.15",
+		"192.168.178.34",
+		"::1"
+	])
+	assert_false("127.0.0.1" in ranked, "Loopback must be filtered out")
+	assert_false("169.254.12.5" in ranked, "APIPA link-local must be filtered out")
+	assert_false("::1" in ranked, "IPv6 must be filtered out")
+	assert_eq(ranked[0], "192.168.178.34", "Real home LAN 192.168.x.x (non-VirtualBox) must rank first")
+	assert_lt(ranked.find("10.0.0.15"), ranked.find("172.24.80.1"), "10.x must rank ahead of 172.16-31.x (WSL/Docker)")
+	assert_lt(ranked.find("10.0.0.15"), ranked.find("192.168.56.1"), "VirtualBox host-only 192.168.56.1 must be deprioritized")
+
+	var host = _http_script.new()
+	var ips = host.get_lan_ips()
+	assert_true(ips is Array, "get_lan_ips() must return Array")
+	host.set_preferred_ip("192.168.178.99")
+	assert_eq(host.get_lan_ip(), "192.168.178.99", "set_preferred_ip must override get_lan_ip()")
+
+func test_http_host_short_url_and_room_api_endpoint():
+	if _http_script == null:
+		pass_test("Pending http_host implementation")
+		return
+
+	var host = _http_script.new()
+	host.set_preferred_ip("192.168.178.42")
+	var err = host.start(0, "127.0.0.1", "res://web_lite")
+	assert_eq(err, OK)
+	var port = host.get_port()
+
+	var short_url = host.get_serve_url("", "player", true)
+	assert_eq(short_url, "http://192.168.178.42:%d" % port, "Short URL must omit query params for easy typing & QR")
+
+	host.set_room_metadata({
+		"room_code": "4912",
+		"ws_port": 8081,
+		"role": "player",
+		"game_name": "Alle Ablegen!"
+	})
+
+	var client = StreamPeerTCP.new()
+	var conn_err = client.connect_to_host("127.0.0.1", port)
+	assert_eq(conn_err, OK, "TCP client should initiate connection to HttpHost")
+
+	var req_sent = false
+	var resp_str = ""
+	for _i in range(80):
+		host.poll()
+		client.poll()
+		var st = client.get_status()
+		if st == StreamPeerTCP.STATUS_CONNECTED and not req_sent:
+			client.put_data("GET /api/room HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n".to_utf8_buffer())
+			req_sent = true
+		var avail = client.get_available_bytes()
+		if avail > 0:
+			var chunk = client.get_partial_data(avail)
+			if chunk[0] == OK:
+				resp_str += chunk[1].get_string_from_utf8()
+				if "\"room_code\"" in resp_str:
+					break
+		OS.delay_msec(10)
+
+	client.disconnect_from_host()
+	host.stop()
+
+	assert_true("200 OK" in resp_str, "/api/room must return 200 OK")
+	assert_true("application/json" in resp_str, "/api/room must return application/json")
+	assert_true("\"4912\"" in resp_str, "/api/room JSON must contain room_code 4912")
+	assert_true("8081" in resp_str, "/api/room JSON must contain ws_port 8081")
+	assert_true("Alle Ablegen!" in resp_str, "/api/room JSON must contain game_name")
+
+func test_webrtc_manager_custom_turn_configuration():
+	if _webrtc_script == null:
+		pass_test("Pending webrtc_manager implementation")
+		return
+
+	var mgr = _webrtc_script.new()
+	mgr.configure_custom_turn("turn:turn.example.com:3478", "deckuser", "secret123")
+	var servers = mgr.get_ice_servers()
+	var found_turn = false
+	for s in servers:
+		if s is Dictionary and "turn:turn.example.com:3478" in s.get("urls", []):
+			found_turn = true
+			assert_eq(s.get("username", ""), "deckuser")
+			assert_eq(s.get("credential", ""), "secret123")
+	assert_true(found_turn, "Configured TURN server must appear in get_ice_servers()")
+
+	mgr.configure_custom_turn("")
+	var cleared = mgr.get_ice_servers()
+	assert_eq(cleared.size(), 2, "Clearing TURN server must leave only default STUN servers")

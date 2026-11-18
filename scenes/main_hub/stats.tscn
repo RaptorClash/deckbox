@@ -16,34 +16,38 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = 20.0
-offset_right = -20.0
-offset_bottom = -20.0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = -12.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 15
+theme_override_constants/separation = 14
 
-[node name="Header" type="HBoxContainer" parent="VBoxContainer"]
+[node name="HeaderPanel" type="PanelContainer" parent="VBoxContainer"]
 layout_mode = 2
 
-[node name="Title" type="Label" parent="VBoxContainer/Header"]
+[node name="Header" type="HBoxContainer" parent="VBoxContainer/HeaderPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="VBoxContainer/HeaderPanel/Header"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 24
-text = "Player Statistics & History"
+theme_override_font_sizes/font_size = 22
+text = "📊 Spieler-Statistiken & Match-Historie"
 
-[node name="RefreshButton" type="Button" parent="VBoxContainer/Header"]
+[node name="RefreshButton" type="Button" parent="VBoxContainer/HeaderPanel/Header"]
 layout_mode = 2
-text = "Refresh"
+text = "🔄 Aktualisieren"
 
-[node name="BackButton" type="Button" parent="VBoxContainer/Header"]
+[node name="BackButton" type="Button" parent="VBoxContainer/HeaderPanel/Header"]
 layout_mode = 2
-text = "Back"
+text = "← Zurück"
 
 [node name="SummaryRow" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
-theme_override_constants/separation = 15
+theme_override_constants/separation = 12
 
 [node name="MatchesCard" type="PanelContainer" parent="VBoxContainer/SummaryRow"]
 layout_mode = 2
@@ -51,14 +55,17 @@ size_flags_horizontal = 3
 
 [node name="Box" type="VBoxContainer" parent="VBoxContainer/SummaryRow/MatchesCard"]
 layout_mode = 2
+theme_override_constants/separation = 4
 
 [node name="Title" type="Label" parent="VBoxContainer/SummaryRow/MatchesCard/Box"]
 layout_mode = 2
-text = "Total Matches"
+theme_override_colors/font_color = Color(0.7, 0.8, 0.94, 1)
+theme_override_font_sizes/font_size = 13
+text = "🎮 Matches gesamt"
 
 [node name="Val" type="Label" parent="VBoxContainer/SummaryRow/MatchesCard/Box"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 26
 text = "0"
 
 [node name="WinsCard" type="PanelContainer" parent="VBoxContainer/SummaryRow"]
@@ -67,14 +74,17 @@ size_flags_horizontal = 3
 
 [node name="Box" type="VBoxContainer" parent="VBoxContainer/SummaryRow/WinsCard"]
 layout_mode = 2
+theme_override_constants/separation = 4
 
 [node name="Title" type="Label" parent="VBoxContainer/SummaryRow/WinsCard/Box"]
 layout_mode = 2
-text = "Total Wins"
+theme_override_colors/font_color = Color(0.45, 0.92, 0.65, 1)
+theme_override_font_sizes/font_size = 13
+text = "🏆 Siege"
 
 [node name="Val" type="Label" parent="VBoxContainer/SummaryRow/WinsCard/Box"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 26
 text = "0"
 
 [node name="WinRateCard" type="PanelContainer" parent="VBoxContainer/SummaryRow"]
@@ -83,14 +93,17 @@ size_flags_horizontal = 3
 
 [node name="Box" type="VBoxContainer" parent="VBoxContainer/SummaryRow/WinRateCard"]
 layout_mode = 2
+theme_override_constants/separation = 4
 
 [node name="Title" type="Label" parent="VBoxContainer/SummaryRow/WinRateCard/Box"]
 layout_mode = 2
-text = "Win Rate"
+theme_override_colors/font_color = Color(0.45, 0.82, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "📈 Siegrate"
 
 [node name="Val" type="Label" parent="VBoxContainer/SummaryRow/WinRateCard/Box"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 26
 text = "0.0%"
 
 [node name="StreakCard" type="PanelContainer" parent="VBoxContainer/SummaryRow"]
@@ -99,15 +112,18 @@ size_flags_horizontal = 3
 
 [node name="Box" type="VBoxContainer" parent="VBoxContainer/SummaryRow/StreakCard"]
 layout_mode = 2
+theme_override_constants/separation = 4
 
 [node name="Title" type="Label" parent="VBoxContainer/SummaryRow/StreakCard/Box"]
 layout_mode = 2
-text = "Win Streak"
+theme_override_colors/font_color = Color(0.98, 0.78, 0.24, 1)
+theme_override_font_sizes/font_size = 13
+text = "🔥 Siegesserie"
 
 [node name="Val" type="Label" parent="VBoxContainer/SummaryRow/StreakCard/Box"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "0"
+theme_override_font_sizes/font_size = 24
+text = "0 (Best: 0)"
 
 [node name="PlayTimeCard" type="PanelContainer" parent="VBoxContainer/SummaryRow"]
 layout_mode = 2
@@ -115,40 +131,78 @@ size_flags_horizontal = 3
 
 [node name="Box" type="VBoxContainer" parent="VBoxContainer/SummaryRow/PlayTimeCard"]
 layout_mode = 2
+theme_override_constants/separation = 4
 
 [node name="Title" type="Label" parent="VBoxContainer/SummaryRow/PlayTimeCard/Box"]
 layout_mode = 2
-text = "Play Time"
+theme_override_colors/font_color = Color(0.76, 0.65, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "⏱ Spielzeit"
 
 [node name="Val" type="Label" parent="VBoxContainer/SummaryRow/PlayTimeCard/Box"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 26
 text = "0 min"
 
 [node name="ChartsRow" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/separation = 20
+theme_override_constants/separation = 16
 
-[node name="DonutBox" type="CenterContainer" parent="VBoxContainer/ChartsRow"]
+[node name="DonutPanel" type="PanelContainer" parent="VBoxContainer/ChartsRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="BarBox" type="CenterContainer" parent="VBoxContainer/ChartsRow"]
+[node name="DonutVBox" type="VBoxContainer" parent="VBoxContainer/ChartsRow/DonutPanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ChartTitle" type="Label" parent="VBoxContainer/ChartsRow/DonutPanel/DonutVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Siegesbilanz (Siege vs. Niederlagen)"
+
+[node name="DonutBox" type="CenterContainer" parent="VBoxContainer/ChartsRow/DonutPanel/DonutVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BarPanel" type="PanelContainer" parent="VBoxContainer/ChartsRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="OpponentsLabel" type="Label" parent="VBoxContainer"]
+[node name="BarVBox" type="VBoxContainer" parent="VBoxContainer/ChartsRow/BarPanel"]
 layout_mode = 2
-text = "Opponents Head-to-Head:"
+theme_override_constants/separation = 6
 
-[node name="OpponentsScroll" type="ScrollContainer" parent="VBoxContainer"]
-custom_minimum_size = Vector2(0, 100)
+[node name="ChartTitle" type="Label" parent="VBoxContainer/ChartsRow/BarPanel/BarVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Gespielte Runden nach Spiel"
+
+[node name="BarBox" type="CenterContainer" parent="VBoxContainer/ChartsRow/BarPanel/BarVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="OpponentsPanel" type="PanelContainer" parent="VBoxContainer"]
 layout_mode = 2
 
-[node name="OpponentsList" type="VBoxContainer" parent="VBoxContainer/OpponentsScroll"]
+[node name="OpponentsVBox" type="VBoxContainer" parent="VBoxContainer/OpponentsPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="OpponentsLabel" type="Label" parent="VBoxContainer/OpponentsPanel/OpponentsVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "⚔ Rivalen & Direkte Duelle"
+
+[node name="OpponentsScroll" type="ScrollContainer" parent="VBoxContainer/OpponentsPanel/OpponentsVBox"]
+custom_minimum_size = Vector2(0, 110)
+layout_mode = 2
+
+[node name="OpponentsList" type="VBoxContainer" parent="VBoxContainer/OpponentsPanel/OpponentsVBox/OpponentsScroll"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_constants/separation = 6
 
-[connection signal="pressed" from="VBoxContainer/Header/RefreshButton" to="." method="_on_refresh_pressed"]
-[connection signal="pressed" from="VBoxContainer/Header/BackButton" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="VBoxContainer/HeaderPanel/Header/RefreshButton" to="." method="_on_refresh_pressed"]
+[connection signal="pressed" from="VBoxContainer/HeaderPanel/Header/BackButton" to="." method="_on_back_pressed"]

@@ -5,10 +5,15 @@ extends RefCounted
 
 const CURRENT_SCHEMA_VERSION: int = 1
 const ALLOWED_GAMES: Array[String] = ["uno", "*"]
-const ALLOWED_CARD_COLORS: Array[String] = ["red", "blue", "green", "yellow", "wild", "special", "colorless"]
+const ALLOWED_CARD_COLORS: Array[String] = [
+	"red", "blue", "green", "yellow",
+	"pink", "teal", "purple", "orange",
+	"wild", "special", "colorless"
+]
 const ALLOWED_PRIMITIVE_TYPES: Array[String] = [
 	"draw_cards", "skip_next", "reverse", "choose_color",
-	"swap_hands", "discard_color", "negate_penalty", "custom_prompt"
+	"swap_hands", "discard_color", "negate_penalty", "custom_prompt",
+	"flip_side", "skip_everyone"
 ]
 const ALLOWED_TARGETS: Array[String] = ["next", "all_opponents", "chosen", "self"]
 const ALLOWED_SWAP_TARGETS: Array[String] = ["choose_opponent", "left", "right"]
@@ -41,8 +46,8 @@ static func validate_action(action: Variant) -> Dictionary:
 	match type_str:
 		"draw_cards":
 			var count = int(action.get("count", 1))
-			if count < 1 or count > 10:
-				errors.append("draw_cards count must be between 1 and 10, got %d" % count)
+			if count < 1 or count > 20:
+				errors.append("draw_cards count must be between 1 and 20, got %d" % count)
 			var target = str(action.get("target", "next"))
 			if not ALLOWED_TARGETS.has(target):
 				errors.append("Invalid draw_cards target: '%s'" % target)

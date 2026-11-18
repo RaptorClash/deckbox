@@ -19,12 +19,28 @@ var _is_host: bool = false
 var _peer_id: String = "local_peer"
 var _session_key: PackedByteArray = PackedByteArray()
 var _crypto: Crypto = Crypto.new()
+var _custom_turn_servers: Array = []
 
 # peer_id -> Dictionary { "pc": WebRTCPeerConnection, "dc": WebRTCDataChannel, "is_initiator": bool, "connected": bool, "created_at": int }
 var _peers: Dictionary = {}
 
+func configure_custom_turn(turn_url: String, username: String = "", credential: String = "") -> void:
+	_custom_turn_servers.clear()
+	var clean_url = turn_url.strip_edges()
+	if clean_url.is_empty():
+		return
+	var entry: Dictionary = { "urls": [clean_url] }
+	if not username.strip_edges().is_empty():
+		entry["username"] = username.strip_edges()
+	if not credential.is_empty():
+		entry["credential"] = credential
+	_custom_turn_servers.append(entry)
+
 func get_ice_servers() -> Array:
-	return ICE_SERVERS.duplicate(true)
+	var combined = ICE_SERVERS.duplicate(true)
+	for srv in _custom_turn_servers:
+		combined.append(srv.duplicate(true))
+	return combined
 
 func initialize_session(room_code: String, rules_hash: String, is_host: bool, peer_id: String = "local_peer") -> void:
 	_room_code = room_code
@@ -78,7 +94,7 @@ func add_peer(peer_id: String, is_initiator: bool) -> void:
 		remove_peer(peer_id)
 
 	var pc = WebRTCPeerConnection.new()
-	var config = { "iceServers": ICE_SERVERS }
+	var config = { "iceServers": get_ice_servers() }
 	var err = pc.initialize(config)
 	if err != OK:
 		return

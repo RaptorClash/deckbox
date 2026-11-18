@@ -42,6 +42,13 @@ func create_default_profile(display_name: String = "Player") -> Dictionary:
 		"preferred_back": DEFAULT_CARD_BACK,
 		"theme_preset": DEFAULT_THEME_PRESET,
 		"quality_preset": DEFAULT_QUALITY_PRESET,
+		"view_mode": "full_3d",
+		"card_skin": "classic_arcade",
+		"bot_speed": "normal",
+		"turn_url": "",
+		"turn_username": "",
+		"turn_credential": "",
+		"language": "",
 		"colorblind_mode": false,
 		"created_at": now,
 		"updated_at": now,
@@ -160,6 +167,20 @@ func migrate_schema(data: Dictionary) -> Dictionary:
 			migrated["preferred_card_back"] = migrated["preferred_back"]
 		if not migrated.has("uuid") and migrated.has("player_id"):
 			migrated["uuid"] = migrated["player_id"]
+		if not migrated.has("view_mode"):
+			migrated["view_mode"] = "full_3d"
+		if not migrated.has("card_skin"):
+			migrated["card_skin"] = "classic_arcade"
+		if not migrated.has("bot_speed"):
+			migrated["bot_speed"] = "normal"
+		if not migrated.has("turn_url"):
+			migrated["turn_url"] = ""
+		if not migrated.has("turn_username"):
+			migrated["turn_username"] = ""
+		if not migrated.has("turn_credential"):
+			migrated["turn_credential"] = ""
+		if not migrated.has("language"):
+			migrated["language"] = ""
 
 	return migrated
 

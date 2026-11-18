@@ -1,19 +1,28 @@
 # uno_bot_ai.gd
-# Tactical Bot AI Decision Evaluator and Disconnect Takeover Heuristics
+# Tactical Bot AI Decision Evaluator supporting Classic, No Mercy Stacking, UNO Flip Dark Side & Custom Cards
 class_name UnoBotAi
 extends RefCounted
 
-func choose_wild_color(hand: Array) -> String:
-	var counts = { "red": 0, "blue": 0, "green": 0, "yellow": 0 }
+const UnoHouseRulesScript = preload("res://games/uno/uno_house_rules.gd")
+
+const LIGHT_COLS: Array[String] = ["red", "blue", "green", "yellow"]
+const DARK_COLS: Array[String] = ["pink", "teal", "purple", "orange"]
+
+func choose_wild_color(hand: Array, active_side: String = "light") -> String:
+	var valid_cols: Array[String] = DARK_COLS if active_side == "dark" else LIGHT_COLS
+	var counts: Dictionary = {}
+	for c_key in valid_cols:
+		counts[c_key] = 0
+
 	for c in hand:
 		if c is Dictionary:
 			var col = str(c.get("color", ""))
 			if counts.has(col):
 				counts[col] += 1
 
-	var best_color = "red"
+	var best_color = valid_cols[0]
 	var max_count = -1
-	for col in ["red", "blue", "green", "yellow"]:
+	for col in valid_cols:
 		if counts[col] > max_count:
 			max_count = counts[col]
 			best_color = col
@@ -28,7 +37,7 @@ func is_card_playable(card: Dictionary, top_discard: Dictionary, active_color: S
 	var target_col = active_color if not active_color.is_empty() else str(top_discard.get("color", ""))
 	var target_val = str(top_discard.get("value", ""))
 
-	if c_col == "wild":
+	if c_col in ["wild", "special", "colorless"]:
 		return true
 	if c_col == target_col:
 		return true
@@ -41,29 +50,40 @@ func choose_action(hand: Array, top_discard: Dictionary, difficulty: String = "t
 
 func choose_action_with_context(hand: Array, top_discard: Dictionary, match_context: Dictionary, _difficulty: String = "tactical") -> Dictionary:
 	var pending_penalty = int(match_context.get("pending_penalty_draws", 0))
+	var last_step = int(match_context.get("last_penalty_step", 0))
 	var active_color = str(match_context.get("active_color", ""))
+	var active_side = str(match_context.get("active_side", "light"))
 
-	# If there is a pending penalty draw, bot must counter-stack if possible, otherwise draw penalty
+	# If there is a pending penalty draw, bot must counter-stack (or use shield) if allowed
 	if pending_penalty > 0:
+		var prog = bool(match_context.get("progressive_stacking", false))
 		var can_stack_two = bool(match_context.get("stacking_draw_two", true))
 		var can_stack_four = bool(match_context.get("stacking_draw_four", true))
+
+		# First check shield custom cards
 		for c in hand:
-			if c is Dictionary:
-				var val = str(c.get("value", ""))
-				if val == "draw_two" and can_stack_two:
-					return {
-						"type": "ACTION_PLAY_CARD",
-						"card_id": str(c.get("id", c.get("uid", "")))
-					}
+			if c is Dictionary and UnoHouseRulesScript.card_has_action(c, "negate_penalty"):
+				return _build_play(c, hand, active_side)
+
+		if prog:
+			var best_stack: Dictionary = {}
+			var min_pen = 999
+			for c in hand:
+				if c is Dictionary:
+					var pen = UnoHouseRulesScript.get_card_draw_penalty(c)
+					if pen > 0 and pen >= maxi(2, last_step) and pen < min_pen:
+						min_pen = pen
+						best_stack = c
+			if not best_stack.is_empty():
+				return _build_play(best_stack, hand, active_side)
+			return { "type": "ACTION_DRAW_CARD" }
+
 		for c in hand:
-			if c is Dictionary:
-				var val = str(c.get("value", ""))
-				if val == "wild_draw_four" and can_stack_four:
-					return {
-						"type": "ACTION_PLAY_CARD",
-						"card_id": str(c.get("id", c.get("uid", ""))),
-						"chosen_color": choose_wild_color(hand)
-					}
+			if c is Dictionary and str(c.get("value", "")) == "draw_two" and can_stack_two:
+				return _build_play(c, hand, active_side)
+		for c in hand:
+			if c is Dictionary and str(c.get("value", "")) == "wild_draw_four" and can_stack_four:
+				return _build_play(c, hand, active_side)
 		return { "type": "ACTION_DRAW_CARD" }
 
 	var playable_cards: Array[Dictionary] = []
@@ -74,55 +94,40 @@ func choose_action_with_context(hand: Array, top_discard: Dictionary, match_cont
 	if playable_cards.is_empty():
 		return { "type": "ACTION_DRAW_CARD" }
 
-	# 1. Attack leader: if next player has 1 card or called UNO, prioritize action attacks
+	# 1. Attack leader if close to winning
 	var next_card_count = int(match_context.get("next_player_card_count", 99))
 	var next_called_uno = bool(match_context.get("next_player_called_uno", false))
-	if next_called_uno or next_card_count <= 1:
+	if next_called_uno or next_card_count <= 2:
 		for c in playable_cards:
 			var val = str(c.get("value", ""))
-			if val in ["skip", "draw_two", "reverse"]:
-				return {
-					"type": "ACTION_PLAY_CARD",
-					"card_id": str(c.get("id", c.get("uid", "")))
-				}
+			if val in ["skip", "skip_everyone", "draw_two", "draw_four", "draw_five", "reverse", "discard_all"]:
+				return _build_play(c, hand, active_side)
 		for c in playable_cards:
-			if str(c.get("value", "")) == "wild_draw_four":
-				return {
-					"type": "ACTION_PLAY_CARD",
-					"card_id": str(c.get("id", c.get("uid", ""))),
-					"chosen_color": choose_wild_color(hand)
-				}
+			if str(c.get("value", "")) in ["wild_draw_ten", "wild_draw_six", "wild_draw_four", "wild_reverse_draw_four", "wild_draw_color"]:
+				return _build_play(c, hand, active_side)
 
-	# 2. Prioritize regular color/number cards over Wilds
+	# 2. Prioritize regular colored cards / Discard All over Wilds
 	var regular_playable: Array[Dictionary] = []
 	for c in playable_cards:
-		if str(c.get("color", "")) != "wild":
+		if not (str(c.get("color", "")) in ["wild", "special", "colorless"]):
 			regular_playable.append(c)
 
 	if not regular_playable.is_empty():
-		# Save Draw Two / actions if number cards exist, or play regular
-		var chosen = regular_playable[0]
-		return {
-			"type": "ACTION_PLAY_CARD",
-			"card_id": str(chosen.get("id", chosen.get("uid", "")))
-		}
+		return _build_play(regular_playable[0], hand, active_side)
 
-	# 3. Fallback: play standard Wild if held
+	# 3. Play standard Wild before heavy Wilds
 	for c in playable_cards:
 		if str(c.get("value", "")) == "wild":
-			return {
-				"type": "ACTION_PLAY_CARD",
-				"card_id": str(c.get("id", c.get("uid", ""))),
-				"chosen_color": choose_wild_color(hand)
-			}
+			return _build_play(c, hand, active_side)
 
-	# 4. Fallback: play Wild Draw Four
-	for c in playable_cards:
-		if str(c.get("value", "")) == "wild_draw_four":
-			return {
-				"type": "ACTION_PLAY_CARD",
-				"card_id": str(c.get("id", c.get("uid", ""))),
-				"chosen_color": choose_wild_color(hand)
-			}
+	# 4. Play any remaining Wild / Custom card
+	return _build_play(playable_cards[0], hand, active_side)
 
-	return { "type": "ACTION_DRAW_CARD" }
+func _build_play(c: Dictionary, hand: Array, active_side: String) -> Dictionary:
+	var act = {
+		"type": "ACTION_PLAY_CARD",
+		"card_id": str(c.get("id", c.get("uid", "")))
+	}
+	if str(c.get("color", "")) in ["wild", "special", "colorless"]:
+		act["chosen_color"] = choose_wild_color(hand, active_side)
+	return act

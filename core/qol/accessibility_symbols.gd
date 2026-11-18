@@ -7,6 +7,10 @@ const SYMBOL_MAP = {
 	"blue":   { "shape": "diamond",  "char": "◆", "name": "Diamond",  "color": Color(0.18, 0.45, 0.95) },
 	"green":  { "shape": "circle",   "char": "●", "name": "Circle",   "color": Color(0.18, 0.75, 0.32) },
 	"yellow": { "shape": "star",     "char": "★", "name": "Star",     "color": Color(0.95, 0.82, 0.10) },
+	"pink":   { "shape": "triangle", "char": "▲", "name": "Triangle", "color": Color(0.96, 0.25, 0.65) },
+	"teal":   { "shape": "diamond",  "char": "◆", "name": "Diamond",  "color": Color(0.10, 0.82, 0.80) },
+	"purple": { "shape": "circle",   "char": "●", "name": "Circle",   "color": Color(0.62, 0.24, 0.95) },
+	"orange": { "shape": "star",     "char": "★", "name": "Star",     "color": Color(1.00, 0.52, 0.10) },
 	"wild":   { "shape": "asterisk", "char": "✱", "name": "Asterisk", "color": Color(0.65, 0.25, 0.85) }
 }
 
@@ -57,7 +61,7 @@ static func draw_card_symbol(canvas: CanvasItem, center: Vector2, radius: float,
 		return
 	var key = color_name.to_lower()
 	match key:
-		"red": # Triangle
+		"red", "pink": # Triangle
 			var pts = PackedVector2Array([
 				center + Vector2(0, -radius),
 				center + Vector2(-radius * 0.866, radius * 0.5),
@@ -65,7 +69,7 @@ static func draw_card_symbol(canvas: CanvasItem, center: Vector2, radius: float,
 			])
 			canvas.draw_colored_polygon(pts, fill_color)
 
-		"blue": # Diamond
+		"blue", "teal": # Diamond
 			var pts = PackedVector2Array([
 				center + Vector2(0, -radius),
 				center + Vector2(radius * 0.75, 0),
@@ -74,10 +78,10 @@ static func draw_card_symbol(canvas: CanvasItem, center: Vector2, radius: float,
 			])
 			canvas.draw_colored_polygon(pts, fill_color)
 
-		"green": # Circle
+		"green", "purple": # Circle
 			canvas.draw_circle(center, radius, fill_color)
 
-		"yellow": # Star (5 points)
+		"yellow", "orange": # Star (5 points)
 			var pts = PackedVector2Array()
 			var inner_r = radius * 0.4
 			for i in range(10):

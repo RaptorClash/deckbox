@@ -72,6 +72,7 @@ def load_languages_config(custom_path: Path = None):
     """Loads configured languages from JSON file or falls back to standard 13 languages."""
     candidates = [
         custom_path,
+        REPO_ROOT / "i18n" / "languages.json",
         REPO_ROOT / "lib" / "i18n" / "languages.json",
         REPO_ROOT / "locales" / "languages.json",
         REPO_ROOT / "tool" / "languages.json",
@@ -427,6 +428,37 @@ def main():
             print(f"Error: {doc_path} not found.")
             sys.exit(1)
         print(f"Translating markdown doc: {doc_path}")
+
+    if args.strings:
+        strings_path = Path(args.strings).resolve()
+        if not strings_path.exists():
+            print(f"Error: {strings_path} not found.")
+            sys.exit(1)
+        with open(strings_path, "r", encoding="utf-8") as f:
+            source_data = json.load(f)
+        for lang_entry in languages:
+            code = lang_entry["code"] if isinstance(lang_entry, dict) else str(lang_entry)
+            if code == args.source_lang:
+                continue
+            target_path = strings_path.parent / f"{code}.json"
+            existing = {}
+            if target_path.exists():
+                with open(target_path, "r", encoding="utf-8") as tf:
+                    existing = json.load(tf)
+            updated = {}
+            missing_count = 0
+            for k, v in source_data.items():
+                if k in existing and str(existing[k]).strip():
+                    updated[k] = existing[k]
+                else:
+                    missing_count += 1
+                    updated[k] = v if args.dry_run else translate_single_string(str(v), code, cache, source_lang=args.source_lang)
+            if missing_count > 0:
+                print(f"  [{code}] Translated {missing_count} missing string(s) -> {target_path.name}")
+                if not args.dry_run:
+                    with open(target_path, "w", encoding="utf-8") as tf:
+                        json.dump(updated, tf, indent=2, ensure_ascii=False)
+                        tf.write("\n")
 
     save_cache(cache)
     print("Done.")
