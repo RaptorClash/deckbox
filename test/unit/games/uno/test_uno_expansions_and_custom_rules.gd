@@ -326,3 +326,126 @@ func test_uno_flip_opposite_side_card_helper_and_display_name() -> void:
 	var opp_when_dark = rules_script.get_opposite_side_card(dark_sample, "dark")
 	assert_eq(opp_when_dark.get("color"), "blue", "Opposite of dark teal draw_five must be light blue")
 	assert_eq(opp_when_dark.get("value"), "draw_two", "Opposite value of dark draw_five must be light draw_two")
+
+func test_hand_sort_and_shuffle_and_uno_catch_and_plus_four_challenge_with_hand_reveal() -> void:
+	var game = _cartridge_script.new()
+	game.init_match("challenge_test", _make_players(3), {}, 42)
+	game.start_round()
+
+	# 1. Hand Sorting (Color & Value) and Shuffle
+	game.debug_set_state({
+		"top_discard": { "id": "top", "color": "red", "value": "5" },
+		"active_seat": 0,
+		"player_hands": {
+			"p0": [
+				{ "id": "c_y9", "uid": "c_y9", "color": "yellow", "value": "9" },
+				{ "id": "c_b2", "uid": "c_b2", "color": "blue", "value": "2" },
+				{ "id": "c_r5", "uid": "c_r5", "color": "red", "value": "5" },
+				{ "id": "c_g1", "uid": "c_g1", "color": "green", "value": "1" }
+			],
+			"p1": [
+				{ "id": "p1_only", "uid": "p1_only", "color": "green", "value": "8" }
+			],
+			"p2": [
+				{ "id": "p2_1", "uid": "p2_1", "color": "blue", "value": "4" },
+				{ "id": "p2_2", "uid": "p2_2", "color": "yellow", "value": "6" }
+			]
+		}
+	})
+	assert_true(game.sort_player_hand("p0", "color"), "sort_player_hand by color must return true")
+	assert_eq(game.player_hands["p0"][0]["color"], "red", "Red comes first in color sort")
+	assert_true(game.sort_player_hand("p0", "value"), "sort_player_hand by value must return true")
+	assert_eq(game.player_hands["p0"][0]["value"], "1", "Value '1' comes before 2/5/9 in value sort")
+	assert_true(game.shuffle_player_hand("p0"), "shuffle_player_hand must succeed")
+	assert_eq(game.player_hands["p0"].size(), 4, "Shuffle preserves all 4 cards")
+
+	# 2. Catch forgotten LETZTE! (UNO)
+	game.player_map["p1"]["called_uno"] = false
+	var catchable = game.get_catchable_uno_players("p0")
+	assert_eq(catchable.size(), 1, "P1 with 1 card and called_uno=false must be catchable")
+	var catch_res = game.handle_action("p0", { "type": "ACTION_CATCH_UNO", "target_player_id": "p1" })
+	assert_true(catch_res["success"], "Catching player who forgot LETZTE! must succeed")
+	assert_eq(game.get_player_card_count("p1"), 3, "Caught player draws +2 penalty cards (1 -> 3)")
+	var found_caught_ev = false
+	for ev in catch_res.get("events", []):
+		if ev is Dictionary and ev.get("type", "") == "UNO_CAUGHT":
+			found_caught_ev = true
+	assert_true(found_caught_ev, "Catching forgotten LETZTE! must emit UNO_CAUGHT event")
+
+	# 3. +4 Challenge Success (Bluff Caught -> reveals offender hand & gives offender +4)
+	game.debug_set_state({
+		"top_discard": { "id": "top", "color": "red", "value": "5" },
+		"active_seat": 0,
+		"direction": 1,
+		"player_hands": {
+			"p0": [
+				{ "id": "p0_r7", "uid": "p0_r7", "color": "red", "value": "7" },
+				{ "id": "p0_w4", "uid": "p0_w4", "color": "wild", "value": "wild_draw_four" }
+			],
+			"p1": [
+				{ "id": "p1_k", "uid": "p1_k", "color": "green", "value": "3" }
+			],
+			"p2": [
+				{ "id": "p2_k", "uid": "p2_k", "color": "blue", "value": "8" }
+			]
+		}
+	})
+	var play_bluff = game.handle_action("p0", { "type": "ACTION_PLAY_CARD", "card_id": "p0_w4", "chosen_color": "blue" })
+	assert_true(play_bluff["success"], "Playing Wild +4 even when bluffing must succeed initially")
+	assert_true(game.can_challenge_plus_four("p1"), "Victim P1 must be allowed to challenge +4")
+
+	var win_chal = game.handle_action("p1", { "type": "ACTION_CHALLENGE_PLUS_FOUR" })
+	assert_true(win_chal["success"], "Challenge action must succeed")
+	assert_true(bool(win_chal.get("challenge_won", false)), "Challenge must succeed because P0 held playable Red 7")
+	assert_gt(win_chal.get("offender_hand", []).size(), 0, "Challenge must return offender_hand snapshot for UI reveal")
+	var found_guilty_card = false
+	for rc in win_chal.get("offender_hand", []):
+		if rc is Dictionary and str(rc.get("id", "")) == "p0_r7" and bool(rc.get("could_have_played", false)):
+			found_guilty_card = true
+	assert_true(found_guilty_card, "Revealed offender hand must highlight playable Red 7 with could_have_played=true")
+	assert_eq(game.get_player_card_count("p0"), 5, "Bluffing P0 must receive the 4 penalty cards (1 + 4 = 5)")
+	assert_eq(game.get_player_card_count("p1"), 1, "P1's 4-card penalty must be refunded cleanly")
+	assert_eq(game.current_turn_seat, 1, "Turn must return to P1 after winning +4 challenge")
+
+	# 4. +4 Challenge Failure (Legal +4 -> reveals hand & challenger draws +2 extra = 6 total)
+	game.debug_set_state({
+		"top_discard": { "id": "top", "color": "red", "value": "5" },
+		"active_seat": 0,
+		"direction": 1,
+		"player_hands": {
+			"p0": [
+				{ "id": "p0_b2", "uid": "p0_b2", "color": "blue", "value": "2" },
+				{ "id": "p0_w4b", "uid": "p0_w4b", "color": "wild", "value": "wild_draw_four" }
+			],
+			"p1": [
+				{ "id": "p1_k2", "uid": "p1_k2", "color": "yellow", "value": "4" }
+			],
+			"p2": [
+				{ "id": "p2_k2", "uid": "p2_k2", "color": "green", "value": "9" }
+			]
+		}
+	})
+	game.handle_action("p0", { "type": "ACTION_PLAY_CARD", "card_id": "p0_w4b", "chosen_color": "blue" })
+	var lose_chal = game.handle_action("p1", { "type": "ACTION_CHALLENGE_PLUS_FOUR" })
+	assert_true(lose_chal["success"])
+	assert_false(bool(lose_chal.get("challenge_won", true)), "Challenge must fail because P0 had no Red/5 card")
+	assert_eq(lose_chal.get("offender_hand", []).size(), 1, "Legal +4 reveal must still return offender hand proof")
+	assert_eq(game.get_player_card_count("p1"), 7, "Losing challenge gives P1 +6 total cards (1 + 4 + 2 = 7)")
+
+func test_bot_difficulty_levels_easy_normal_hard() -> void:
+	var ai = load("res://games/uno/uno_bot_ai.gd").new()
+	var top = { "color": "red", "value": "5" }
+	var hand = [
+		{ "id": "r2", "color": "red", "value": "2", "playable": true },
+		{ "id": "w1", "color": "wild", "value": "wild", "playable": true }
+	]
+	var easy_act = ai.choose_action_with_context(hand, top, {}, "easy")
+	assert_eq(easy_act["type"], "ACTION_PLAY_CARD")
+	assert_false(bool(easy_act.get("called_uno", false)), "Easy bot with 2 cards forgets to call LETZTE!")
+
+	var norm_act = ai.choose_action_with_context(hand, top, {}, "normal")
+	assert_eq(norm_act["type"], "ACTION_PLAY_CARD")
+
+	var hard_act = ai.choose_action_with_context(hand, top, {}, "hard")
+	assert_eq(hard_act["card_id"], "r2", "Hard bot saves Wild and plays Red 2")
+	assert_true(bool(hard_act.get("called_uno", false)), "Hard bot with 2 cards remembers to call LETZTE!")

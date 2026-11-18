@@ -4,6 +4,7 @@
 extends Control
 
 signal back_requested
+signal match_state_changed(pub_state: Dictionary)
 
 const UnoCartridgeScript = preload("res://games/uno/uno_cartridge.gd")
 const UnoRulesScript = preload("res://games/uno/uno_rules.gd")
@@ -57,8 +58,11 @@ var active_quality_preset: String = "high"
 var active_view_mode: String = "full_3d"
 var active_card_skin: String = "classic_arcade"
 var active_bot_speed: String = "normal"
+var active_bot_difficulty: String = "normal"
 var colorblind_mode: bool = true
 var pending_wild_card_id: String = ""
+var _local_human_ids: Array[String] = []
+var _last_revealed_human_id: String = ""
 
 var active_table_3d: Node3D = null
 var direction_ring_3d: Node3D = null
@@ -103,8 +107,12 @@ var _rng_visual: RandomNumberGenerator = RandomNumberGenerator.new()
 @onready var quality_option: OptionButton = $HudLayer/QuickSettingsDrawer/DrawerBox/QualityRow/QualityOption
 @onready var colorblind_btn: CheckButton = $HudLayer/QuickSettingsDrawer/DrawerBox/ColorblindBtn
 @onready var bottom_right_actions: VBoxContainer = $HudLayer/BottomRightActions
+@onready var catch_uno_btn: Button = $HudLayer/BottomRightActions/CatchUnoBtn
+@onready var challenge_p4_btn: Button = $HudLayer/BottomRightActions/ChallengePlusFourBtn
 @onready var uno_call_btn: Button = $HudLayer/BottomRightActions/CallUnoButton
 @onready var draw_pile_btn: Button = $HudLayer/BottomRightActions/DrawPileBtn
+@onready var sort_hand_btn: Button = $HudLayer/BottomRightActions/HandToolsRow/SortHandBtn
+@onready var shuffle_hand_btn: Button = $HudLayer/BottomRightActions/HandToolsRow/ShuffleHandBtn
 @onready var table_qr_badge: PanelContainer = $HudLayer/TableQrBadge
 @onready var table_qr_rect: TextureRect = $HudLayer/TableQrBadge/QrBox/QrRect
 @onready var table_qr_pin: Label = $HudLayer/TableQrBadge/QrBox/QrPinLabel
@@ -115,6 +123,11 @@ var _rng_visual: RandomNumberGenerator = RandomNumberGenerator.new()
 @onready var curtain_title: Label = $CurtainOverlay/CurtainBox/CurtainTitle
 @onready var round_over_overlay: PanelContainer = $RoundOverOverlay
 @onready var winner_label: Label = $RoundOverOverlay/RoundBox/WinnerLabel
+@onready var challenge_reveal_overlay: PanelContainer = $ChallengeRevealOverlay
+@onready var challenge_result_title: Label = $ChallengeRevealOverlay/RevealBox/ChallengeResultTitle
+@onready var challenge_result_subtitle: Label = $ChallengeRevealOverlay/RevealBox/ChallengeResultSubtitle
+@onready var revealed_cards_row: HBoxContainer = $ChallengeRevealOverlay/RevealBox/RevealedCardsRow
+@onready var close_challenge_btn: Button = $ChallengeRevealOverlay/RevealBox/CloseChallengeBtn
 
 func _ready() -> void:
 	_rng_visual.seed = 1337
@@ -157,6 +170,16 @@ func apply_language() -> void:
 	_set_rel_text("HudLayer/QuickSettingsDrawer/DrawerBox/QualityRow/Lbl", "settings.quality")
 	if uno_call_btn != null:
 		uno_call_btn.text = I18nServiceScript.t("hud.call_last")
+	if catch_uno_btn != null:
+		catch_uno_btn.text = I18nServiceScript.t("hud.catch_uno_btn")
+	if challenge_p4_btn != null:
+		challenge_p4_btn.text = I18nServiceScript.t("hud.challenge_p4_btn")
+	if sort_hand_btn != null:
+		sort_hand_btn.text = I18nServiceScript.t("hud.sort_btn")
+	if shuffle_hand_btn != null:
+		shuffle_hand_btn.text = I18nServiceScript.t("hud.shuffle_btn")
+	if close_challenge_btn != null:
+		close_challenge_btn.text = I18nServiceScript.t("hud.challenge_close_btn")
 	_set_rel_text("HudLayer/BottomRightActions/EmoteRow/EmoteTapBtn", "hud.knock_btn")
 	_set_rel_text("HudLayer/BottomRightActions/EmoteRow/EmoteNiceBtn", "hud.nice_btn")
 	_set_rel_text("CurtainOverlay/CurtainBox/CurtainHint", "hud.curtain_hint")
@@ -172,10 +195,16 @@ func _apply_hud_accent_styles() -> void:
 	if uno_call_btn != null:
 		uno_call_btn.add_theme_stylebox_override("normal", UIThemeScript.make_accent_button(Color(0.92, 0.30, 0.16, 0.96), Color(1.0, 0.85, 0.25, 0.95), 24))
 		uno_call_btn.add_theme_stylebox_override("hover", UIThemeScript.make_accent_button(Color(1.0, 0.38, 0.20, 1.0), Color.WHITE, 24))
+	if catch_uno_btn != null:
+		catch_uno_btn.add_theme_stylebox_override("normal", UIThemeScript.make_accent_button(Color(0.86, 0.56, 0.10, 0.96), Color(1.0, 0.90, 0.35, 0.95), 14))
+	if challenge_p4_btn != null:
+		challenge_p4_btn.add_theme_stylebox_override("normal", UIThemeScript.make_accent_button(Color(0.68, 0.20, 0.86, 0.96), Color(1.0, 0.55, 0.95, 0.95), 14))
 	if curtain_overlay != null:
 		curtain_overlay.add_theme_stylebox_override("panel", UIThemeScript.make_glass_panel(Color(0.03, 0.04, 0.09, 0.96), UIThemeScript.COL_BORDER_GOLD, 0, 24))
 	if round_over_overlay != null:
 		round_over_overlay.add_theme_stylebox_override("panel", UIThemeScript.make_glass_panel(Color(0.04, 0.06, 0.12, 0.92), UIThemeScript.COL_BORDER_GOLD, 0, 24))
+	if challenge_reveal_overlay != null:
+		challenge_reveal_overlay.add_theme_stylebox_override("panel", UIThemeScript.make_glass_panel(Color(0.04, 0.06, 0.12, 0.94), Color(0.75, 0.35, 1.0, 0.85), 0, 24))
 
 func _process(delta: float) -> void:
 	if direction_ring_3d != null and is_instance_valid(direction_ring_3d):
@@ -195,9 +224,15 @@ func _animate_3d_player_hand_hover(delta: float) -> void:
 		var is_play = bool(entry.get("playable", false))
 		var base_pos: Vector3 = entry["base_pos"]
 		var base_scale: Vector3 = entry["base_scale"]
-		var lift = 0.038 if (is_hov and is_play) else (0.012 if is_play else 0.0)
-		var target_pos = base_pos + Vector3(0.0, lift, -lift * 0.65)
-		var target_scale = base_scale * (1.10 if (is_hov and is_play) else 1.0)
+		var lift_y = 0.045 if (is_hov and is_play) else (0.022 if is_hov else (0.012 if is_play else 0.0))
+		var pop_z = 0.032 if (is_hov and is_play) else (0.016 if is_hov else 0.0)
+		var x_part = 0.0
+		if _hovered_3d_index >= 0 and not is_hov:
+			var d_idx = i - _hovered_3d_index
+			if absi(d_idx) <= 3:
+				x_part = signf(float(d_idx)) * (0.028 / float(absi(d_idx)))
+		var target_pos = base_pos + Vector3(x_part, lift_y, pop_z)
+		var target_scale = base_scale * (1.12 if (is_hov and is_play) else (1.05 if is_hov else 1.0))
 		node.position = node.position.lerp(target_pos, lerp_w)
 		node.scale = node.scale.lerp(target_scale, lerp_w)
 
@@ -263,6 +298,9 @@ func configure_match(options: Dictionary = {}) -> void:
 	var view_m = str(options.get("view_mode", active_view_mode))
 	var skin_m = str(options.get("card_skin", active_card_skin))
 	var speed_m = str(options.get("bot_speed", active_bot_speed))
+	active_bot_difficulty = str(options.get("bot_difficulty", active_bot_difficulty)).to_lower().strip_edges()
+	if not (active_bot_difficulty in ["easy", "normal", "hard", "tactical"]):
+		active_bot_difficulty = "normal"
 	var rules = options.get("rules", {})
 
 	if options.has("colorblind_mode"):
@@ -272,18 +310,58 @@ func configure_match(options: Dictionary = {}) -> void:
 
 	cartridge = UnoCartridgeScript.new()
 	var players: Array[Dictionary] = []
-	if options.has("players") and options["players"] is Array and not options["players"].is_empty():
-		for p in options["players"]:
+	var explicit_roster = options.get("players_roster", options.get("players", []))
+	if explicit_roster is Array and not explicit_roster.is_empty():
+		for i in range(explicit_roster.size()):
+			var p = explicit_roster[i]
 			if p is Dictionary:
-				players.append(p)
+				var copy_p = p.duplicate(true)
+				if not copy_p.has("seat"):
+					copy_p["seat"] = i
+				if not copy_p.has("player_id"):
+					copy_p["player_id"] = "p%d" % i
+				players.append(copy_p)
+	elif options.has("human_names") and options["human_names"] is Array and not options["human_names"].is_empty():
+		var h_names: Array = options["human_names"]
+		var b_count = maxi(0, int(options.get("bot_count", 0)))
+		var seat_i = 0
+		for hn in h_names:
+			players.append({
+				"player_id": "p%d" % seat_i,
+				"seat": seat_i,
+				"name": str(hn),
+				"is_bot": false,
+				"is_remote": false
+			})
+			seat_i += 1
+		for bi in range(b_count):
+			players.append({
+				"player_id": "p%d" % seat_i,
+				"seat": seat_i,
+				"name": "Bot %d" % (bi + 1),
+				"is_bot": true,
+				"is_remote": false
+			})
+			seat_i += 1
 	elif match_mode == "pass_and_play":
 		var p_count = maxi(2, int(options.get("player_count", 2)))
+		var bot_c = maxi(0, int(options.get("bot_count", 0)))
 		for i in range(p_count):
 			players.append({
 				"player_id": "p%d" % i,
 				"seat": i,
 				"name": "Spieler %d" % (i + 1),
-				"is_bot": false
+				"is_bot": false,
+				"is_remote": false
+			})
+		for bi in range(bot_c):
+			var s_idx = players.size()
+			players.append({
+				"player_id": "p%d" % s_idx,
+				"seat": s_idx,
+				"name": "Bot %d" % (bi + 1),
+				"is_bot": true,
+				"is_remote": false
 			})
 	else:
 		var total_count = maxi(2, int(options.get("player_count", 4)))
@@ -291,21 +369,33 @@ func configure_match(options: Dictionary = {}) -> void:
 			"player_id": "p0",
 			"seat": 0,
 			"name": str(options.get("player_name", "Du")),
-			"is_bot": false
+			"is_bot": false,
+			"is_remote": false
 		})
 		for i in range(1, total_count):
 			players.append({
 				"player_id": "p%d" % i,
 				"seat": i,
 				"name": "Bot %d" % i,
-				"is_bot": true
+				"is_bot": true,
+				"is_remote": false
 			})
+
+	if players.size() < 2:
+		var bot_idx = players.size()
+		players.append({ "player_id": "p%d" % bot_idx, "seat": bot_idx, "name": "Bot 1", "is_bot": true, "is_remote": false })
+
+	_local_human_ids.clear()
+	for p in players:
+		if not bool(p.get("is_bot", false)) and not bool(p.get("is_remote", false)):
+			_local_human_ids.append(str(p.get("player_id", "")))
 
 	var match_seed = int(options.get("seed", Time.get_unix_time_from_system()))
 	cartridge.init_match("match_ui_%d" % match_seed, players, rules if rules is Dictionary else {}, match_seed)
 	cartridge.start_round()
 
-	current_player_id = str(players[0].get("player_id", "p0"))
+	current_player_id = _local_human_ids[0] if not _local_human_ids.is_empty() else str(players[0].get("player_id", "p0"))
+	_last_revealed_human_id = current_player_id
 	pending_wild_card_id = ""
 	_hovered_3d_index = -1
 	_round_recorded = false
@@ -313,6 +403,8 @@ func configure_match(options: Dictionary = {}) -> void:
 
 	if round_over_overlay != null:
 		round_over_overlay.visible = false
+	if challenge_reveal_overlay != null:
+		challenge_reveal_overlay.visible = false
 	if color_wheel != null:
 		color_wheel.close_wheel()
 	if quick_drawer != null:
@@ -320,8 +412,8 @@ func configure_match(options: Dictionary = {}) -> void:
 
 	if pass_and_play_ctrl != null:
 		pass_and_play_ctrl.init_session(players, 0)
-		if match_mode != "pass_and_play":
-			pass_and_play_ctrl.request_reveal(current_player_id)
+		if _local_human_ids.size() <= 1 or view_m == "table_role":
+			pass_and_play_ctrl.request_reveal(str(players[0].get("player_id", "p0")))
 
 	_update_table_qr_badge(options)
 	set_bot_speed(speed_m)
@@ -331,6 +423,10 @@ func configure_match(options: Dictionary = {}) -> void:
 	set_table_theme(theme_id)
 	set_quality_preset(quality)
 	set_view_mode(active_view_mode)
+	if cartridge != null and not cartridge.is_round_over():
+		var start_p = cartridge.get_player_by_seat(cartridge.current_turn_seat)
+		if bool(start_p.get("is_bot", false)):
+			_post_human_turn()
 
 func _update_table_qr_badge(options: Dictionary) -> void:
 	if table_qr_badge == null:
@@ -680,8 +776,8 @@ func _rebuild_player_hand_3d(my_view: Dictionary, total_players: int, my_seat: i
 		return
 
 	var is_flip = _is_flip_enabled()
-	var max_span = 0.86 * minf(table_scale, 1.85)
-	var spacing = minf(0.088 * hand_cam_scale, max_span / float(maxi(1, hand_len)))
+	var max_span = 1.06 * minf(table_scale, 1.85)
+	var spacing = minf(0.102 * hand_cam_scale, max_span / float(maxi(1, hand_len)))
 	var card_scale_val = clampf(2.25 - float(maxi(0, hand_len - 10)) * 0.045, 1.45, 2.25) * hand_cam_scale
 
 	for idx in range(hand_len):
@@ -695,8 +791,9 @@ func _rebuild_player_hand_3d(my_view: Dictionary, total_players: int, my_seat: i
 		var off = float(idx) - float(hand_len - 1) * 0.5
 		var is_masked = bool(c_data.get("masked", false))
 		var playable = bool(c_data.get("playable", false)) and not is_masked
-		var arc_z = absf(off) * 0.014 + (float(idx) * 0.0005)
-		var base_pos = seat0_pos + Vector3(off * spacing, 0.14 * hand_cam_scale + (0.014 if playable else 0.0), 0.14 + arc_z)
+		var arch_y = -absf(off) * 0.0045
+		var shingle_z = float(idx) * 0.0024 + (0.014 if playable else -0.006)
+		var base_pos = seat0_pos + Vector3(off * spacing, 0.14 * hand_cam_scale + arch_y + (0.016 if playable else 0.0), 0.14 + shingle_z)
 		var roll_deg = -off * clampf(3.8, 1.2, 32.0 / float(maxi(1, hand_len)))
 		var card_basis = Basis(Vector3.RIGHT, deg_to_rad(52.0)) * Basis(Vector3.UP, deg_to_rad(roll_deg))
 		if is_masked:
@@ -719,6 +816,8 @@ func _rebuild_player_hand_3d(my_view: Dictionary, total_players: int, my_seat: i
 						raw_card = real_hand[idx]
 				opp_card = UnoRulesScript.get_opposite_side_card(raw_card, cur_side)
 		CardTextureGenScript.apply_card_materials_to_mesh(c_node, c_data, active_card_skin, colorblind_mode, not is_masked, opp_card)
+		if not is_masked:
+			CardTextureGenScript.set_card_mesh_playable_state(c_node, playable)
 		player_hand_3d_root.add_child(c_node)
 
 		_player_3d_cards.append({
@@ -782,7 +881,7 @@ func _handle_3d_pointer_event(event: InputEvent) -> bool:
 	if active_view_mode != "full_3d":
 		_hovered_3d_index = -1
 		return false
-	if (curtain_overlay != null and curtain_overlay.visible) or (round_over_overlay != null and round_over_overlay.visible) or (color_wheel != null and color_wheel.visible):
+	if (curtain_overlay != null and curtain_overlay.visible) or (round_over_overlay != null and round_over_overlay.visible) or (challenge_reveal_overlay != null and challenge_reveal_overlay.visible) or (color_wheel != null and color_wheel.visible):
 		return false
 
 	if event is InputEventMouseMotion:
@@ -832,15 +931,18 @@ func _update_3d_hover(screen_pos: Vector2) -> void:
 	var ray_origin = cam.project_ray_origin(norm_pos)
 	var ray_dir = cam.project_ray_normal(norm_pos)
 
-	# 1. Pick closest front-to-back 3D hand card via ray-plane intersection
+	# 1. Pick 3D hand card via ray-plane intersection using base_pos + smallest distance to card centerline
 	var best_idx = -1
 	var best_dist = 999.0
+	var best_x_score = 999.0
+	var parent_xform: Transform3D = player_hand_3d_root.global_transform if (player_hand_3d_root != null and player_hand_3d_root.is_inside_tree()) else Transform3D.IDENTITY
 	for i in range(_player_3d_cards.size() - 1, -1, -1):
 		var entry = _player_3d_cards[i]
 		var node: Node3D = entry.get("node", null)
 		if node == null or not is_instance_valid(node):
 			continue
-		var card_xform = node.global_transform
+		var base_local = Transform3D(node.transform.basis, entry["base_pos"])
+		var card_xform: Transform3D = parent_xform * base_local
 		var normal = card_xform.basis.y.normalized()
 		var denom = ray_dir.dot(normal)
 		if absf(denom) < 0.001:
@@ -850,8 +952,10 @@ func _update_3d_hover(screen_pos: Vector2) -> void:
 			continue
 		var hit_world = ray_origin + ray_dir * t
 		var local_hit = card_xform.affine_inverse() * hit_world
-		if absf(local_hit.x) <= 0.042 and absf(local_hit.z) <= 0.056:
-			if t < best_dist:
+		var abs_lx = absf(local_hit.x)
+		if abs_lx <= 0.044 and absf(local_hit.z) <= 0.058:
+			if abs_lx < best_x_score - 0.002 or (absf(abs_lx - best_x_score) <= 0.002 and t < best_dist):
+				best_x_score = abs_lx
 				best_dist = t
 				best_idx = i
 
@@ -907,22 +1011,25 @@ func _update_3d_hover(screen_pos: Vector2) -> void:
 func reveal_pass_and_play() -> void:
 	if pass_and_play_ctrl != null:
 		pass_and_play_ctrl.request_reveal(current_player_id)
+	_last_revealed_human_id = current_player_id
 	refresh_display()
 
 func refresh_display() -> void:
 	if cartridge == null:
 		return
 
+	var use_curtain = (_local_human_ids.size() > 1 and active_view_mode != "table_role")
 	var pub_state = cartridge.get_public_state()
 	var my_view = cartridge.get_player_view(current_player_id)
-	if match_mode == "pass_and_play" and pass_and_play_ctrl != null:
+	if use_curtain and pass_and_play_ctrl != null:
 		my_view = pass_and_play_ctrl.filter_view_for_curtain(my_view)
 
 	# 1. Pass-and-Play Curtain
+	var curtain_shown = false
 	if curtain_overlay != null:
-		var show_curtain = (match_mode == "pass_and_play" and pass_and_play_ctrl != null and pass_and_play_ctrl.is_curtain_active() and not cartridge.is_round_over())
-		curtain_overlay.visible = show_curtain
-		if show_curtain and curtain_title != null:
+		curtain_shown = (use_curtain and pass_and_play_ctrl != null and pass_and_play_ctrl.is_curtain_active() and not cartridge.is_round_over())
+		curtain_overlay.visible = curtain_shown
+		if curtain_shown and curtain_title != null:
 			var active_p = cartridge.get_player_by_seat(int(pub_state.get("current_turn_seat", 0)))
 			curtain_title.text = I18nServiceScript.t("hud.curtain_title", {"player": str(active_p.get("name", current_player_id))})
 
@@ -966,12 +1073,21 @@ func refresh_display() -> void:
 	# 5. Floating Opponent Badges
 	_rebuild_opponent_badges(pub_state, my_view)
 
-	# 6. Highlight UNO button when human is down to 1-2 cards
+	# 6. Highlight UNO button & update Challenge / Hand Tools visibility
 	if uno_call_btn != null:
 		var my_len = my_view.get("hand", []).size()
 		uno_call_btn.modulate = Color(1.15, 1.15, 1.15) if my_len <= 2 else Color(0.92, 0.92, 0.96, 0.85)
 
+	if catch_uno_btn != null:
+		var can_catch = (not curtain_shown) and (active_view_mode != "table_role") and (not cartridge.is_round_over()) and (not cartridge.get_catchable_uno_players(current_player_id).is_empty())
+		catch_uno_btn.visible = can_catch
+
+	if challenge_p4_btn != null:
+		var can_chal = (not curtain_shown) and (active_view_mode != "table_role") and (not cartridge.is_round_over()) and cartridge.can_challenge_plus_four(current_player_id)
+		challenge_p4_btn.visible = can_chal
+
 	_check_round_over()
+	match_state_changed.emit(pub_state)
 
 func _rebuild_25d_hand_fan(my_view: Dictionary) -> void:
 	if hand_cards_layer == null:
@@ -1016,7 +1132,7 @@ func _rebuild_25d_hand_fan(my_view: Dictionary) -> void:
 		card_btn.position = Vector2(start_x + float(idx) * step_x, base_y)
 		card_btn.pivot_offset = Vector2(card_w * 0.5, card_h)
 		card_btn.rotation_degrees = clampf(off * 2.1, -18.0, 18.0)
-		card_btn.modulate = Color.WHITE if (playable or is_masked) else Color(0.62, 0.65, 0.72, 0.92)
+		card_btn.modulate = Color.WHITE if (playable or is_masked) else Color(0.42, 0.45, 0.52, 0.58)
 		card_btn.disabled = (not playable) or is_masked
 
 		if not is_masked:
@@ -1080,7 +1196,7 @@ func _rebuild_opponent_badges(pub_state: Dictionary, my_view: Dictionary) -> voi
 		hbox.add_theme_constant_override("separation", 6)
 		var name_lbl = Label.new()
 		var p_name = str(p.get("name", "P%d" % p_seat))
-		var uno_flag = " 💀KO" if is_elim else (" 🔥%s" % I18nServiceScript.t("hud.call_last") if bool(p.get("called_uno", false)) or int(p.get("card_count", 0)) == 1 else "")
+		var uno_flag = " 💀KO" if is_elim else (" 🔥%s" % I18nServiceScript.t("hud.call_last") if bool(p.get("called_uno", false)) else (" ⚠!" if int(p.get("card_count", 0)) == 1 else ""))
 		name_lbl.text = ("%s" % p_name) if compact else ("%s%s" % [p_name, " 🤖" if p.get("is_bot", false) else ""])
 		name_lbl.add_theme_font_size_override("font_size", 12 if compact else 14)
 		hbox.add_child(name_lbl)
@@ -1306,10 +1422,18 @@ func _run_bot_turns_sync() -> void:
 		var active_player = cartridge.get_player_by_seat(turn_seat)
 		if bool(active_player.get("is_bot", false)):
 			var pid = str(active_player.get("player_id", ""))
-			var bot_act = cartridge.get_bot_action(pid)
+			var bot_act = cartridge.get_bot_action(pid, active_bot_difficulty)
 			cartridge.handle_action(pid, bot_act)
 		else:
 			break
+
+func _has_local_challenge_opportunity() -> bool:
+	if cartridge == null:
+		return false
+	for hid in _local_human_ids:
+		if cartridge.can_challenge_plus_four(hid):
+			return true
+	return false
 
 func _on_bot_turn_timer_timeout() -> void:
 	if cartridge == null or cartridge.is_round_over() or not is_inside_tree():
@@ -1326,7 +1450,7 @@ func _on_bot_turn_timer_timeout() -> void:
 		return
 
 	var pid = str(active_player.get("player_id", ""))
-	var bot_act = cartridge.get_bot_action(pid)
+	var bot_act = cartridge.get_bot_action(pid, active_bot_difficulty)
 	var res = cartridge.handle_action(pid, bot_act)
 	if res.get("success", false):
 		if str(bot_act.get("type", "")) == "ACTION_DRAW_CARD":
@@ -1347,7 +1471,8 @@ func _on_bot_turn_timer_timeout() -> void:
 	var bot_delay = animator.get_bot_delay() if animator != null else 0.0
 	if bool(next_p.get("is_bot", false)):
 		if bot_delay > 0.0:
-			_bot_turn_timer.start(bot_delay)
+			var need_pause = (not cartridge.get_catchable_uno_players("").is_empty()) or _has_local_challenge_opportunity()
+			_bot_turn_timer.start(maxf(bot_delay, 2.2) if need_pause else bot_delay)
 		else:
 			_run_bot_turns_sync()
 			_bot_sequence_running = false
@@ -1360,16 +1485,135 @@ func _finish_turn_cycle() -> void:
 	if cartridge == null or cartridge.is_round_over():
 		refresh_display()
 		return
-	if match_mode == "pass_and_play":
-		var pub = cartridge.get_public_state()
-		var next_seat = int(pub.get("current_turn_seat", 0))
-		var next_p = cartridge.get_player_by_seat(next_seat)
-		var next_pid = str(next_p.get("player_id", current_player_id))
-		if next_pid != current_player_id:
-			current_player_id = next_pid
-			if pass_and_play_ctrl != null:
-				pass_and_play_ctrl.advance_to_seat(next_seat, next_pid, false)
+	var pub = cartridge.get_public_state()
+	var next_seat = int(pub.get("current_turn_seat", 0))
+	var next_p = cartridge.get_player_by_seat(next_seat)
+	var next_pid = str(next_p.get("player_id", current_player_id))
+	if next_pid in _local_human_ids:
+		var use_curtain = (_local_human_ids.size() > 1 and active_view_mode != "table_role")
+		current_player_id = next_pid
+		if use_curtain and next_pid != _last_revealed_human_id and pass_and_play_ctrl != null:
+			pass_and_play_ctrl.advance_to_seat(next_seat, next_pid, false)
 	refresh_display()
+
+func _on_sort_hand_btn_pressed() -> void:
+	if cartridge == null:
+		return
+	cartridge.handle_action(current_player_id, { "type": "ACTION_SORT_HAND", "mode": "auto" })
+	refresh_display()
+
+func _on_shuffle_hand_btn_pressed() -> void:
+	if cartridge == null:
+		return
+	cartridge.handle_action(current_player_id, { "type": "ACTION_SHUFFLE_HAND" })
+	refresh_display()
+
+func _on_catch_uno_btn_pressed() -> void:
+	if cartridge == null:
+		return
+	var candidates = cartridge.get_catchable_uno_players(current_player_id)
+	if candidates.is_empty():
+		return
+	var target_id = str(candidates[0].get("player_id", ""))
+	var target_name = str(candidates[0].get("name", target_id))
+	var res = cartridge.handle_action(current_player_id, { "type": "ACTION_CATCH_UNO", "target_player_id": target_id })
+	if res.get("success", false):
+		_show_status_toast(I18nServiceScript.t("hud.uno_caught_toast", { "target": target_name, "count": 2 }))
+		if sfx_player != null:
+			sfx_player.play_special_impact()
+	refresh_display()
+
+func _on_challenge_plus_four_btn_pressed() -> void:
+	if cartridge == null:
+		return
+	var res = cartridge.handle_action(current_player_id, { "type": "ACTION_CHALLENGE_PLUS_FOUR" })
+	if res.get("success", false):
+		_show_challenge_reveal_overlay(res)
+		_finish_turn_cycle()
+	else:
+		_show_status_toast(str(res.get("error", "")))
+		refresh_display()
+
+func _show_challenge_reveal_overlay(res: Dictionary) -> void:
+	if challenge_reveal_overlay == null:
+		return
+	var won = bool(res.get("challenge_won", false))
+	var offender_name = str(res.get("offender_name", res.get("offender_id", "Player")))
+	var challenger_id = str(res.get("challenger_id", current_player_id))
+	var challenger_p = cartridge.player_map.get(challenger_id, {}) if cartridge != null else {}
+	var challenger_name = str(challenger_p.get("name", challenger_id))
+	var applied = int(res.get("penalty_applied", 4))
+
+	if challenge_result_title != null:
+		if won:
+			challenge_result_title.text = I18nServiceScript.t("hud.challenge_won_title", { "offender": offender_name, "count": applied })
+		else:
+			challenge_result_title.text = I18nServiceScript.t("hud.challenge_lost_title", { "challenger": challenger_name, "count": applied })
+	if challenge_result_subtitle != null:
+		challenge_result_subtitle.text = I18nServiceScript.t("hud.challenge_hand_subtitle", { "offender": offender_name })
+
+	if revealed_cards_row != null:
+		for child in revealed_cards_row.get_children():
+			child.queue_free()
+		var revealed: Array = res.get("offender_hand", [])
+		for c_dict in revealed:
+			if not (c_dict is Dictionary):
+				continue
+			var frame = PanelContainer.new()
+			var guilty = bool(c_dict.get("could_have_played", false))
+			var border_col = Color(1.0, 0.84, 0.16, 1.0) if guilty else Color(0.28, 0.42, 0.62, 0.65)
+			frame.add_theme_stylebox_override("panel", UIThemeScript.make_glass_panel(Color(0.06, 0.09, 0.16, 0.95), border_col, 10, 6))
+			var tex_rect = TextureRect.new()
+			tex_rect.custom_minimum_size = Vector2(96, 136)
+			tex_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			tex_rect.texture = CardTextureGenScript.get_card_front_texture(c_dict, active_card_skin, colorblind_mode)
+			if not guilty:
+				tex_rect.modulate = Color(0.75, 0.78, 0.85, 0.90)
+			frame.add_child(tex_rect)
+			revealed_cards_row.add_child(frame)
+
+	challenge_reveal_overlay.visible = true
+
+func _on_close_challenge_overlay_pressed() -> void:
+	if challenge_reveal_overlay != null:
+		challenge_reveal_overlay.visible = false
+	if cartridge != null and not cartridge.is_round_over():
+		var pub = cartridge.get_public_state()
+		var cur_p = cartridge.get_player_by_seat(int(pub.get("current_turn_seat", 0)))
+		if bool(cur_p.get("is_bot", false)):
+			_post_human_turn()
+
+func execute_remote_player_action(player_id: String, action_type: String, payload: Dictionary = {}) -> Dictionary:
+	if cartridge == null:
+		return { "success": false, "error": "No active match" }
+	if action_type == "ACTION_SEND_EMOTE":
+		var emote_id = str(payload.get("emote_id", "👋"))
+		_on_emote_pressed(emote_id)
+		return { "success": true }
+
+	var act: Dictionary = { "type": action_type }
+	for k in payload.keys():
+		act[k] = payload[k]
+
+	var pub_before = cartridge.get_public_state()
+	var turn_before = int(pub_before.get("current_turn_seat", 0))
+	var res = cartridge.handle_action(player_id, act)
+	if res.get("success", false):
+		if action_type == "ACTION_PLAY_CARD":
+			_trigger_action_feedback(res.get("events", []), turn_before, cartridge.get_top_discard(), true)
+		elif action_type == "ACTION_DRAW_CARD":
+			if sfx_player != null:
+				sfx_player.play_draw_pop()
+			_animate_draw_to_seat(turn_before, false)
+		elif action_type == "ACTION_CALL_UNO":
+			if sfx_player != null:
+				sfx_player.play_uno_fanfare()
+		elif action_type == "ACTION_CHALLENGE_PLUS_FOUR" and _local_human_ids.size() > 0:
+			_show_challenge_reveal_overlay(res)
+		_post_human_turn()
+	refresh_display()
+	return res
 
 func _check_round_over() -> void:
 	if cartridge == null or not cartridge.is_round_over():

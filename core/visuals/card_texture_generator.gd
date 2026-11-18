@@ -142,7 +142,7 @@ static func apply_card_materials_to_mesh(card_root: Node, card_data: Dictionary,
 	var front_mat: StandardMaterial3D
 	if is_masked:
 		var masked_key = "MASKED_" + back_key if not back_card_data.is_empty() else "MASKED"
-		front_mat = _get_or_create_material(skin, masked_key, back_special, back_tex, false)
+		front_mat = _get_or_create_material(skin, masked_key, false, back_tex, false, Color(0.68, 0.72, 0.80, 1.0) if not back_card_data.is_empty() else Color(1, 1, 1, 1))
 	else:
 		var col_name = str(card_data.get("color", "wild")).to_lower()
 		var val_name = str(card_data.get("value", card_data.get("name", "?"))).to_lower()
@@ -150,7 +150,8 @@ static func apply_card_materials_to_mesh(card_root: Node, card_data: Dictionary,
 		var front_tex = get_card_front_texture(card_data, skin, colorblind)
 		front_mat = _get_or_create_material(skin, "%s|%s|%s" % [col_name, val_name, "cb1" if colorblind else "cb0"], is_special, front_tex, true)
 
-	var back_mat = _get_or_create_material(skin, back_key, back_special, back_tex, false)
+	var back_tint = Color(0.68, 0.72, 0.80, 1.0) if not back_card_data.is_empty() else Color(1, 1, 1, 1)
+	var back_mat = _get_or_create_material(skin, back_key, false if not back_card_data.is_empty() else back_special, back_tex, false, back_tint)
 	var edge_mat = _get_or_create_edge_material(skin)
 
 	var surf_count = mesh_node.mesh.get_surface_count()
@@ -161,16 +162,47 @@ static func apply_card_materials_to_mesh(card_root: Node, card_data: Dictionary,
 	if surf_count >= 3:
 		mesh_node.set_surface_override_material(2, edge_mat)
 
-static func _get_or_create_material(skin: String, key: String, is_special: bool, tex: Texture2D, is_front: bool) -> StandardMaterial3D:
-	var cache_key = "%s|%s|%s" % [skin, key, "F" if is_front else "B"]
+static func set_card_mesh_playable_state(card_root: Node, is_playable: bool) -> void:
+	var mesh_node = _find_first_mesh_instance(card_root)
+	if mesh_node == null or mesh_node.mesh == null:
+		return
+	var surf_count = mesh_node.mesh.get_surface_count()
+	if surf_count >= 1:
+		var raw_f = mesh_node.get_surface_override_material(0)
+		if raw_f is StandardMaterial3D:
+			var f_mat: StandardMaterial3D = raw_f.duplicate()
+			if is_playable:
+				f_mat.albedo_color = Color(1.0, 1.0, 1.0, 1.0)
+				f_mat.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
+			else:
+				f_mat.albedo_color = Color(0.42, 0.45, 0.52, 0.68)
+				f_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+				f_mat.roughness = 0.85
+				f_mat.rim_enabled = false
+			mesh_node.set_surface_override_material(0, f_mat)
+	if surf_count >= 3:
+		var raw_e = mesh_node.get_surface_override_material(2)
+		if raw_e is StandardMaterial3D:
+			var e_mat: StandardMaterial3D = raw_e.duplicate()
+			if is_playable:
+				e_mat.albedo_color = Color(e_mat.albedo_color.r, e_mat.albedo_color.g, e_mat.albedo_color.b, 1.0)
+				e_mat.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
+			else:
+				e_mat.albedo_color = Color(0.42, 0.45, 0.52, 0.68)
+				e_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			mesh_node.set_surface_override_material(2, e_mat)
+
+static func _get_or_create_material(skin: String, key: String, is_special: bool, tex: Texture2D, is_front: bool, tint: Color = Color(1.0, 1.0, 1.0, 1.0)) -> StandardMaterial3D:
+	var cache_key = "%s|%s|%s|%s" % [skin, key, "F" if is_front else "B", str(tint)]
 	if _mat_cache.has(cache_key):
 		return _mat_cache[cache_key]
 	var mat = StandardMaterial3D.new()
 	mat.albedo_texture = tex
+	mat.albedo_color = tint
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	mat.roughness = 0.38 if is_special else 0.52
-	mat.metallic = 0.10 if is_special else 0.0
-	if is_special:
+	mat.roughness = 0.78 if tint != Color(1.0, 1.0, 1.0, 1.0) else (0.38 if is_special else 0.52)
+	mat.metallic = 0.10 if (is_special and tint == Color(1.0, 1.0, 1.0, 1.0)) else 0.0
+	if is_special and tint == Color(1.0, 1.0, 1.0, 1.0):
 		mat.rim_enabled = true
 		mat.rim = 0.25
 		mat.rim_tint = 0.45
@@ -199,23 +231,44 @@ static func _draw_classic_arcade_front(img: Image, col_name: String, val_name: S
 	var is_dark_side = col_name in DARK_SIDE_COLORS
 	var base_col: Color = CLASSIC_COLORS.get(col_name, CLASSIC_COLORS["wild"])
 	var dark_col: Color = base_col.darkened(0.32)
-	var frame_col = Color(0.08, 0.09, 0.14, 1.0) if is_dark_side else Color(0.97, 0.97, 0.96, 1.0)
-	var oval_rim = base_col.lightened(0.45) if is_dark_side else Color(0.97, 0.97, 0.96, 1.0)
 	var white = Color(0.97, 0.97, 0.96, 1.0)
 	var shadow = Color(0.05, 0.06, 0.09, 0.85)
+	var cx = TEX_W * 0.5
+	var cy = TEX_H * 0.5
 
-	# 1. Crisp card frame (white on Light Side, obsidian-neon on Flip Dark Side)
+	if is_dark_side:
+		# Flip! Dark Side: glowing neon border around deep pitch-black obsidian body
+		var neon = base_col.lightened(0.18)
+		var symbol_neon = base_col.lightened(0.38)
+		var obsidian = Color(0.05, 0.06, 0.10, 1.0)
+		var oval_fill = Color(0.08, 0.10, 0.16, 1.0)
+		var neon_rim = base_col.lightened(0.28)
+		img.fill(neon)
+		_fill_rounded_rect(img, Rect2i(10, 10, TEX_W - 20, TEX_H - 20), 14, obsidian)
+		_fill_rounded_rect(img, Rect2i(12, TEX_H / 2, TEX_W - 24, TEX_H / 2 - 12), 12, Color(base_col.r * 0.16, base_col.g * 0.16, base_col.b * 0.16, 0.35))
+		_draw_tilted_oval(img, cx, cy, 58.0, 86.0, -0.34, oval_fill, neon_rim, 6.5)
+		_draw_center_symbol(img, val_name, cx, cy, symbol_neon, shadow, false)
+		var corner_text = _get_corner_label(val_name)
+		_draw_text(img, corner_text, 20, 20, 3, symbol_neon, shadow)
+		_draw_text_rotated_180(img, corner_text, TEX_W - 20, TEX_H - 20, 3, symbol_neon, shadow)
+		if colorblind:
+			_draw_cb_shape(img, col_name, TEX_W - 30, 30, 9.0, symbol_neon)
+			_draw_cb_shape(img, col_name, 30, TEX_H - 30, 9.0, symbol_neon)
+		return
+
+	# Light Side: Crisp white frame around vibrant colored card face
+	var frame_col = Color(0.97, 0.97, 0.96, 1.0)
+	var oval_rim = Color(0.97, 0.97, 0.96, 1.0)
+
 	img.fill(frame_col)
 	_fill_rounded_rect(img, Rect2i(10, 10, TEX_W - 20, TEX_H - 20), 14, base_col)
 	_fill_rounded_rect(img, Rect2i(12, TEX_H / 2, TEX_W - 24, TEX_H / 2 - 12), 12, Color(dark_col.r, dark_col.g, dark_col.b, 0.45))
 
 	# 2. Tilted central oval
-	var cx = TEX_W * 0.5
-	var cy = TEX_H * 0.5
 	if col_name == "wild":
 		_draw_wild_tilted_oval(img, cx, cy, 58.0, 86.0, -0.34, white, 5.0)
 	else:
-		_draw_tilted_oval(img, cx, cy, 58.0, 86.0, -0.34, base_col.darkened(0.18 if is_dark_side else 0.12), oval_rim, 5.5)
+		_draw_tilted_oval(img, cx, cy, 58.0, 86.0, -0.34, base_col.darkened(0.12), oval_rim, 5.5)
 
 	# 3. Center large symbol / number
 	_draw_center_symbol(img, val_name, cx, cy, white, shadow, false)

@@ -109,6 +109,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   let actionDispatcher = null;
   let roleController = null;
   let chosenWildCardId = null;
+  const clientSenderId = sessionStorage.getItem('deckbox_sender_id') || ('web_' + Math.floor(Math.random() * 900000 + 100000));
+  sessionStorage.setItem('deckbox_sender_id', clientSenderId);
+  let joinSeq = 1;
 
   // Determine WebSocket URL
   const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -121,6 +124,26 @@ window.addEventListener('DOMContentLoaded', async () => {
     statusIndicatorEl.className = `status-indicator ${className}`;
     const txt = statusIndicatorEl.querySelector('.status-text');
     if (txt) txt.textContent = text;
+  }
+
+  function sendJoinRequest(requestedRole) {
+    if (!transport || !transport.connected) return;
+    const token = reconnectToken || sessionStorage.getItem('deckbox_token') || '';
+    transport.send({
+      v: 1,
+      type: 'JOIN_REQUEST',
+      seq: joinSeq++,
+      sender: clientSenderId,
+      timestamp: Math.floor(Date.now() / 1000),
+      payload: {
+        app_version: '0.1.0',
+        protocol_version: 1,
+        rules_hash: '',
+        player_name: playerName,
+        role: requestedRole,
+        reconnect_token: token
+      }
+    });
   }
 
   setStatus('Connecting...', 'status--connecting');
@@ -137,7 +160,9 @@ window.addEventListener('DOMContentLoaded', async () => {
             sessionStorage.setItem('deckbox_token', payload.reconnect_token);
           }
           if (payload.role) {
-            roleController.setRole(payload.role, { playerId: message.recipient });
+            const resolvedPid = message.recipient || clientSenderId;
+            if (actionDispatcher) actionDispatcher.playerId = resolvedPid;
+            roleController.setRole(payload.role, { playerId: resolvedPid });
             if (roleSelectEl) roleSelectEl.value = payload.role;
           }
         } else if (payload.status === 'REJECTED_VERSION_MISMATCH' || payload.status === 'REJECTED_PROTOCOL_MISMATCH') {
@@ -153,23 +178,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     // onOpen
     () => {
       setStatus('Joining Room...', 'status--connecting');
-      // Send JOIN_REQUEST
-      const token = reconnectToken || sessionStorage.getItem('deckbox_token') || '';
-      transport.send({
-        v: 1,
-        type: 'JOIN_REQUEST',
-        seq: 1,
-        sender: 'web_' + Math.floor(Math.random() * 100000),
-        timestamp: Math.floor(Date.now() / 1000),
-        payload: {
-          app_version: '0.1.0',
-          protocol_version: 1,
-          rules_hash: '',
-          player_name: playerName,
-          role: initialRole,
-          reconnect_token: token
-        }
-      });
+      sendJoinRequest(initialRole);
     },
     // onClose
     () => {
@@ -179,7 +188,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   actionDispatcher = new ActionDispatcher({
     transport,
-    playerId: playerName,
+    playerId: clientSenderId,
     getState: () => stateStore.getState()
   });
 
@@ -187,13 +196,16 @@ window.addEventListener('DOMContentLoaded', async () => {
     rootElement: appRoot,
     stateStore,
     actionDispatcher,
-    initialRole
+    initialRole: 'spectator'
   });
+  roleController.setRole(initialRole, { playerId: clientSenderId });
 
   if (roleSelectEl) {
     roleSelectEl.value = initialRole;
     roleSelectEl.addEventListener('change', (e) => {
-      roleController.setRole(e.target.value, { playerId: playerName });
+      const nextRole = e.target.value;
+      roleController.setRole(nextRole, { playerId: actionDispatcher.playerId });
+      sendJoinRequest(nextRole);
     });
   }
 

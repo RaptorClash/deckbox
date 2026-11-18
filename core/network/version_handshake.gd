@@ -131,8 +131,9 @@ func _generate_fallback_url(role: String) -> String:
 	return "http://%s:%d/?room=%s&role=%s" % [ip, port, room, role]
 
 func _find_free_seat() -> int:
-	var max_p = host_config.get("max_players", 4)
-	for s in range(max_p):
+	var max_p = int(host_config.get("max_players", 4))
+	var limit = 999 if max_p <= 0 else max_p
+	for s in range(limit):
 		if not _seats.has(s):
 			return s
 	return -1

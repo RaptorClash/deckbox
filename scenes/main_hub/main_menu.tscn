@@ -139,31 +139,44 @@ theme_override_colors/font_color = Color(0.74, 0.82, 0.94, 1)
 theme_override_font_sizes/font_size = 14
 text = "Wähle zuerst ein Spiel für deine Runde oder tritt direkt einem laufenden LAN-/PC-Spiel bei. Grafik & Tisch findest du unter ⚙ Einstellungen."
 
-[node name="GamesGrid" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView"]
+[node name="GameSearchEdit" type="LineEdit" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GalleryHeaderPanel/HeaderBox"]
+layout_mode = 2
+placeholder_text = "🔍 Spiele durchsuchen..."
+
+[node name="GamesScroll" type="ScrollContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/separation = 16
+horizontal_scroll_mode = 0
 
-[node name="AlleAblegenCard" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid"]
+[node name="GamesGrid" type="GridContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 16
+columns = 3
+
+[node name="AlleAblegenCard" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid"]
+custom_minimum_size = Vector2(280, 240)
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CardBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/AlleAblegenCard"]
+[node name="CardBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/AlleAblegenCard"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Badge" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/AlleAblegenCard/CardBox"]
+[node name="Badge" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/AlleAblegenCard/CardBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.32, 0.95, 0.65, 1)
 theme_override_font_sizes/font_size = 13
 text = "● SPIELBEREIT • 2–32+ SPIELER"
 
-[node name="Title" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/AlleAblegenCard/CardBox"]
+[node name="Title" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/AlleAblegenCard/CardBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "🃏 Alle Ablegen!"
 
-[node name="Desc" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/AlleAblegenCard/CardBox"]
+[node name="Desc" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/AlleAblegenCard/CardBox"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.8, 0.86, 0.96, 1)
@@ -173,71 +186,73 @@ text = "Der schnelle Ablege-Klassiker in 3D & Web-Lite. Inklusive kombinierbarer
 • 🃏 Eigene Karten aus dem Editor"
 autowrap_mode = 3
 
-[node name="SelectUnoBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/AlleAblegenCard/CardBox"]
+[node name="SelectUnoBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/AlleAblegenCard/CardBox"]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 theme_override_font_sizes/font_size = 17
 text = "▶ Alle Ablegen! auswählen"
 
-[node name="WizardCard" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid"]
+[node name="WizardCard" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid"]
+custom_minimum_size = Vector2(280, 240)
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CardBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/WizardCard"]
+[node name="CardBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/WizardCard"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Badge" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/WizardCard/CardBox"]
+[node name="Badge" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/WizardCard/CardBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.98, 0.78, 0.24, 1)
 theme_override_font_sizes/font_size = 13
 text = "◌ MODUL-VORSCHAU • 3–6 SPIELER"
 
-[node name="Title" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/WizardCard/CardBox"]
+[node name="Title" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/WizardCard/CardBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "🧙 Zauber-Stiche"
 
-[node name="Desc" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/WizardCard/CardBox"]
+[node name="Desc" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/WizardCard/CardBox"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.7, 0.76, 0.88, 1)
 text = "Taktisches Stichspiel mit Vorhersage der genauen Stichzahl vor jeder Runde. Die Cartridge-Schnittstelle ist vorbereitet."
 autowrap_mode = 3
 
-[node name="SoonBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/WizardCard/CardBox"]
+[node name="SoonBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/WizardCard/CardBox"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 disabled = true
 text = "In Vorbereitung (Modul-Slot)"
 
-[node name="DoppelkopfCard" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid"]
+[node name="DoppelkopfCard" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid"]
+custom_minimum_size = Vector2(280, 240)
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CardBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/DoppelkopfCard"]
+[node name="CardBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/DoppelkopfCard"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Badge" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/DoppelkopfCard/CardBox"]
+[node name="Badge" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/DoppelkopfCard/CardBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.98, 0.78, 0.24, 1)
 theme_override_font_sizes/font_size = 13
 text = "◌ MODUL-VORSCHAU • 4 SPIELER"
 
-[node name="Title" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/DoppelkopfCard/CardBox"]
+[node name="Title" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/DoppelkopfCard/CardBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "👑 Doppelkopf"
 
-[node name="Desc" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/DoppelkopfCard/CardBox"]
+[node name="Desc" type="Label" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/DoppelkopfCard/CardBox"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.7, 0.76, 0.88, 1)
 text = "Das traditionsreiche deutsche Team-Stichspiel mit Hochzeiten, Soli und Sonderpunkten. Modul-Schnittstelle aktiv."
 autowrap_mode = 3
 
-[node name="SoonBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/DoppelkopfCard/CardBox"]
+[node name="SoonBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/DoppelkopfCard/CardBox"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 disabled = true
@@ -338,6 +353,10 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.74, 0.84, 0.96, 1)
 text = "Bereit: Alle Ablegen! • Modul-Schnittstelle aktiv"
 
+[node name="ModHelpBtn" type="Button" parent="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox"]
+layout_mode = 2
+text = "ℹ Anleitung: Module & Online-Spiel"
+
 [node name="MatchSetupView" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab"]
 visible = false
 layout_mode = 2
@@ -414,6 +433,59 @@ value = 4.0
 layout_mode = 2
 button_pressed = true
 text = "Unbegrenzt (LAN)"
+
+[node name="RosterConfigBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HumansRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RosterConfigBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="HumansLabel" type="Label" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RosterConfigBox/HumansRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Menschliche Spieler (Pass & Play / Host):"
+
+[node name="HumanCountSpin" type="SpinBox" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RosterConfigBox/HumansRow"]
+layout_mode = 2
+min_value = 1.0
+max_value = 16.0
+value = 1.0
+
+[node name="BotsRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RosterConfigBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BotsLabel" type="Label" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RosterConfigBox/BotsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Zusätzliche KI-Bots:"
+
+[node name="BotCountSpin" type="SpinBox" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RosterConfigBox/BotsRow"]
+layout_mode = 2
+min_value = 0.0
+max_value = 32.0
+value = 3.0
+
+[node name="BotDifficultyRow" type="HBoxContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RosterConfigBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BotDifficultyLabel" type="Label" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RosterConfigBox/BotDifficultyRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "KI-Schwierigkeit:"
+
+[node name="BotDifficultyOption" type="OptionButton" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RosterConfigBox/BotDifficultyRow"]
+custom_minimum_size = Vector2(180, 34)
+layout_mode = 2
+
+[node name="HumanNamesGrid" type="GridContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RosterConfigBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 6
+columns = 2
 
 [node name="ExpansionsHeader" type="Label" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox"]
 layout_mode = 2
@@ -526,7 +598,7 @@ size_flags_vertical = 3
 layout_mode = 2
 
 [node name="QRTextureRect" type="TextureRect" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/QrCenter/QrBackplate"]
-custom_minimum_size = Vector2(188, 188)
+custom_minimum_size = Vector2(150, 150)
 layout_mode = 2
 stretch_mode = 5
 
@@ -563,6 +635,33 @@ theme_override_colors/font_color = Color(0.68, 0.78, 0.92, 1)
 theme_override_font_sizes/font_size = 13
 text = "Online P2P: STUN aktiv • TURN-Server konfigurierbar unter ⚙ Einstellungen"
 autowrap_mode = 3
+
+[node name="LobbyRosterPanel" type="PanelContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LobbyRosterBox" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/LobbyRosterPanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="LobbyRosterTitle" type="Label" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/LobbyRosterPanel/LobbyRosterBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Verbundene Lobby & Rollenvergabe:"
+
+[node name="HostRoleOption" type="OptionButton" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/LobbyRosterPanel/LobbyRosterBox"]
+layout_mode = 2
+
+[node name="LobbyClientsScroll" type="ScrollContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/LobbyRosterPanel/LobbyRosterBox"]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="LobbyClientsList" type="VBoxContainer" parent="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/LobbyRosterPanel/LobbyRosterBox/LobbyClientsScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
 
 [node name="FriendsTab" type="PanelContainer" parent="HubShell/ContentStack"]
 visible = false
@@ -850,6 +949,42 @@ text = "Bereit für Release-Prüfung (RaptorClash/deckbox)."
 layout_mode = 2
 size_flags_vertical = 3
 
+[node name="ModHelpOverlay" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -360.0
+offset_top = -230.0
+offset_right = 360.0
+offset_bottom = 230.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HelpBox" type="VBoxContainer" parent="ModHelpOverlay"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HelpScroll" type="ScrollContainer" parent="ModHelpOverlay/HelpBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ModHelpLabel" type="Label" parent="ModHelpOverlay/HelpBox/HelpScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
+text = "Module & Online Help"
+
+[node name="CloseModHelpBtn" type="Button" parent="ModHelpOverlay/HelpBox"]
+custom_minimum_size = Vector2(180, 42)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "OK"
+
 [node name="ActiveMatchHost" type="Control" parent="."]
 visible = false
 layout_mode = 1
@@ -869,13 +1004,20 @@ mouse_filter = 1
 [connection signal="pressed" from="HubShell/TopBarPanel/TopBar/StatsTabBtn" to="." method="select_tab" binds= ["stats"]]
 [connection signal="pressed" from="HubShell/TopBarPanel/TopBar/SettingsTabBtn" to="." method="select_tab" binds= ["settings"]]
 [connection signal="pressed" from="HubShell/TopBarPanel/TopBar/UpdaterTabBtn" to="." method="select_tab" binds= ["updater"]]
-[connection signal="pressed" from="HubShell/ContentStack/PlayTab/GameSelectorView/GamesGrid/AlleAblegenCard/CardBox/SelectUnoBtn" to="." method="select_game" binds= ["uno"]]
+[connection signal="text_changed" from="HubShell/ContentStack/PlayTab/GameSelectorView/GalleryHeaderPanel/HeaderBox/GameSearchEdit" to="." method="_on_game_search_changed"]
+[connection signal="pressed" from="HubShell/ContentStack/PlayTab/GameSelectorView/GamesScroll/GamesGrid/AlleAblegenCard/CardBox/SelectUnoBtn" to="." method="select_game" binds= ["uno"]]
 [connection signal="pressed" from="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/JoinAddressRow/JoinDirectBtn" to="." method="_on_join_direct_pressed"]
 [connection signal="pressed" from="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/LanRoomsRow/LanJoinBtns/JoinLanRoomBtn" to="." method="_on_join_selected_lan_room_pressed"]
 [connection signal="pressed" from="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/QuickJoinPanel/JoinBox/LanRoomsRow/LanJoinBtns/RefreshLanBtn" to="." method="_on_refresh_lan_rooms_pressed"]
 [connection signal="pressed" from="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox/ExternalRow/LoadPckBtn" to="." method="_on_load_external_pck_pressed"]
+[connection signal="pressed" from="HubShell/ContentStack/PlayTab/GameSelectorView/BottomJoinRow/ExternalModulePanel/ModBox/ModHelpBtn" to="." method="_on_toggle_mod_help_pressed"]
+[connection signal="pressed" from="ModHelpOverlay/HelpBox/CloseModHelpBtn" to="." method="_on_toggle_mod_help_pressed"]
 [connection signal="pressed" from="HubShell/ContentStack/PlayTab/MatchSetupView/SetupTopBar/BarRow/BackToGamesBtn" to="." method="show_game_selector"]
 [connection signal="pressed" from="HubShell/ContentStack/PlayTab/MatchSetupView/SetupTopBar/BarRow/OpenSettingsShortcutBtn" to="." method="select_tab" binds= ["settings"]]
+[connection signal="item_selected" from="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/ModeOption" to="." method="_on_mode_option_selected"]
+[connection signal="value_changed" from="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/PlayerCountRow/PlayerCountSpin" to="." method="_on_player_count_spin_changed"]
+[connection signal="value_changed" from="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RosterConfigBox/HumansRow/HumanCountSpin" to="." method="_on_roster_counts_changed"]
+[connection signal="value_changed" from="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RosterConfigBox/BotsRow/BotCountSpin" to="." method="_on_roster_counts_changed"]
 [connection signal="toggled" from="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/ExpansionsGrid/NoMercyCheck" to="." method="_on_no_mercy_toggled"]
 [connection signal="pressed" from="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/LaunchUnoBtn" to="." method="start_uno_match"]
 [connection signal="pressed" from="HubShell/ContentStack/PlayTab/MatchSetupView/Columns/LobbyPanel/LobbyBox/HostControlsRow/HostLanBtn" to="." method="_on_host_lan_btn_pressed"]
