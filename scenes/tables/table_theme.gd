@@ -14,6 +14,16 @@ extends Node3D
 @onready var table_mesh: Node3D = $TableMesh
 @onready var camera_3d: Camera3D = $Camera3D
 
+const LocationEnvBuilderScript = preload("res://core/visuals/location_environment_builder.gd")
+var active_location_id: String = "cozy_house"
+
+func apply_location_environment(location_id: String) -> void:
+	var clean_id := location_id.strip_edges().to_lower()
+	if clean_id.is_empty():
+		clean_id = "cozy_house"
+	active_location_id = clean_id
+	LocationEnvBuilderScript.apply_to_table(self, active_location_id)
+
 var _total_players: int = 4
 var _scale_xz: float = 1.0
 var _view_mode: String = "full_3d"

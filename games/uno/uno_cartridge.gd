@@ -16,6 +16,7 @@ var active_side: String = "light"
 var last_penalty_step: int = 0
 var mercy_hand_limit: int = 0
 var last_plus_four_challenge: Dictionary = {}
+var finish_order: Array[String] = []
 var _last_sort_mode: String = ""
 var _last_immediate_draw: Dictionary = {}
 
@@ -55,6 +56,7 @@ func get_default_rules() -> Dictionary:
 		"expansion_flip": false,
 		"progressive_stacking": false,
 		"mercy_hand_limit": 0,
+		"play_until_end": false,
 		"custom_cards": []
 	}
 
@@ -67,6 +69,7 @@ func init_match(p_match_id: String, p_players: Array[Dictionary], p_rules: Dicti
 	last_penalty_step = 0
 	mercy_hand_limit = house_rules.mercy_hand_limit
 	last_plus_four_challenge = {}
+	finish_order = []
 	_last_sort_mode = ""
 
 func _add_to_discard(card: Dictionary) -> void:
@@ -83,10 +86,13 @@ func _draw_card() -> Variant:
 	discard_pile = uno_rules.discard_pile
 	return drawn
 
+func _is_player_out(p: Dictionary) -> bool:
+	return bool(p.get("eliminated", false)) or bool(p.get("finished", false))
+
 func _get_alive_player_count() -> int:
 	var alive = 0
 	for p in players:
-		if not bool(p.get("eliminated", false)):
+		if not _is_player_out(p):
 			alive += 1
 	return alive
 
@@ -99,7 +105,7 @@ func _advance_turn(steps: int = 1) -> void:
 
 	if steps <= 0:
 		var cur_p = get_player_by_seat(current_turn_seat)
-		if not bool(cur_p.get("eliminated", false)):
+		if not _is_player_out(cur_p):
 			return
 		steps = 1
 
@@ -107,7 +113,7 @@ func _advance_turn(steps: int = 1) -> void:
 		for _guard in range(n):
 			current_turn_seat = (current_turn_seat + direction + n) % n
 			var cand = get_player_by_seat(current_turn_seat)
-			if not bool(cand.get("eliminated", false)):
+			if not _is_player_out(cand):
 				break
 
 func _get_next_alive_seat(from_seat: int = -1, step_dir: int = 0) -> int:
@@ -119,7 +125,7 @@ func _get_next_alive_seat(from_seat: int = -1, step_dir: int = 0) -> int:
 	for _i in range(n):
 		s = (s + d + n) % n
 		var p = get_player_by_seat(s)
-		if not bool(p.get("eliminated", false)):
+		if not _is_player_out(p):
 			return s
 	return current_turn_seat
 
@@ -135,6 +141,8 @@ func _calculate_round_results(player_seat: int) -> Dictionary:
 		"winner_player_id": player_id,
 		"score_earned": earned_points if earned_points > 0 else 50
 	}
+	if not finish_order.is_empty():
+		round_results["placements"] = finish_order.duplicate()
 	return round_results
 
 func start_round() -> void:
@@ -144,9 +152,12 @@ func start_round() -> void:
 	last_penalty_step = 0
 	mercy_hand_limit = house_rules.mercy_hand_limit
 	last_plus_four_challenge = {}
+	finish_order = []
 	_last_sort_mode = ""
 	for p in players:
 		p["eliminated"] = false
+		p["finished"] = false
+		p["placement"] = 0
 		p["called_uno"] = false
 
 	var requested_decks = int(rules_config.get("deck_count", 0))
@@ -340,12 +351,10 @@ func _handle_play_card(player_id: String, action: Dictionary) -> Dictionary:
 	elif current_hand.size() > 1:
 		player_map[player_id]["called_uno"] = false
 	if current_hand.size() == 0:
-		round_over = true
-		var res = _calculate_round_results(player_seat)
-		var earned_points = res.get("score_earned", 50)
-		var win_evs: Array[Dictionary] = [{ "type": "ROUND_WON", "winner": player_id, "score": earned_points, "card": target_card.duplicate(true) }]
-		win_evs.append_array(extra_events)
-		return { "success": true, "events": win_evs }
+		var fin_evs: Array[Dictionary] = _handle_player_emptied_hand(player_id, player_seat, target_card, extra_events)
+		if round_over:
+			return { "success": true, "events": fin_evs }
+		extra_events = fin_evs
 
 	var played_val = str(target_card.get("value", ""))
 	if played_val in ["wild_draw_four", "wild_reverse_draw_four", "wild_draw_six", "wild_draw_ten"] and not round_over:
@@ -365,12 +374,69 @@ func _handle_play_card(player_id: String, action: Dictionary) -> Dictionary:
 	all_evs.append_array(extra_events)
 	return { "success": true, "events": all_evs }
 
+func _handle_player_emptied_hand(player_id: String, player_seat: int, target_card: Dictionary, extra_events: Array[Dictionary]) -> Array[Dictionary]:
+	if bool(rules_config.get("play_until_end", false)):
+		var p_dict: Dictionary = player_map.get(player_id, {})
+		p_dict["finished"] = true
+		p_dict["called_uno"] = true
+		if not (player_id in finish_order):
+			finish_order.append(player_id)
+		var place := finish_order.size()
+		p_dict["placement"] = place
+		extra_events.append({ "type": "PLAYER_FINISHED", "player_id": player_id, "name": str(p_dict.get("name", player_id)), "placement": place })
+
+		if _get_alive_player_count() <= 1:
+			for rem in players:
+				if not _is_player_out(rem):
+					var rem_id := str(rem.get("player_id", ""))
+					if not rem_id.is_empty() and not (rem_id in finish_order):
+						finish_order.append(rem_id)
+						rem["placement"] = finish_order.size()
+			round_over = true
+			var first_id: String = finish_order[0] if not finish_order.is_empty() else player_id
+			var first_seat := int(player_map.get(first_id, {}).get("seat", player_seat))
+			var res = _calculate_round_results(first_seat)
+			var earned_points = res.get("score_earned", 50)
+			var win_evs: Array[Dictionary] = [{
+				"type": "ROUND_WON",
+				"winner": first_id,
+				"placements": finish_order.duplicate(),
+				"score": earned_points,
+				"card": target_card.duplicate(true)
+			}]
+			win_evs.append_array(extra_events)
+			return win_evs
+
+		if _is_player_out(get_player_by_seat(current_turn_seat)):
+			_advance_turn(1)
+		return extra_events
+
+	round_over = true
+	var res = _calculate_round_results(player_seat)
+	var earned_points = res.get("score_earned", 50)
+	var win_evs: Array[Dictionary] = [{ "type": "ROUND_WON", "winner": player_id, "score": earned_points, "card": target_card.duplicate(true) }]
+	win_evs.append_array(extra_events)
+	return win_evs
+
+func _emit_skip_event(skipped_seat: int, out_events: Array[Dictionary]) -> void:
+	var sp: Dictionary = get_player_by_seat(skipped_seat)
+	var sp_id := str(sp.get("player_id", ""))
+	if sp_id.is_empty():
+		return
+	out_events.append({
+		"type": "PLAYER_SKIPPED",
+		"skipped_player_id": sp_id,
+		"skipped_name": str(sp.get("name", sp_id)),
+		"skipped_seat": skipped_seat
+	})
+
 func _apply_card_action_effects(player_id: String, card: Dictionary, action: Dictionary, out_events: Array[Dictionary]) -> void:
 	var val = str(card.get("value", ""))
 	var alive_n = _get_alive_player_count()
 
 	match val:
 		"skip":
+			_emit_skip_event(_get_next_alive_seat(), out_events)
 			_advance_turn(2)
 
 		"skip_everyone":
@@ -400,6 +466,7 @@ func _apply_card_action_effects(player_id: String, card: Dictionary, action: Dic
 
 		"reverse":
 			if alive_n == 2:
+				_emit_skip_event(_get_next_alive_seat(), out_events)
 				_advance_turn(0)
 			else:
 				direction = -direction
@@ -432,6 +499,7 @@ func _apply_card_action_effects(player_id: String, card: Dictionary, action: Dic
 					"penalty": pen,
 					"card_ids": drawn_ids
 				}
+				_emit_skip_event(next_s, out_events)
 				_advance_turn(2)
 
 		"wild_color_roulette", "wild_draw_color":
@@ -695,16 +763,8 @@ func _handle_jump_in(player_id: String, player_seat: int, action: Dictionary) ->
 	current_turn_seat = _get_next_alive_seat(player_seat, direction)
 
 	if hand.size() == 0:
-		round_over = true
-		var res = _calculate_round_results(player_seat)
-		var earned_points = res.get("score_earned", 50)
-		return {
-			"success": true,
-			"events": [
-				{ "type": "JUMP_IN", "player_id": player_id, "card_id": card_id },
-				{ "type": "ROUND_WON", "winner": player_id, "score": earned_points }
-			]
-		}
+		var fin_evs := _handle_player_emptied_hand(player_id, player_seat, target_card, [{ "type": "JUMP_IN", "player_id": player_id, "card_id": card_id }])
+		return { "success": true, "events": fin_evs }
 
 	if hand.size() == 1:
 		player_map[player_id]["called_uno"] = bool(action.get("called_uno", false))
@@ -713,6 +773,21 @@ func _handle_jump_in(player_id: String, player_seat: int, action: Dictionary) ->
 		"success": true,
 		"events": [{ "type": "JUMP_IN", "player_id": player_id, "card_id": card_id }]
 	}
+
+func get_jump_in_cards(player_id: String) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	if not house_rules.jump_in or round_over:
+		return out
+	var p_dict: Dictionary = player_map.get(player_id, {})
+	if _is_player_out(p_dict):
+		return out
+	var top := get_top_discard()
+	if top.is_empty():
+		return out
+	for c in player_hands.get(player_id, []):
+		if c is Dictionary and house_rules.can_jump_in(c, top):
+			out.append(c)
+	return out
 
 func get_bot_action(player_id: String, difficulty: String = "tactical") -> Dictionary:
 	var hand = player_hands.get(player_id, [])
@@ -828,7 +903,7 @@ func get_catchable_uno_players(exclude_player_id: String = "") -> Array[Dictiona
 	for p in players:
 		if not (p is Dictionary):
 			continue
-		if bool(p.get("eliminated", false)):
+		if _is_player_out(p):
 			continue
 		var pid = str(p.get("player_id", ""))
 		if pid.is_empty() or pid == exclude_player_id:

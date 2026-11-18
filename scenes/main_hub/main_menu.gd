@@ -20,6 +20,8 @@ const ExternalLoaderScript = preload("res://core/cartridge/external_loader.gd")
 const CartridgeRegistryScript = preload("res://core/cartridge/cartridge_registry.gd")
 const CardTextureGenScript = preload("res://core/visuals/card_texture_generator.gd")
 const UIThemeScript = preload("res://core/visuals/deckbox_ui_theme.gd")
+const SoundEffectsPlayerScript = preload("res://core/audio/sound_effects_player.gd")
+const KeybindServiceScript = preload("res://core/input/keybind_service.gd")
 const UnoGameScene = preload("res://games/uno/ui/uno_game.tscn")
 const CardMeshScene = preload("res://assets/3d/card_rounded.glb")
 
@@ -54,6 +56,9 @@ var _custom_human_names: Array[String] = []
 var active_preview_table_3d: Node3D = null
 var _preview_showcase_root: Node3D = null
 var _lounge_orbit_angle: float = 0.0
+var _menu_sfx: Node = null
+var _keybind_svc: RefCounted = null
+var _awaiting_rebind_action: String = ""
 
 @onready var hub_shell: VBoxContainer = $HubShell
 @onready var active_match_host: Control = $ActiveMatchHost
@@ -108,6 +113,7 @@ var _lounge_orbit_angle: float = 0.0
 @onready var jump_in_check: CheckBox = $HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RulesGrid/JumpInCheck
 @onready var seven_zero_check: CheckBox = $HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RulesGrid/SevenZeroCheck
 @onready var draw_match_check: CheckBox = $HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RulesGrid/DrawMatchCheck
+@onready var play_to_end_check: CheckBox = $HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/SetupScroll/SetupBox/RulesGrid/PlayToEndCheck
 @onready var launch_uno_btn: Button = $HubShell/ContentStack/PlayTab/MatchSetupView/Columns/SetupPanel/SetupOuter/LaunchUnoBtn
 
 @onready var preview_viewport: SubViewport = $LoungeViewportContainer/PreviewViewport
@@ -129,6 +135,9 @@ var _lounge_orbit_angle: float = 0.0
 @onready var view_mode_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/ViewModeRow/ViewModeOption
 @onready var skin_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/SkinRow/SkinOption
 @onready var theme_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/ThemeRow/ThemeOption
+@onready var location_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/LocationRow/LocationOption
+@onready var jukebox_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/JukeboxRow/JukeboxOption
+@onready var keybinds_box: VBoxContainer = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/KeybindsScroll/KeybindsBox
 @onready var quality_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/QualityRow/QualityOption
 @onready var bot_speed_option: OptionButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/SpeedRow/BotSpeedOption
 @onready var colorblind_check: CheckButton = $HubShell/ContentStack/SettingsTab/SettingsColumns/VisualSettingsPanel/VisualBox/ColorblindCheck
@@ -185,6 +194,9 @@ func _ready() -> void:
 	_ext_loader = ExternalLoaderScript.new()
 	_registry = CartridgeRegistryScript.new()
 	_registry.auto_register_builtin_cartridges()
+	_keybind_svc = KeybindServiceScript.new()
+	_menu_sfx = SoundEffectsPlayerScript.new()
+	add_child(_menu_sfx)
 
 	_ws_host.packet_received.connect(_on_ws_packet_received)
 	if _ws_host.has_signal("client_disconnected"):
@@ -218,13 +230,38 @@ func _ready() -> void:
 
 	_init_play_options()
 	_init_lan_ip_options()
+	if games_grid != null:
+		games_grid.resized.connect(_update_games_grid_columns)
+		_update_games_grid_columns()
 	_wire_embedded_screens()
 	_refresh_friends_ui()
 	_update_3d_preview()
+	_update_jukebox_music()
 	show_game_selector()
 	select_tab("play")
 	if not DisplayServer.get_name().to_lower().contains("headless"):
 		_start_lan_discovery_listener()
+
+func _input(event: InputEvent) -> void:
+	if _awaiting_rebind_action.is_empty():
+		return
+	if event is InputEventKey and event.pressed and not event.echo:
+		var kcode: int = int(event.keycode)
+		if kcode in [KEY_SHIFT, KEY_CTRL, KEY_ALT, KEY_META, KEY_CAPSLOCK]:
+			return
+		if kcode == KEY_ESCAPE:
+			_awaiting_rebind_action = ""
+			_rebuild_keybinds_ui()
+			if get_viewport() != null:
+				get_viewport().set_input_as_handled()
+			return
+		if kcode > 0 and _keybind_svc != null:
+			_keybind_svc.set_keybind(_awaiting_rebind_action, kcode)
+			_awaiting_rebind_action = ""
+			_rebuild_keybinds_ui()
+			save_settings()
+			if get_viewport() != null:
+				get_viewport().set_input_as_handled()
 
 func _exit_tree() -> void:
 	stop_lan_host()
@@ -354,6 +391,11 @@ func _init_play_options() -> void:
 	_select_option_by_meta(view_mode_option, str(prof.get("view_mode", "full_3d")))
 	_select_option_by_meta(skin_option, str(prof.get("card_skin", "classic_arcade")))
 	_select_option_by_meta(theme_option, str(prof.get("theme_preset", "arcade_ps5")))
+	_populate_location_and_jukebox_options()
+	_select_option_by_meta(location_option, str(prof.get("location_id", "cozy_house")))
+	_select_option_by_meta(jukebox_option, str(prof.get("jukebox_mode", "auto")))
+	if _keybind_svc != null and prof.get("keybinds", null) is Dictionary:
+		_keybind_svc.load_from_dict(prof["keybinds"])
 	_select_option_by_meta(quality_option, str(prof.get("quality_preset", "high")))
 	_select_option_by_meta(bot_speed_option, str(prof.get("bot_speed", "normal")))
 	if colorblind_check != null:
@@ -506,6 +548,8 @@ func apply_language() -> void:
 		seven_zero_check.text = I18nServiceScript.t("setup.seven_zero")
 	if draw_match_check != null:
 		draw_match_check.text = I18nServiceScript.t("setup.draw_match")
+	if play_to_end_check != null:
+		play_to_end_check.text = I18nServiceScript.t("ui.setup.play_until_end")
 	if launch_uno_btn != null:
 		launch_uno_btn.text = I18nServiceScript.t("setup.launch_btn")
 
@@ -535,10 +579,17 @@ func apply_language() -> void:
 	_set_rel_text(st_vis + "ViewModeRow/ViewLabel", "settings.view_mode")
 	_set_rel_text(st_vis + "SkinRow/SkinLabel", "settings.card_skin")
 	_set_rel_text(st_vis + "ThemeRow/ThemeLabel", "settings.table_theme")
+	_set_rel_text(st_vis + "LocationRow/LocationLabel", "ui.settings.location_label")
+	_set_rel_text(st_vis + "JukeboxRow/JukeboxLabel", "ui.settings.jukebox_label")
 	_set_rel_text(st_vis + "QualityRow/QualityLabel", "settings.quality")
 	_set_rel_text(st_vis + "SpeedRow/SpeedLabel", "settings.bot_speed")
 	if colorblind_check != null:
 		colorblind_check.text = I18nServiceScript.t("settings.colorblind")
+	_set_rel_text(st_vis + "KeybindsTitle", "ui.settings.keybinds_title")
+	_set_rel_text(st_vis + "KeybindsHint", "ui.settings.keybinds_hint")
+	_set_rel_text(st_vis + "KeybindsResetBtn", "ui.settings.keybinds_reset")
+	_populate_location_and_jukebox_options()
+	_rebuild_keybinds_ui()
 	_set_rel_text(st_vis + "SaveVisualSettingsBtn", "settings.save_visual_btn")
 
 	var st_net = "HubShell/ContentStack/SettingsTab/SettingsColumns/NetworkSettingsPanel/NetBox/"
@@ -595,6 +646,15 @@ func _on_game_search_changed(query: String) -> void:
 					txt += " " + str(sub.text)
 		card.visible = q in txt.to_lower()
 
+func _update_games_grid_columns() -> void:
+	if games_grid == null:
+		return
+	var w := games_grid.size.x
+	if w > 100.0:
+		games_grid.columns = clampi(int(w / 256.0), 2, 5)
+	else:
+		games_grid.columns = 4
+
 func _rebuild_dynamic_game_cards() -> void:
 	if games_grid == null or _registry == null:
 		return
@@ -603,7 +663,7 @@ func _rebuild_dynamic_game_cards() -> void:
 			games_grid.remove_child(c)
 			c.queue_free()
 
-	var builtin_ids = ["uno", "wizard", "doppelkopf"]
+	var builtin_ids = ["uno", "wizard", "doppelkopf", "base_cartridge"]
 	if _registry.has_method("get_available_cartridges"):
 		for info in _registry.get_available_cartridges():
 			if not (info is Dictionary):
@@ -612,9 +672,10 @@ func _rebuild_dynamic_game_cards() -> void:
 			if gid.is_empty() or gid in builtin_ids:
 				continue
 			var card_p = PanelContainer.new()
+			card_p.name = "DynCard_%s" % gid
 			card_p.set_meta("dynamic_cartridge", gid)
-			card_p.custom_minimum_size = Vector2(280, 240)
-			card_p.size_flags_horizontal = SIZE_EXPAND_FILL
+			card_p.custom_minimum_size = Vector2(240, 185)
+			card_p.size_flags_horizontal = SIZE_SHRINK_BEGIN
 			card_p.add_theme_stylebox_override("panel", UIThemeScript.make_glass_panel(UIThemeScript.COL_GLASS_SURFACE, Color(0.28, 0.72, 1.0, 0.55), 16, 16))
 			var vbox = VBoxContainer.new()
 			vbox.name = "CardBox"
@@ -795,6 +856,8 @@ func save_settings() -> void:
 	var view_m = _get_selected_meta(view_mode_option, "full_3d")
 	var skin_m = _get_selected_meta(skin_option, "classic_arcade")
 	var theme_m = _get_selected_meta(theme_option, "arcade_ps5")
+	var loc_m = _get_selected_meta(location_option, "cozy_house")
+	var jukebox_m = _get_selected_meta(jukebox_option, "auto")
 	var quality_m = _get_selected_meta(quality_option, "high")
 	var speed_m = _get_selected_meta(bot_speed_option, "normal")
 	var cb_mode = colorblind_check.button_pressed if colorblind_check != null else true
@@ -807,6 +870,7 @@ func save_settings() -> void:
 		apply_language()
 	_apply_turn_config_from_inputs()
 	_update_3d_preview()
+	_update_jukebox_music()
 
 	var ok = false
 	if _profile_svc != null:
@@ -815,6 +879,9 @@ func save_settings() -> void:
 			"view_mode": view_m,
 			"card_skin": skin_m,
 			"theme_preset": theme_m,
+			"location_id": loc_m,
+			"jukebox_mode": jukebox_m,
+			"keybinds": _keybind_svc.to_dict() if _keybind_svc != null else {},
 			"quality_preset": quality_m,
 			"bot_speed": speed_m,
 			"colorblind_mode": cb_mode,
@@ -858,6 +925,9 @@ func _update_3d_preview() -> void:
 			if inst is Node3D:
 				active_preview_table_3d = inst
 				preview_viewport.add_child(active_preview_table_3d)
+				var loc_id := _get_selected_meta(location_option, "cozy_house")
+				if active_preview_table_3d.has_method("apply_location_environment"):
+					active_preview_table_3d.apply_location_environment(loc_id)
 				if active_preview_table_3d.has_method("apply_quality_preset"):
 					active_preview_table_3d.apply_quality_preset(quality)
 				_spawn_preview_3d_cards(skin_id)
@@ -903,6 +973,90 @@ func _spawn_preview_3d_cards(skin_id: String = "classic_arcade") -> void:
 
 func _on_preview_setting_changed(_idx: int) -> void:
 	_update_3d_preview()
+	_update_jukebox_music()
+
+func _on_jukebox_option_selected(_idx: int) -> void:
+	_update_jukebox_music()
+
+func _update_jukebox_music() -> void:
+	if _menu_sfx == null:
+		return
+	var jukebox_m := _get_selected_meta(jukebox_option, "auto")
+	var loc_m := _get_selected_meta(location_option, "cozy_house")
+	_menu_sfx.play_jukebox(jukebox_m, loc_m)
+
+func _populate_location_and_jukebox_options() -> void:
+	if location_option != null:
+		var prev_loc := _get_selected_meta(location_option, "cozy_house")
+		location_option.clear()
+		var loc_entries := [
+			["cozy_house", "ui.settings.location_cozy_house"],
+			["forest_glade", "ui.settings.location_forest_glade"],
+			["neon_club", "ui.settings.location_neon_club"],
+			["bowling_alley", "ui.settings.location_bowling_alley"],
+			["rustic_pub", "ui.settings.location_rustic_pub"]
+		]
+		for i in range(loc_entries.size()):
+			location_option.add_item(I18nServiceScript.t(loc_entries[i][1]), i)
+			location_option.set_item_metadata(i, loc_entries[i][0])
+		_select_option_by_meta(location_option, prev_loc)
+
+	if jukebox_option != null:
+		var prev_jb := _get_selected_meta(jukebox_option, "auto")
+		jukebox_option.clear()
+		var jb_entries := [
+			["auto", "ui.settings.jukebox_auto"],
+			["shuffle", "ui.settings.jukebox_shuffle"],
+			["cozy_house", "ui.settings.jukebox_track_house"],
+			["forest_glade", "ui.settings.jukebox_track_forest"],
+			["neon_club", "ui.settings.jukebox_track_club"],
+			["bowling_alley", "ui.settings.jukebox_track_bowling"],
+			["rustic_pub", "ui.settings.jukebox_track_pub"],
+			["off", "ui.settings.jukebox_off"]
+		]
+		for i in range(jb_entries.size()):
+			jukebox_option.add_item(I18nServiceScript.t(jb_entries[i][1]), i)
+			jukebox_option.set_item_metadata(i, jb_entries[i][0])
+		_select_option_by_meta(jukebox_option, prev_jb)
+
+func _rebuild_keybinds_ui() -> void:
+	if keybinds_box == null or _keybind_svc == null:
+		return
+	for ch in keybinds_box.get_children():
+		keybinds_box.remove_child(ch)
+		ch.queue_free()
+
+	for act_id in KeybindServiceScript.get_action_order():
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		var lbl := Label.new()
+		lbl.size_flags_horizontal = SIZE_EXPAND_FILL
+		lbl.text = I18nServiceScript.t("ui.keybind.%s" % act_id)
+		lbl.add_theme_font_size_override("font_size", 12)
+		row.add_child(lbl)
+
+		var btn := Button.new()
+		btn.custom_minimum_size = Vector2(120, 26)
+		btn.add_theme_font_size_override("font_size", 12)
+		if _awaiting_rebind_action == act_id:
+			btn.text = I18nServiceScript.t("ui.settings.keybinds_press_key")
+		else:
+			btn.text = KeybindServiceScript.get_key_display_name(_keybind_svc.get_keybind(act_id))
+		var cap_id := act_id
+		btn.pressed.connect(func():
+			_awaiting_rebind_action = cap_id
+			_rebuild_keybinds_ui()
+		)
+		row.add_child(btn)
+		keybinds_box.add_child(row)
+
+func _on_reset_keybinds_pressed() -> void:
+	if _keybind_svc == null:
+		return
+	_awaiting_rebind_action = ""
+	_keybind_svc.reset_to_defaults()
+	_rebuild_keybinds_ui()
+	save_settings()
 
 func _select_option_by_meta(opt: OptionButton, meta_val: String) -> void:
 	if opt == null:
@@ -1332,6 +1486,8 @@ func _gather_match_options() -> Dictionary:
 	var view_m = _get_selected_meta(view_mode_option, "full_3d")
 	var skin_m = _get_selected_meta(skin_option, "classic_arcade")
 	var theme_m = _get_selected_meta(theme_option, "arcade_ps5")
+	var loc_m = _get_selected_meta(location_option, "cozy_house")
+	var jukebox_m = _get_selected_meta(jukebox_option, "auto")
 	var quality = _get_selected_meta(quality_option, "high")
 	var speed_m = _get_selected_meta(bot_speed_option, "normal")
 	var diff_m = _get_selected_meta(bot_difficulty_option, "normal")
@@ -1408,6 +1564,9 @@ func _gather_match_options() -> Dictionary:
 		"view_mode": view_m,
 		"card_skin": skin_m,
 		"theme": theme_m,
+		"location_id": loc_m,
+		"jukebox_mode": jukebox_m,
+		"keybinds": _keybind_svc.to_dict() if _keybind_svc != null else {},
 		"quality": quality,
 		"bot_speed": speed_m,
 		"colorblind_mode": cb_mode,
@@ -1417,6 +1576,7 @@ func _gather_match_options() -> Dictionary:
 			"jump_in": jump_in_check.button_pressed if jump_in_check != null else false,
 			"seven_zero_passing": seven_zero_check.button_pressed if seven_zero_check != null else false,
 			"draw_to_match": draw_match_check.button_pressed if draw_match_check != null else false,
+			"play_until_end": play_to_end_check.button_pressed if play_to_end_check != null else false,
 			"expansion_no_mercy": no_mercy_on,
 			"expansion_flip": flip_on,
 			"progressive_stacking": no_mercy_on,
@@ -1453,6 +1613,9 @@ func start_uno_match(custom_options: Dictionary = {}) -> bool:
 	if _active_uno_view.has_method("configure_match"):
 		_active_uno_view.configure_match(opts)
 
+	if _menu_sfx != null:
+		_menu_sfx.stop_ambient_lounge()
+
 	if hub_shell != null:
 		hub_shell.visible = false
 	active_match_host.visible = true
@@ -1467,6 +1630,7 @@ func _on_match_back_requested() -> void:
 	if _is_hosting and _ws_host != null:
 		for peer_id in _connected_lobby_clients.keys():
 			_ws_host.send_to(peer_id, _ws_host.build_envelope("STATUS_UPDATE", { "status": "waiting" }))
+	_update_jukebox_music()
 	select_tab("play")
 
 func _on_load_external_pck_pressed() -> void:

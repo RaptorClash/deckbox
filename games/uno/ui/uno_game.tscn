@@ -347,6 +347,81 @@ theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
 text = "PIN: ----"
 
+[node name="SkipBannerPanel" type="PanelContainer" parent="HudLayer"]
+visible = false
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -220.0
+offset_top = 72.0
+offset_right = 220.0
+offset_bottom = 116.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="SkipBannerLabel" type="Label" parent="HudLayer/SkipBannerPanel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.35, 1)
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+text = "🚫 AUSSETZEN!"
+
+[node name="CenterReactionPanel" type="PanelContainer" parent="HudLayer"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -190.0
+offset_top = -95.0
+offset_right = 190.0
+offset_bottom = 65.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ReactionBox" type="VBoxContainer" parent="HudLayer/CenterReactionPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="ReactionTitleLabel" type="Label" parent="HudLayer/CenterReactionPanel/ReactionBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.28, 1)
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
+text = "⚡ SCHNELLE REAKTION (4.0s)"
+
+[node name="ReactionTimerBar" type="ProgressBar" parent="HudLayer/CenterReactionPanel/ReactionBox"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+max_value = 100.0
+value = 100.0
+show_percentage = false
+
+[node name="CatchUnoPopupBtn" type="Button" parent="HudLayer/CenterReactionPanel/ReactionBox"]
+visible = false
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "🚨 LETZTE! vergessen anfechten!"
+
+[node name="JumpInPopupBtn" type="Button" parent="HudLayer/CenterReactionPanel/ReactionBox"]
+visible = false
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "⚡ Dazwischenlegen!"
+
+[node name="ChallengeP4PopupBtn" type="Button" parent="HudLayer/CenterReactionPanel/ReactionBox"]
+visible = false
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "⚖ +4 Anfechten!"
+
 [node name="RadialColorWheel" type="Control" parent="."]
 visible = false
 layout_mode = 1
@@ -477,6 +552,9 @@ text = "Weiter spielen"
 [connection signal="toggled" from="HudLayer/QuickSettingsDrawer/DrawerBox/ColorblindBtn" to="." method="_on_colorblind_toggled"]
 [connection signal="pressed" from="HudLayer/BottomRightActions/CatchUnoBtn" to="." method="_on_catch_uno_btn_pressed"]
 [connection signal="pressed" from="HudLayer/BottomRightActions/ChallengePlusFourBtn" to="." method="_on_challenge_plus_four_btn_pressed"]
+[connection signal="pressed" from="HudLayer/CenterReactionPanel/ReactionBox/CatchUnoPopupBtn" to="." method="_on_catch_uno_btn_pressed"]
+[connection signal="pressed" from="HudLayer/CenterReactionPanel/ReactionBox/JumpInPopupBtn" to="." method="_on_jump_in_popup_btn_pressed"]
+[connection signal="pressed" from="HudLayer/CenterReactionPanel/ReactionBox/ChallengeP4PopupBtn" to="." method="_on_challenge_plus_four_btn_pressed"]
 [connection signal="pressed" from="HudLayer/BottomRightActions/CallUnoButton" to="." method="_on_call_uno_button_pressed"]
 [connection signal="pressed" from="HudLayer/BottomRightActions/DrawPileBtn" to="." method="_on_draw_pile_btn_pressed"]
 [connection signal="pressed" from="HudLayer/BottomRightActions/HandToolsRow/SortHandBtn" to="." method="_on_sort_hand_btn_pressed"]

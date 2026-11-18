@@ -4,16 +4,23 @@ class_name SoundEffectsPlayer
 extends Node
 
 const AudioControlsScript = preload("res://core/qol/audio_controls.gd")
+const JukeboxServiceScript = preload("res://core/audio/jukebox_service.gd")
 const SAMPLE_RATE: int = 22050
 
 var _clips: Dictionary = {}
 var _audio_controls: RefCounted = null
+var _jukebox: RefCounted = null
 var _ambient_player: AudioStreamPlayer = null
+var _shuffle_timer: Timer = null
+var _jukebox_mode: String = "auto"
+var _active_location_id: String = "cozy_house"
+var _active_track_id: String = "cozy_house"
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
 func _init() -> void:
 	_rng.seed = 42069
 	_audio_controls = AudioControlsScript.new()
+	_jukebox = JukeboxServiceScript.new()
 	_generate_all_clips()
 
 func _ready() -> void:
@@ -187,22 +194,87 @@ func play_table_knock() -> void:
 	play_clip("table_knock", "Emotes", -2.0)
 
 func start_ambient_lounge() -> void:
+	play_jukebox(_jukebox_mode, _active_location_id)
+
+func play_jukebox(mode: String = "auto", location_id: String = "cozy_house") -> void:
+	_jukebox_mode = mode.strip_edges().to_lower() if not mode.strip_edges().is_empty() else "auto"
+	_active_location_id = location_id.strip_edges().to_lower() if not location_id.strip_edges().is_empty() else "cozy_house"
+	if _jukebox == null:
+		_jukebox = JukeboxServiceScript.new()
+
+	var resolved: String = _jukebox.resolve_track_for_mode(_jukebox_mode, _active_location_id)
+	if _jukebox_mode == "shuffle" and _active_track_id in JukeboxServiceScript.get_available_tracks():
+		resolved = _active_track_id
+
+	_active_track_id = resolved
+	if resolved == "off":
+		stop_ambient_lounge()
+		return
+
 	if not is_inside_tree():
 		return
-	if _ambient_player != null and is_instance_valid(_ambient_player):
-		if not _ambient_player.playing:
-			_ambient_player.play()
-		return
-	var stream = get_clip("ambient_lounge")
+
+	var stream: AudioStreamWAV = _jukebox.get_track_stream(resolved)
+	if stream == null:
+		stream = get_clip("ambient_lounge")
 	if stream == null:
 		return
-	_ambient_player = AudioStreamPlayer.new()
-	_ambient_player.stream = stream
-	_ambient_player.volume_db = -18.0
-	_ambient_player.bus = "Music" if AudioServer.get_bus_index("Music") != -1 else "Master"
-	add_child(_ambient_player)
-	_ambient_player.play()
+
+	if _ambient_player == null or not is_instance_valid(_ambient_player):
+		_ambient_player = AudioStreamPlayer.new()
+		_ambient_player.volume_db = -14.0
+		_ambient_player.bus = "Music" if AudioServer.get_bus_index("Music") != -1 else "Master"
+		add_child(_ambient_player)
+
+	if _ambient_player.stream != stream or not _ambient_player.playing:
+		_ambient_player.stream = stream
+		_ambient_player.play()
+
+	_sync_shuffle_timer()
+
+func next_jukebox_track() -> String:
+	if _jukebox == null:
+		_jukebox = JukeboxServiceScript.new()
+	_active_track_id = _jukebox.next_shuffle_track(_active_track_id)
+	if _jukebox_mode == "off":
+		_jukebox_mode = "shuffle"
+	if is_inside_tree():
+		var stream: AudioStreamWAV = _jukebox.get_track_stream(_active_track_id)
+		if stream != null:
+			if _ambient_player == null or not is_instance_valid(_ambient_player):
+				_ambient_player = AudioStreamPlayer.new()
+				_ambient_player.volume_db = -14.0
+				_ambient_player.bus = "Music" if AudioServer.get_bus_index("Music") != -1 else "Master"
+				add_child(_ambient_player)
+			_ambient_player.stream = stream
+			_ambient_player.play()
+	_sync_shuffle_timer()
+	return _active_track_id
+
+func get_active_jukebox_track_id() -> String:
+	return _active_track_id
+
+func _sync_shuffle_timer() -> void:
+	if not is_inside_tree():
+		return
+	if _jukebox_mode == "shuffle":
+		if _shuffle_timer == null or not is_instance_valid(_shuffle_timer):
+			_shuffle_timer = Timer.new()
+			_shuffle_timer.wait_time = 24.0
+			_shuffle_timer.one_shot = false
+			_shuffle_timer.timeout.connect(_on_shuffle_timeout)
+			add_child(_shuffle_timer)
+		if _shuffle_timer.is_stopped():
+			_shuffle_timer.start()
+	elif _shuffle_timer != null and is_instance_valid(_shuffle_timer):
+		_shuffle_timer.stop()
+
+func _on_shuffle_timeout() -> void:
+	if _jukebox_mode == "shuffle":
+		next_jukebox_track()
 
 func stop_ambient_lounge() -> void:
+	if _shuffle_timer != null and is_instance_valid(_shuffle_timer):
+		_shuffle_timer.stop()
 	if _ambient_player != null and is_instance_valid(_ambient_player):
 		_ambient_player.stop()
